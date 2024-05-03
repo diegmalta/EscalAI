@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="utf-8"?><!-- activity_main.xml -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:gravity="center"
+    tools:context="com.ufrj.escalaiv2.ViewModel.MainActivityVM">
+
+    <androidx.cardview.widget.CardView
+        android:layout_width="275dp"
+        android:layout_height="500dp"
+        android:layout_margin="30dp"
+        app:cardCornerRadius="30dp"
+        app:cardElevation="20dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_gravity="center_horizontal"
+            android:background="@drawable/custom_edittext"
+            android:orientation="vertical"
+            android:padding="24dp">
+
+            <TextView
+                android:id="@+id/loginText"
+                android:layout_width="match_parent"
+                android:layout_height="104dp"
+                android:text="EscalAI"
+                android:textAlignment="center"
+                android:textColor="@color/seed"
+                android:textSize="35sp"
+                android:textStyle="bold"
+                android:typeface="serif" />
+
+            <TextView
+                android:id="@+id/Resultado"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="" />
+
+            <EditText
+                android:id="@+id/editEmail"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:layout_marginTop="20dp"
+                android:background="@drawable/custom_edittext"
+                android:drawableLeft="@drawable/baseline_person_24"
+                android:drawablePadding="8dp"
+                android:hint="@string/email"
+                android:padding="8dp"
+                android:textColor="@color/black" />
+
+            <EditText
+                android:id="@+id/editPassword"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:layout_marginTop="20dp"
+                android:background="@drawable/custom_edittext"
+                android:drawableLeft="@drawable/baseline_lock_24"
+                android:drawablePadding="8dp"
+                android:hint="@string/password"
+                android:padding="8dp"
+                android:textColor="@color/black"
+                android:inputType="textPassword" />
+
+            <Button
+                android:id="@+id/button_login"
+                android:layout_width="match_parent"
+                android:layout_height="60dp"
+                android:layout_marginTop="10dp"
+                android:backgroundTint="@color/seed"
+                android:onClick="login"
+                android:text="Login"
+                android:textSize="20dp"
+                app:cornerRadius="20dp" />
+
+            <Button
+                android:id="@+id/recuperarSenhaButton"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:layout_marginTop="20dp"
+                android:text="Esqueci minha senha"
+                android:textSize="15dp"
+                android:backgroundTint="@android:color/transparent"
+                android:textColor="@color/black"
+                tools:ignore="TextSizeCheck" />
+
+
+            <Button
+                android:id="@+id/button_cadastro"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:backgroundTint="@android:color/transparent"
+                android:onClick="cadastrar"
+                android:text="Criar conta"
+                android:textColor="@color/black"
+                android:textSize="15dp"
+                app:cornerRadius="20dp"
+                tools:ignore="TextSizeCheck" />
+
+        </LinearLayout>
+
+    </androidx.cardview.widget.CardView>
+
+</LinearLayout>

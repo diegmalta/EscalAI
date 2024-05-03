@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="weights_measures">
+        <item>@string/kilograms</item>
+        <item>@string/pounds</item>
+    </string-array>
+    <string-array name="height_measures">
+        <item>@string/meters</item>
+        <item>@string/feet</item>
+    </string-array>
+</resources>

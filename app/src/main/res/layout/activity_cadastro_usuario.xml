@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="utf-8"?><!-- activity_criacao_conta.xml -->
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <FrameLayout android:id="@+id/cadastroUsuarioLayout"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:gravity="center"
+        tools:context="com.ufrj.escalaiv2.ViewModel.CadastroUsuarioVM">
+
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_gravity="center_horizontal"
+            android:orientation="vertical"
+            android:padding="24dp">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:text="EscalAI"
+                android:textAlignment="center"
+                android:textColor="@color/seed"
+                android:textSize="35sp"
+                android:textStyle="bold"
+                android:typeface="serif" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:text="@string/createAccount"
+                android:textAlignment="center"
+                android:textColor="@color/seed"
+                android:textSize="25sp"
+                android:textStyle="bold"
+                android:typeface="serif"
+                android:paddingTop="10sp" />
+
+            <TextView
+                android:id="@+id/errosCadastro"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text=""
+                android:background="@drawable/custom_error_box"
+                android:backgroundTint="@android:color/holo_red_dark"
+                android:visibility="gone" />
+
+            <EditText
+                android:id="@+id/email"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:layout_marginTop="20dp"
+                android:background="@drawable/custom_edittext"
+                android:drawablePadding="8dp"
+                android:hint="@string/email"
+                android:padding="8dp"
+                android:textColor="@color/black" />
+
+            <EditText
+                android:id="@+id/nome"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:layout_marginTop="20dp"
+                android:background="@drawable/custom_edittext"
+                android:drawablePadding="8dp"
+                android:hint="@string/name"
+                android:padding="8dp"
+                android:textColor="@color/black" />
+
+            <EditText
+                android:id="@+id/sobrenome"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:layout_marginTop="20dp"
+                android:background="@drawable/custom_edittext"
+                android:drawablePadding="8dp"
+                android:hint="@string/lastName"
+                android:padding="8dp"
+                android:textColor="@color/black" />
+
+            <EditText
+                android:id="@+id/dataNascimento"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:layout_marginTop="20dp"
+                android:background="@drawable/custom_edittext"
+                android:drawablePadding="8dp"
+                android:hint="@string/birthDate"
+                android:padding="8dp"
+                android:textColor="@color/black"
+                android:focusable="false"
+                android:onClick="showDatePickerDialog" />
+
+
+            <EditText
+                android:id="@+id/celular"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:layout_marginTop="20dp"
+                android:background="@drawable/custom_edittext"
+                android:drawablePadding="8dp"
+                android:hint="@string/phoneNumber"
+                android:padding="8dp"
+                android:textColor="@color/black"
+                android:inputType="phone"
+                android:digits="0123456789+" />
+
+            <EditText
+                android:id="@+id/senha"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:layout_marginTop="20dp"
+                android:background="@drawable/custom_edittext"
+                android:drawablePadding="8dp"
+                android:hint="@string/password"
+                android:padding="8dp"
+                android:textColor="@color/black" />
+
+            <EditText
+                android:id="@+id/confirmaSenha"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:layout_marginTop="20dp"
+                android:background="@drawable/custom_edittext"
+                android:drawablePadding="8dp"
+                android:hint="@string/confirmPassword"
+                android:padding="8dp"
+                android:textColor="@color/black" />
+
+            <CheckBox
+                android:id="@+id/agreeToTermsCheckBox"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/termsAgreement"
+                android:textColorLink="@android:color/holo_blue_bright"
+                android:layout_marginTop="16dp" />
+
+            <Button
+                android:id="@+id/cadastrarButton"
+                android:layout_width="match_parent"
+                android:layout_height="60dp"
+                android:layout_marginTop="10dp"
+                android:backgroundTint="@color/seed"
+                android:text="Criar conta"
+                android:textSize="20sp"
+                app:cornerRadius="20dp" />
+        </LinearLayout>
+
+    </FrameLayout>
+</ScrollView>

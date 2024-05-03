@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="peso">Peso</string>
+    <string name="altura">Altura\n</string>
+    <string name="select">Selecione...</string>
+    <string name="yes">sim</string>
+    <string name="questionDoYouClimb">Você já pratica escalada?</string>
+</resources>
