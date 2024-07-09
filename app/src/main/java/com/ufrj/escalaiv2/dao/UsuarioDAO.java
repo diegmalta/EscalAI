@@ -3,7 +3,7 @@ package com.ufrj.escalaiv2.dao;
 import android.util.Log;
 
 import com.ufrj.escalaiv2.conexao.Conexao;
-import com.ufrj.escalaiv2.Usuario;
+import com.ufrj.escalaiv2.Model.Usuario;
 
 import java.sql.Connection;
 import java.sql.ResultSet;

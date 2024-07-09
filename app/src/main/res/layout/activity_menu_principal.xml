@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?><!-- activity_home.xml -->
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:padding="10dp"
     android:layout_gravity="center"
-    tools:context="com.ufrj.escalaiv2.ViewModel.MenuPrincipalVM">
-
+    tools:context="com.ufrj.escalaiv2.ViewModel.MenuPrincipalActivity"
+    android:orientation="vertical">
     <TextView
         android:id="@+id/txtNomeUsuario"
         android:layout_width="match_parent"
@@ -47,7 +47,7 @@
             <Button
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:background="@color/teal_200"
+                android:background="@color/md_theme_light_primaryContainer"
                 android:text="@string/bloco1"
                 android:textColor="#ffffff"
                 android:gravity="center" />
@@ -65,7 +65,7 @@
             <Button
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:background="#FF03DAC5"
+                android:background="@color/md_theme_light_primaryContainer"
                 android:text="@string/bloco2"
                 android:textColor="#ffffff"
                 android:gravity="center" />
@@ -83,7 +83,7 @@
             <Button
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:background="@color/teal_200"
+                android:background="@color/md_theme_light_primaryContainer"
                 android:text="@string/bloco3"
                 android:textColor="#ffffff"
                 android:gravity="center" />
@@ -101,7 +101,7 @@
             <Button
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:background="@color/teal_200"
+                android:background="@color/md_theme_light_primaryContainer"
                 android:text="@string/bloco4"
                 android:textColor="#ffffff"
                 android:gravity="center" />
@@ -119,7 +119,7 @@
             <Button
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:background="@color/teal_200"
+                android:background="@color/md_theme_light_primaryContainer"
                 android:text="@string/bloco5"
                 android:textColor="#ffffff"
                 android:gravity="center" />
@@ -137,7 +137,7 @@
             <Button
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:background="@color/teal_200"
+                android:background="@color/md_theme_light_primaryContainer"
                 android:text="@string/bloco6"
                 android:textColor="#ffffff"
                 android:gravity="center" />
@@ -155,7 +155,7 @@
             <Button
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:background="@color/teal_200"
+                android:background="@color/md_theme_light_primaryContainer"
                 android:text="@string/bloco7"
                 android:textColor="#ffffff"
                 android:gravity="center" />
@@ -173,7 +173,7 @@
             <Button
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:background="@color/teal_200"
+                android:background="@color/md_theme_light_primaryContainer"
                 android:text="@string/bloco8"
                 android:textColor="#ffffff"
                 android:gravity="center" />
@@ -182,4 +182,10 @@
 
     </GridLayout>
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+    <com.google.android.material.bottomnavigation.BottomNavigationView
+        android:id="@+id/bottom_navigation"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:menu="@menu/bottom_navigation_menu" />
+
+</LinearLayout>

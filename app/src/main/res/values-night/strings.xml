@@ -5,4 +5,5 @@
     <string name="select">Selecione...</string>
     <string name="yes">sim</string>
     <string name="questionDoYouClimb">Você já pratica escalada?</string>
+    <string name="confirmData">Confirmar dados</string>
 </resources>

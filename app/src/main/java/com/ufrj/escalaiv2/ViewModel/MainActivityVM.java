@@ -11,7 +11,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.escalaiv2.R;
-import com.ufrj.escalaiv2.Usuario;
+import com.ufrj.escalaiv2.Model.Usuario;
 import com.ufrj.escalaiv2.dao.UsuarioDAO;
 
 public class MainActivityVM extends AppCompatActivity {
@@ -55,13 +55,13 @@ public class MainActivityVM extends AppCompatActivity {
     }
 
     @NonNull
-    private static Class<MenuPrincipalVM> getMenuPrincipal() {
-        return MenuPrincipalVM.class;
+    private static Class<MenuPrincipalActivity> getMenuPrincipal() {
+        return MenuPrincipalActivity.class;
     }
 
     @NonNull
-    private static Class<UserInfoFormVM> getUserInfoForm() {
-        return UserInfoFormVM.class;
+    private static Class<FormInfoUsuariosActivity> getUserInfoForm() {
+        return FormInfoUsuariosActivity.class;
     }
 
     public void cadastrar(View v) {

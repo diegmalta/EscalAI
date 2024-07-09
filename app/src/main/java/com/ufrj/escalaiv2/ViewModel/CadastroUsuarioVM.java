@@ -19,7 +19,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.escalaiv2.R;
 import com.ufrj.escalaiv2.dao.UsuarioDAO;
-import com.ufrj.escalaiv2.Usuario;
+import com.ufrj.escalaiv2.Model.Usuario;
 
 import java.sql.SQLException;
 import java.text.ParseException;

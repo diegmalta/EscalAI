@@ -1,15 +1,19 @@
-package com.ufrj.escalaiv2;
+package com.ufrj.escalaiv2.Model;
 
 public class Usuario {
 
     private Integer codigo;
     private String email;
     private String nome;
-
     private String sobrenome;
     private String dataNasc;
     private String celular;
     private String senha;
+
+    // Informações complementares
+    private String nomeCompleto;
+    private double peso; // em Kg
+    private double altura; // em cm
 
     public String getNome() {
         return nome;
@@ -65,5 +69,29 @@ public class Usuario {
 
     public void setSenha(String senha) {
         this.senha = senha;
+    }
+
+    public String getNomeCompleto() {
+        return nomeCompleto;
+    }
+
+    public void setNomeCompleto(String nomeCompleto) {
+        this.nomeCompleto = nomeCompleto;
+    }
+
+    public double getPeso() {
+        return peso;
+    }
+
+    public void setPeso(double peso) {
+        this.peso = peso;
+    }
+
+    public double getAltura() {
+        return altura;
+    }
+
+    public void setAltura(double altura) {
+        this.altura = altura;
     }
 }

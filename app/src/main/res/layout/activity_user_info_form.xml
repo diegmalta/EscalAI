@@ -90,7 +90,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:inputType="none"
-                    app:simpleItems="@array/weights_measures" />
+                    app:simpleItems="@array/height_measures" />
 
             </com.google.android.material.textfield.TextInputLayout>
 
@@ -169,15 +169,15 @@
                     android:text="@string/no"/>
             </RadioGroup>
 
+            <!--        inserir grau de escalada, frequencia de escalada. Somente disponiveis
+                        se marcar o botão de que é escalador -->
         </LinearLayout>
-<!--        inserir grau de escalada, frequencia de escalada. Somente disponiveis
-            se marcar o botão de que é escalador -->
             <Button
-                android:id="@+id/filledButton"
+                android:id="@+id/confirmDataButton"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="15dp"
-                android:text="Filled button"
+                android:text="@string/confirmData"
                 />
         </LinearLayout>
 
