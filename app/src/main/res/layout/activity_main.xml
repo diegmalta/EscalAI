@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:gravity="center"
-    tools:context="com.ufrj.escalaiv2.ViewModel.MainActivityVM">
+    tools:context="com.ufrj.escalaiv2.Activity.MainActivity">
 
     <androidx.cardview.widget.CardView
         android:layout_width="275dp"

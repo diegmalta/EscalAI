@@ -45,10 +45,10 @@
                 app:hintEnabled="true"
                 style="@style/Widget.Material3.TextInputLayout.OutlinedBox">
 
-                    <com.google.android.material.textfield.TextInputEditText
+                <com.google.android.material.textfield.TextInputEditText
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:inputType="numberDecimal"
+                android:inputType="textPersonName"
                 android:maxLines="1"
                 />
 
@@ -87,10 +87,11 @@
                 style="@style/Widget.App.ExposedDropdownMenu">
 
                 <AutoCompleteTextView
+                    android:id="@+id/weightDropdown"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:inputType="none"
-                    app:simpleItems="@array/height_measures" />
+                    app:simpleItems="@array/weights_measures" />
 
             </com.google.android.material.textfield.TextInputLayout>
 
@@ -127,10 +128,11 @@
                 style="@style/Widget.App.ExposedDropdownMenu">
 
                 <AutoCompleteTextView
+                    android:id="@+id/heightDropdown"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:inputType="none"
-                    app:simpleItems="@array/weights_measures" />
+                    app:simpleItems="@array/height_measures" />
 
             </com.google.android.material.textfield.TextInputLayout>
         </LinearLayout>
@@ -178,6 +180,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="15dp"
                 android:text="@string/confirmData"
+                android:onClick="confirmarDados"
                 />
         </LinearLayout>
 

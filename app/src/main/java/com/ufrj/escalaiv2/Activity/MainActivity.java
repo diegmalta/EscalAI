@@ -1,4 +1,4 @@
-package com.ufrj.escalaiv2.ViewModel;
+package com.ufrj.escalaiv2.Activity;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -12,9 +12,10 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.escalaiv2.R;
 import com.ufrj.escalaiv2.Model.Usuario;
+import com.ufrj.escalaiv2.ViewModel.CadastroUsuarioVM;
 import com.ufrj.escalaiv2.dao.UsuarioDAO;
 
-public class MainActivityVM extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity {
 
     EditText editEmail, editPassword;
     Button button_login, button_cadastro;
@@ -38,19 +39,20 @@ public class MainActivityVM extends AppCompatActivity {
 
         if(usuario.equals("teste") && senha.equals("teste")){
             Resultado.setText("Login efetuado com sucesso");
-            Intent intent = new Intent(MainActivityVM.this, getUserInfoForm());
-            startActivity(intent);
-        }
-
-        Usuario usu = new UsuarioDAO().selecionaUsuario(usuario, senha);
-        if (usu != null) {
-            Resultado.setText("Login efetuado com sucesso");
-            Intent intent = new Intent(MainActivityVM.this, getMenuPrincipal());
+            Intent intent = new Intent(MainActivity.this, getUserInfoForm());
             startActivity(intent);
             finish();
         } else {
-            Resultado.setText("Usuário ou senha inválidos");
-            limpar();
+            Usuario usu = new UsuarioDAO().selecionaUsuario(usuario, senha);
+            if (usu != null) {
+                Resultado.setText("Login efetuado com sucesso");
+                Intent intent = new Intent(MainActivity.this, getMenuPrincipal());
+                startActivity(intent);
+                finish();
+            } else {
+                Resultado.setText("Usuário ou senha inválidos");
+                limpar();
+            }
         }
     }
 
@@ -65,7 +67,7 @@ public class MainActivityVM extends AppCompatActivity {
     }
 
     public void cadastrar(View v) {
-        Intent intent = new Intent(MainActivityVM.this, CadastroUsuarioVM.class);
+        Intent intent = new Intent(MainActivity.this, CadastroUsuarioVM.class);
         startActivity(intent);
     }
 

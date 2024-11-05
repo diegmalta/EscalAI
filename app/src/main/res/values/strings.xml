@@ -38,7 +38,7 @@
 
 
     <!-- MENSAGENS DE CADASTRO -->
-    <string name="signUpMessage_signUpSuccess">Usuario cadastrado com sucesso</string>
+    <string name="signUpMessage_signUpSuccess">Usuário cadastrado com sucesso</string>
     <!-- ERROS DE CADASTRO -->
     <string name="signUpError_FieldsNotFilledIn">Preencha todos os campos corretamente</string>
     <string name="peso">Peso</string>
@@ -48,7 +48,7 @@
     <string name="meters">metros</string>
     <string name="feet">pés</string>
     <string name="nomeCompleto">Nome Completo</string>
-    <string name="select">Selecione...</string>
+    <string name="select">Selecione…</string>
     <string name="yes">sim</string>
     <string name="no">não</string>
     <string name="questionDoYouClimb">Você já pratica escalada?</string>

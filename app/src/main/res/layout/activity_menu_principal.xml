@@ -1,40 +1,72 @@
 <?xml version="1.0" encoding="utf-8"?><!-- activity_home.xml -->
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="10dp"
     android:layout_gravity="center"
-    tools:context="com.ufrj.escalaiv2.ViewModel.MenuPrincipalActivity"
+    tools:context="com.ufrj.escalaiv2.Activity.MenuPrincipalActivity"
     android:orientation="vertical">
-    <TextView
-        android:id="@+id/txtNomeUsuario"
+
+    <com.google.android.material.appbar.AppBarLayout
+        android:id="@+id/topAppBar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:gravity="right"
-        android:text="@string/hello"
-        android:textSize="20sp"
-        android:layout_marginRight="20dp"
-        android:layout_marginTop="10dp"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent">
+        android:layout_gravity="top"
+        tools:ignore="MissingConstraints">
 
-    </TextView>
+        <com.google.android.material.appbar.MaterialToolbar
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:background="@color/md_theme_light_primaryContainer"
+            app:menu="@menu/top_navigation_menu">
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
+
+                <com.google.android.material.imageview.ShapeableImageView
+                    android:id="@+id/profileImage"
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
+                    android:padding="4dp"
+                    android:scaleType="center"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:contentDescription="Access profile"/>
+<!--                    app:shapeAppearanceOverlay="@style/circleImageView"-->
+<!--                    android:src="@drawable/default_profile_image"-->
+
+                <TextView
+                    android:id="@+id/txtNomeUsuario"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:text="Username"
+                    android:textSize="16sp"
+                    android:textColor="@color/md_theme_light_onPrimaryContainer"/>
+
+            </LinearLayout>
+
+        </com.google.android.material.appbar.MaterialToolbar>
+
+    </com.google.android.material.appbar.AppBarLayout>
 
     <GridLayout
+        android:id="@+id/gridLayout"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="10dp"
         android:rowCount="4"
         android:columnCount="2"
         android:layout_gravity="center"
-
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/topAppBar"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent">
-        <!--app:layout_constraintTop_toTopOf="parent"-->
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/bottom_navigation">
 
         <androidx.cardview.widget.CardView
             android:layout_width="125dp"
@@ -83,7 +115,7 @@
             <Button
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:background="@color/md_theme_light_primaryContainer"
+                android:background="@color/md_theme_dark_primaryContainer"
                 android:text="@string/bloco3"
                 android:textColor="#ffffff"
                 android:gravity="center" />
@@ -144,41 +176,24 @@
 
         </androidx.cardview.widget.CardView>
 
-        <androidx.cardview.widget.CardView
-            android:layout_width="125dp"
-            android:layout_height="125dp"
-            android:layout_column="0"
-            android:layout_row="3"
-            android:layout_margin="8dp"
-            app:cardCornerRadius="16dp">
 
-            <Button
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:background="@color/md_theme_light_primaryContainer"
-                android:text="@string/bloco7"
-                android:textColor="#ffffff"
-                android:gravity="center" />
+<!--        <androidx.cardview.widget.CardView-->
+<!--            android:layout_width="125dp"-->
+<!--            android:layout_height="125dp"-->
+<!--            android:layout_column="1"-->
+<!--            android:layout_row="3"-->
+<!--            android:layout_margin="8dp"-->
+<!--            app:cardCornerRadius="16dp">-->
 
-        </androidx.cardview.widget.CardView>
+<!--            <Button-->
+<!--                android:layout_width="match_parent"-->
+<!--                android:layout_height="match_parent"-->
+<!--                android:background="@color/md_theme_light_primaryContainer"-->
+<!--                android:text="@string/bloco8"-->
+<!--                android:textColor="#ffffff"-->
+<!--                android:gravity="center" />-->
 
-        <androidx.cardview.widget.CardView
-            android:layout_width="125dp"
-            android:layout_height="125dp"
-            android:layout_column="1"
-            android:layout_row="3"
-            android:layout_margin="8dp"
-            app:cardCornerRadius="16dp">
-
-            <Button
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:background="@color/md_theme_light_primaryContainer"
-                android:text="@string/bloco8"
-                android:textColor="#ffffff"
-                android:gravity="center" />
-
-        </androidx.cardview.widget.CardView>
+<!--        </androidx.cardview.widget.CardView>-->
 
     </GridLayout>
 
@@ -186,6 +201,10 @@
         android:id="@+id/bottom_navigation"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:menu="@menu/bottom_navigation_menu" />
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:menu="@menu/bottom_navigation_menu"
+        tools:ignore="VisualLintBottomNav" />
 
-</LinearLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

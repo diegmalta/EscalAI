@@ -9,6 +9,7 @@ import android.widget.RadioGroup;
 import android.widget.Toast;
 
 import com.example.escalaiv2.R;
+import com.google.android.material.textfield.TextInputLayout;
 import com.ufrj.escalaiv2.Model.Usuario;
 
 public class InfoUsuariosController {
@@ -39,16 +40,16 @@ public class InfoUsuariosController {
         autoCompleteTextView.setAdapter(adapter);
     }
 
-    public void handleSubmit(EditText nomeCompletoEditText, EditText pesoEditText, AutoCompleteTextView pesoDropdown,
-                             EditText alturaEditText, AutoCompleteTextView alturaDropdown, RadioGroup escaladorRadioGroup) {
+    public void handleSubmit(TextInputLayout nomeCompletoEditText, TextInputLayout pesoEditText, AutoCompleteTextView pesoDropdown,
+                             TextInputLayout alturaEditText, AutoCompleteTextView alturaDropdown, RadioGroup escaladorRadioGroup) {
         try {
-            usuario.setNomeCompleto(nomeCompletoEditText.getText().toString());
-            double peso = Float.parseFloat(pesoEditText.getText().toString());
+            usuario.setNomeCompleto(nomeCompletoEditText.getEditText().toString());
+            double peso = Float.parseFloat(pesoEditText.getEditText().toString());
             if(pesoDropdown.getText().toString().equals(context.getString(R.string.pounds))){
                 peso = peso * 0.4535924;
             }
             usuario.setPeso(peso);
-            double altura = Float.parseFloat(alturaEditText.getText().toString());
+            double altura = Float.parseFloat(alturaEditText.getEditText().toString());
             if(alturaDropdown.getText().toString().equals(context.getString(R.string.feet))){
                 altura = altura/30.48;
             }
