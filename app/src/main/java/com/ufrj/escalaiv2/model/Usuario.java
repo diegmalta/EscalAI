@@ -1,8 +1,11 @@
-package com.ufrj.escalaiv2.Model;
+package com.ufrj.escalaiv2.model;
+import androidx.room.Entity;
+import androidx.room.PrimaryKey;
 
+@Entity(tableName = "usuarios")
 public class Usuario {
-
-    private Integer codigo;
+    @PrimaryKey(autoGenerate = true)
+    private int id;
     private String email;
     private String nome;
     private String sobrenome;
@@ -47,12 +50,12 @@ public class Usuario {
         this.celular = celular;
     }
 
-    public Integer getCodigo() {
-        return codigo;
+    public Integer getId() {
+        return id;
     }
 
-    public void setCodigo(Integer codigo) {
-        this.codigo = codigo;
+    public void setId(Integer id) {
+        this.id = id;
     }
 
     public String getEmail() {

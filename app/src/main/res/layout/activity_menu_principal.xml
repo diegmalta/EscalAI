@@ -6,7 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:layout_gravity="center"
-    tools:context="com.ufrj.escalaiv2.Activity.MenuPrincipalActivity"
+    tools:context="com.ufrj.escalaiv2.activity.MenuPrincipalActivity"
     android:orientation="vertical">
 
     <com.google.android.material.appbar.AppBarLayout
@@ -77,9 +77,10 @@
             app:cardCornerRadius="16dp">
 
             <Button
+                android:id="@+id/aguaButton"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:background="@color/md_theme_light_primaryContainer"
+                android:background="?attr/colorPrimaryContainer"
                 android:text="@string/bloco1"
                 android:textColor="#ffffff"
                 android:gravity="center" />

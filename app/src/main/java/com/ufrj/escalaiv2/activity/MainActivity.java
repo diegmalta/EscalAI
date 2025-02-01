@@ -1,4 +1,4 @@
-package com.ufrj.escalaiv2.Activity;
+package com.ufrj.escalaiv2.activity;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -10,10 +10,9 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.example.escalaiv2.R;
-import com.ufrj.escalaiv2.Model.Usuario;
-import com.ufrj.escalaiv2.ViewModel.CadastroUsuarioVM;
-import com.ufrj.escalaiv2.dao.UsuarioDAO;
+import com.ufrj.escalaiv2.R;
+import com.ufrj.escalaiv2.model.Usuario;
+import com.ufrj.escalaiv2.model.AppDatabase;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -43,16 +42,24 @@ public class MainActivity extends AppCompatActivity {
             startActivity(intent);
             finish();
         } else {
-            Usuario usu = new UsuarioDAO().selecionaUsuario(usuario, senha);
-            if (usu != null) {
-                Resultado.setText("Login efetuado com sucesso");
-                Intent intent = new Intent(MainActivity.this, getMenuPrincipal());
-                startActivity(intent);
-                finish();
-            } else {
-                Resultado.setText("Usuário ou senha inválidos");
-                limpar();
-            }
+            // Execute database query in background
+            new Thread(() -> {
+                AppDatabase database = AppDatabase.getInstance(MainActivity.this);
+                Usuario usu = database.usuarioDao().selecionaUsuario(usuario, senha);
+
+                // Update UI on main thread
+                runOnUiThread(() -> {
+                    if (usu != null) {
+                        Resultado.setText("Login efetuado com sucesso");
+                        Intent intent = new Intent(MainActivity.this, getMenuPrincipal());
+                        startActivity(intent);
+                        finish();
+                    } else {
+                        Resultado.setText("Usuário ou senha inválidos");
+                        limpar();
+                    }
+                });
+            }).start();
         }
     }
 
@@ -66,8 +73,8 @@ public class MainActivity extends AppCompatActivity {
         return FormInfoUsuariosActivity.class;
     }
 
-    public void cadastrar(View v) {
-        Intent intent = new Intent(MainActivity.this, CadastroUsuarioVM.class);
+    public void cadastrar(View view) {
+        Intent intent = new Intent(this, CadastroUsuarioActivity.class);
         startActivity(intent);
     }
 

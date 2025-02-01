@@ -1,16 +1,15 @@
-package com.ufrj.escalaiv2.Controller;
+package com.ufrj.escalaiv2.controller;
 
 import android.content.Context;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
-import android.widget.EditText;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.Toast;
 
-import com.example.escalaiv2.R;
+import com.ufrj.escalaiv2.R;
 import com.google.android.material.textfield.TextInputLayout;
-import com.ufrj.escalaiv2.Model.Usuario;
+import com.ufrj.escalaiv2.model.Usuario;
 
 public class InfoUsuariosController {
 

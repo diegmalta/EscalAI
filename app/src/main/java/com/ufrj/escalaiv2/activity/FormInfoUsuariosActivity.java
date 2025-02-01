@@ -1,4 +1,4 @@
-package com.ufrj.escalaiv2.Activity;
+package com.ufrj.escalaiv2.activity;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -8,9 +8,9 @@ import android.widget.Button;
 import android.widget.RadioGroup;
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.example.escalaiv2.R;
+import com.ufrj.escalaiv2.R;
 import com.google.android.material.textfield.TextInputLayout;
-import com.ufrj.escalaiv2.Controller.InfoUsuariosController;
+import com.ufrj.escalaiv2.controller.InfoUsuariosController;
 
 public class FormInfoUsuariosActivity extends AppCompatActivity {
 

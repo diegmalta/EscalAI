@@ -1,21 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
-
     <data>
         <variable
             name="viewModel"
-            type="com.ufrj.escalaiv2.ViewModel.AguaVM" />
+            type="com.ufrj.escalaiv2.viewmodel.AguaVM" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
-        xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:app="http://schemas.android.com/apk/res-auto"
         xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_gravity="center"
-        tools:context="com.ufrj.escalaiv2.Activity.MenuPrincipalActivity"
+        tools:context="com.ufrj.escalaiv2.activity.MenuPrincipalActivity"
         android:orientation="vertical">
 
         <com.google.android.material.appbar.AppBarLayout
@@ -36,17 +33,6 @@
 
         </com.google.android.material.appbar.AppBarLayout>
 
-        <ImageView
-            android:id="@+id/waterIcon"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:layout_marginTop="32dp"
-            android:layout_marginStart="32dp"
-            app:layout_constraintTop_toBottomOf="@id/topAppBar"
-            app:layout_constraintStart_toStartOf="parent"
-            app:tint="@color/md_theme_light_primary"/>
-<!--            android:src="@drawable/ic_water_drop"-->
-
         <TextView
             android:id="@+id/waterAmount"
             android:layout_width="wrap_content"
@@ -54,10 +40,20 @@
             android:text="0 ml"
             android:textSize="24sp"
             android:textStyle="bold"
-            android:layout_marginTop="32dp"
-            android:layout_marginEnd="32dp"
+            android:layout_marginTop="66dp"
             app:layout_constraintTop_toBottomOf="@id/topAppBar"
+            app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"/>
+
+        <ImageView
+            android:id="@+id/waterIcon"
+            android:layout_width="144dp"
+            android:layout_height="144dp"
+            android:layout_marginTop="132dp"
+            app:layout_constraintTop_toBottomOf="@id/topAppBar"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:src="@drawable/glass_water_droplet"/>
 
         <com.google.android.material.slider.Slider
             android:id="@+id/waterSlider"
@@ -74,12 +70,25 @@
             android:id="@+id/sliderValue"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="0 ml"
+            android:text="0ml"
             android:textSize="18sp"
             android:layout_marginTop="5dp"
             app:layout_constraintTop_toBottomOf="@id/waterSlider"
             app:layout_constraintStart_toStartOf="@id/waterSlider"
             app:layout_constraintEnd_toEndOf="@id/waterSlider"/>
+
+        <TextView
+            android:id="@+id/recommendedWaterComsumption"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="0 L"
+            android:textSize="18sp"
+            android:layout_marginTop="5dp"
+            android:textColor="@color/black"
+            app:layout_constraintTop_toBottomOf="@id/sliderValue"
+            app:layout_constraintStart_toStartOf="@id/waterSlider"
+            app:layout_constraintEnd_toEndOf="@id/waterSlider"
+            />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/confirmButton"

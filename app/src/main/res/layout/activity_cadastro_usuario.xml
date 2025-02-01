@@ -10,7 +10,7 @@
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:gravity="center"
-        tools:context="com.ufrj.escalaiv2.ViewModel.CadastroUsuarioVM">
+        tools:context="com.ufrj.escalaiv2.viewmodel.CadastroUsuarioVM">
 
 
         <LinearLayout

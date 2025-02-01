@@ -1,4 +1,4 @@
-package com.example.escalaiv2;
+package com.ufrj.escalaiv2;
 
 import static org.junit.Assert.assertEquals;
 

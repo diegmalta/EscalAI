@@ -1,15 +1,40 @@
 package com.ufrj.escalaiv2.dao;
 
-import android.util.Log;
+import com.ufrj.escalaiv2.model.Usuario;
 
-import com.ufrj.escalaiv2.conexao.Conexao;
-import com.ufrj.escalaiv2.Model.Usuario;
+import java.util.List;
 
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import androidx.lifecycle.LiveData;
+import androidx.room.Dao;
+import androidx.room.Delete;
+import androidx.room.Insert;
+import androidx.room.Query;
+import androidx.room.Update;
 
+@Dao
+public interface UsuarioDao {
+    @Insert
+    long insert(Usuario usuario);
+
+    @Update
+    void update(Usuario usuario);
+
+    @Delete
+    void delete(Usuario usuario);
+
+    @Query("SELECT * FROM usuarios WHERE id = :id")
+    LiveData<Usuario> getUsuario(int id);
+
+    @Query("SELECT * FROM usuarios WHERE email = :email")
+    LiveData<Usuario> getUsuarioPorEmail(String email);
+
+    @Query("SELECT * FROM usuarios")
+    LiveData<List<Usuario>> getAllUsuarios();
+
+    @Query("SELECT * FROM usuarios WHERE email = :email AND senha = :senha")
+    Usuario selecionaUsuario(String email, String senha);
+}
+/*
 public class UsuarioDAO {
 
     public Usuario selecionaUsuario(String email, String senha) {
@@ -54,3 +79,4 @@ public class UsuarioDAO {
     }
 
 }
+*/

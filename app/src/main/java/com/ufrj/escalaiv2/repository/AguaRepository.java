@@ -1,4 +1,6 @@
-package com.ufrj.escalaiv2.Repository;
+package com.ufrj.escalaiv2.repository;
+import android.content.Context;
+import android.content.SharedPreferences;
 
 public class AguaRepository {
     private final SharedPreferences preferences;
