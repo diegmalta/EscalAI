@@ -39,10 +39,9 @@ public class InfoUsuariosController {
         autoCompleteTextView.setAdapter(adapter);
     }
 
-    public void handleSubmit(TextInputLayout nomeCompletoEditText, TextInputLayout pesoEditText, AutoCompleteTextView pesoDropdown,
+    public void handleSubmit(TextInputLayout pesoEditText, AutoCompleteTextView pesoDropdown,
                              TextInputLayout alturaEditText, AutoCompleteTextView alturaDropdown, RadioGroup escaladorRadioGroup) {
         try {
-            usuario.setNomeCompleto(nomeCompletoEditText.getEditText().toString());
             double peso = Float.parseFloat(pesoEditText.getEditText().toString());
             if(pesoDropdown.getText().toString().equals(context.getString(R.string.pounds))){
                 peso = peso * 0.4535924;

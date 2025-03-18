@@ -1,22 +1,34 @@
 package com.ufrj.escalaiv2.model;
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
+import androidx.room.ColumnInfo;
 
-@Entity(tableName = "usuarios")
+import java.util.Date;
+
+@Entity(tableName = "users")
 public class Usuario {
     @PrimaryKey(autoGenerate = true)
     private int id;
+    @ColumnInfo(name = "email")
     private String email;
+    @ColumnInfo(name = "name")
     private String nome;
+    @ColumnInfo(name = "last_name")
     private String sobrenome;
+    @ColumnInfo(name = "birthdate")
     private String dataNasc;
+    @ColumnInfo(name = "phone_number")
     private String celular;
+    @ColumnInfo(name = "password")
     private String senha;
 
-    // Informações complementares
-    private String nomeCompleto;
+    // Informacoes complementares
+    @ColumnInfo(name = "weight")
     private double peso; // em Kg
+    @ColumnInfo(name = "height")
     private double altura; // em cm
+    @ColumnInfo(name = "weight_height_last_update")
+    private Date lastUpdateDate;
 
     public String getNome() {
         return nome;
@@ -50,11 +62,11 @@ public class Usuario {
         this.celular = celular;
     }
 
-    public Integer getId() {
+    public int getId() {
         return id;
     }
 
-    public void setId(Integer id) {
+    public void setId(int id) {
         this.id = id;
     }
 
@@ -75,11 +87,7 @@ public class Usuario {
     }
 
     public String getNomeCompleto() {
-        return nomeCompleto;
-    }
-
-    public void setNomeCompleto(String nomeCompleto) {
-        this.nomeCompleto = nomeCompleto;
+        return nome + sobrenome;
     }
 
     public double getPeso() {

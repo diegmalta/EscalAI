@@ -14,13 +14,13 @@ import com.ufrj.escalaiv2.dao.UsuarioDao;
         exportSchema = false // Add this to prevent schema export warnings
 )
 public abstract class AppDatabase extends RoomDatabase {
-    private static AppDatabase instance;
+    private static volatile AppDatabase INSTANCE;
 
     public abstract UsuarioDao usuarioDao();
 
     public static synchronized AppDatabase getInstance(Context context) {
-        if (instance == null) {
-            instance = Room.databaseBuilder(
+        if (INSTANCE == null) {
+            INSTANCE = Room.databaseBuilder(
                             context.getApplicationContext(),
                             AppDatabase.class,
                             "escalaiv2_database"
@@ -29,6 +29,6 @@ public abstract class AppDatabase extends RoomDatabase {
                     .fallbackToDestructiveMigration()
                     .build();
         }
-        return instance;
+        return INSTANCE;
     }
 }

@@ -42,14 +42,12 @@ public class MainActivity extends AppCompatActivity {
             startActivity(intent);
             finish();
         } else {
-            // Execute database query in background
             new Thread(() -> {
                 AppDatabase database = AppDatabase.getInstance(MainActivity.this);
-                Usuario usu = database.usuarioDao().selecionaUsuario(usuario, senha);
+                Usuario user = database.usuarioDao().selecionaUsuario(usuario, senha);
 
-                // Update UI on main thread
                 runOnUiThread(() -> {
-                    if (usu != null) {
+                    if (user != null) {
                         Resultado.setText("Login efetuado com sucesso");
                         Intent intent = new Intent(MainActivity.this, getMenuPrincipal());
                         startActivity(intent);
@@ -79,7 +77,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void limpar() {
-        //editEmail.setText("");
         editPassword.setText("");
         editEmail.requestFocus();
     }
