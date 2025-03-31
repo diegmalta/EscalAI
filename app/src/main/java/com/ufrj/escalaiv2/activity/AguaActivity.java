@@ -48,7 +48,7 @@ public class AguaActivity extends AppCompatActivity {
     }
 
     private void observeViewModel() {
-        aguaVM.getQuantidadeTotalAgua().observe(this, amount ->
+        aguaVM.getTotalWaterConsumption().observe(this, amount ->
                 binding.waterAmount.setText(String.format("%d ml", amount)));
 
         aguaVM.getValorAtualSlider().observe(this, value -> {

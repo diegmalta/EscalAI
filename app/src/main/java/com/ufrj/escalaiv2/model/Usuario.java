@@ -30,6 +30,15 @@ public class Usuario {
     @ColumnInfo(name = "weight_height_last_update")
     private Date lastUpdateDate;
 
+    public Date getLastUpdateDate() {
+        return lastUpdateDate;
+    }
+
+    public void setLastUpdateDate(Date lastUpdateDate) {
+        this.lastUpdateDate = lastUpdateDate;
+    }
+
+
     public String getNome() {
         return nome;
     }
@@ -105,4 +114,5 @@ public class Usuario {
     public void setAltura(double altura) {
         this.altura = altura;
     }
+
 }

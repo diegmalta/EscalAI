@@ -5,42 +5,56 @@ import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
-public class AguaVM extends AndroidViewModel {
-    private final MutableLiveData<Integer> quantidadeTotalAgua;
-    private final MutableLiveData<Integer> valorAtualSlider;
-    private final MutableLiveData<WaterConsumptionEvent> uiEvent;
-    private final MutableLiveData<String> recomendacaoAgua;
+import com.ufrj.escalaiv2.event.AguaEvent;
+import com.ufrj.escalaiv2.repository.HumorRepository;
+import com.ufrj.escalaiv2.repository.UsuarioRepository;
 
-    // Enum for UI events
-    public enum WaterConsumptionEvent {
-        SHOW_SUCCESS_MESSAGE,
-        SHOW_ERROR_MESSAGE,
-        RESET_COMPLETED
-    }
+public class AguaVM extends AndroidViewModel {
+    private final HumorRepository aguaRepository;
+    private final UsuarioRepository usuarioRepository;
+    private final MutableLiveData<Integer> totalWaterConsumption;
+    private final MutableLiveData<Integer> valorAtualSlider;
+    private final MutableLiveData<AguaEvent> uiEvent;
+    private final MutableLiveData<String> recommendedWater;
 
     public AguaVM(Application application) {
         super(application);
-        quantidadeTotalAgua = new MutableLiveData<>(0);
+        aguaRepository = new HumorRepository(application);
+        usuarioRepository = new UsuarioRepository(application);
+
+        totalWaterConsumption = new MutableLiveData<>(0);
         valorAtualSlider = new MutableLiveData<>(0);
         uiEvent = new MutableLiveData<>();
-        recomendacaoAgua = new MutableLiveData<>("2.0 L"); // Default recommendation
+        recommendedWater = new MutableLiveData<>("2.0 L"); // Default recommendation
+
+        // Initialize total water consumption (you'll need to pass the current user's ID)
+        initializeTotalWaterConsumption();
     }
 
-    // Getters for LiveData
-    public LiveData<Integer> getQuantidadeTotalAgua() {
-        return quantidadeTotalAgua;
+    private void initializeTotalWaterConsumption() {
+        // This is a placeholder. You'll need to implement a way to get the current user's ID
+        int currentUserId = getCurrentUserId(); // You'll need to implement this method
+        int totalConsumption = aguaRepository.getTotalWaterConsumption(currentUserId);
+        totalWaterConsumption.setValue(totalConsumption);
+    }
+
+    public LiveData<Integer> getTotalWaterConsumption() {
+        return getTotalWaterConsumption(getCurrentUserId());
+    }
+    public LiveData<Integer> getTotalWaterConsumption(int currentUserId) {
+        return totalWaterConsumption;
     }
 
     public LiveData<Integer> getValorAtualSlider() {
         return valorAtualSlider;
     }
 
-    public LiveData<WaterConsumptionEvent> getUiEvent() {
+    public LiveData<AguaEvent> getUiEvent() {
         return uiEvent;
     }
 
-    public LiveData<String> getRecomendacaoAgua() {
-        return recomendacaoAgua;
+    public LiveData<String> getTotalWaterRecommended() {
+        return recommendedWater;
     }
 
     // Update slider value
@@ -52,24 +66,41 @@ public class AguaVM extends AndroidViewModel {
 
     // Confirm water consumption
     public void confirmarConsumoAgua() {
-        Integer currentTotal = quantidadeTotalAgua.getValue();
         Integer sliderValue = valorAtualSlider.getValue();
 
-        if (currentTotal != null && sliderValue != null) {
-            int novoTotal = currentTotal + sliderValue;
-            quantidadeTotalAgua.setValue(novoTotal);
-            valorAtualSlider.setValue(0);  // Reset slider
-            uiEvent.setValue(WaterConsumptionEvent.SHOW_SUCCESS_MESSAGE);
+        if (sliderValue != null && sliderValue > 0) {
+            // Get current user ID (you'll need to implement this method)
+            int currentUserId = getCurrentUserId();
+
+            // Add water consumption to repository
+            aguaRepository.addWaterConsumption(currentUserId, sliderValue);
+
+            // Update total water consumption
+            int totalConsumption = aguaRepository.getTotalWaterConsumption(currentUserId);
+            totalWaterConsumption.setValue(totalConsumption);
+
+            // Reset slider
+            valorAtualSlider.setValue(0);
+
+            // Trigger UI event
+            uiEvent.setValue(AguaEvent.SHOW_SUCCESS_MESSAGE);
         } else {
-            uiEvent.setValue(WaterConsumptionEvent.SHOW_ERROR_MESSAGE);
+            uiEvent.setValue(AguaEvent.SHOW_ERROR_MESSAGE);
         }
     }
 
     // Reset total water consumption
     public void resetarConsumoAgua() {
-        quantidadeTotalAgua.setValue(0);
+        // This method would need to be updated to work with the new repository
+        totalWaterConsumption.setValue(0);
         valorAtualSlider.setValue(0);
-        uiEvent.setValue(WaterConsumptionEvent.RESET_COMPLETED);
+        uiEvent.setValue(AguaEvent.RESET_COMPLETED);
+    }
+
+    // Method to get current user ID (you'll need to implement this)
+    private int getCurrentUserId() {
+        // pegar o id do usuario logado atual, usando sharedpreferences
+        return 1;
     }
 
     // Format water amount for display
@@ -83,6 +114,6 @@ public class AguaVM extends AndroidViewModel {
 
     // Update water recommendation
     public void atualizarRecomendacaoAgua(float litros) {
-        recomendacaoAgua.setValue(String.format("%.1f L", litros));
+        recommendedWater.setValue(String.format("%.1f L", litros));
     }
 }

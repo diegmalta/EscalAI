@@ -1,7 +1,7 @@
 plugins {
     id("com.android.application")
-    id("org.jetbrains.kotlin.android")  // Adicione este plugin
-    id("kotlin-kapt")  // Adicione este para data binding
+    id("org.jetbrains.kotlin.android")
+    id("kotlin-kapt")
 }
 
 android {
@@ -29,8 +29,8 @@ android {
     }
 
     buildFeatures {
-        dataBinding = true  // Forma correta de habilitar data binding no Kotlin DSL
-        viewBinding = true  // Forma correta de habilitar view binding no Kotlin DSL
+        dataBinding = true
+        viewBinding = true
     }
 
     compileOptions {
@@ -45,29 +45,32 @@ android {
 }
 
 dependencies {
+    // Room Database
     val roomVersion = "2.6.1"
     implementation("androidx.room:room-runtime:$roomVersion")
     annotationProcessor("androidx.room:room-compiler:$roomVersion")
     kapt("androidx.room:room-compiler:$roomVersion")
+    // Lifecycle
+    val lifecycleVersion = "2.7.0"
+    kapt("androidx.lifecycle:lifecycle-compiler:$lifecycleVersion")
+    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycleVersion")
+    implementation("androidx.lifecycle:lifecycle-livedata-ktx:$lifecycleVersion")
+//    implementation("android.arch.lifecycle:extensions:$lifecycleVersion")
     implementation("androidx.appcompat:appcompat:1.7.0")
+    // Material Design 3
     implementation("com.google.android.material:material:1.12.0")
-    implementation("androidx.constraintlayout:constraintlayout:2.2.0")
+    implementation("androidx.constraintlayout:constraintlayout:2.2.1")
     implementation(files("libs\\jtds-1.3.1.jar"))
-    implementation("androidx.databinding:databinding-runtime:8.8.0")
+    // Databinding
+    implementation("androidx.databinding:databinding-runtime:8.9.1")
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.2.1")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.6.1")
     implementation("androidx.core:core-ktx:1.10.0")
     implementation("androidx.legacy:legacy-support-core-utils:1.0.0")
-    implementation("com.google.android.material:material:1.12.0")
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.4")
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
     implementation("com.squareup.retrofit2:converter-gson:2.9.0")
     implementation("com.squareup.okhttp3:logging-interceptor:4.9.0")
-    implementation("androidx.room:room-runtime:$roomVersion")
-    annotationProcessor("androidx.room:room-compiler:$roomVersion")
     compileOnly("com.google.dagger:dagger:2.28.3")
-    //annotationProcessor("android.arch.persistence.room:runtime:1.1.1")
-    //annotationProcessor("android.arch.persistence.room:compiler:1.1.1")
-    implementation("android.arch.lifecycle:extensions:1.1.1")
 }

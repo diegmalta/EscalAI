@@ -22,16 +22,16 @@ public interface UsuarioDao {
     @Delete
     void delete(Usuario usuario);
 
-    @Query("SELECT * FROM usuarios WHERE id = :id")
+    @Query("SELECT * FROM users WHERE id = :id")
     LiveData<Usuario> getUsuario(int id);
 
-    @Query("SELECT * FROM usuarios WHERE email = :email")
+    @Query("SELECT * FROM users WHERE email = :email")
     LiveData<Usuario> getUsuarioPorEmail(String email);
 
-    @Query("SELECT * FROM usuarios")
+    @Query("SELECT * FROM users")
     LiveData<List<Usuario>> getAllUsuarios();
 
-    @Query("SELECT * FROM usuarios WHERE email = :email AND senha = :senha")
+    @Query("SELECT * FROM users WHERE email = :email AND password = :senha")
     Usuario selecionaUsuario(String email, String senha);
 }
 /*

@@ -17,7 +17,7 @@ import com.ufrj.escalaiv2.model.AppDatabase;
 public class MainActivity extends AppCompatActivity {
 
     EditText editEmail, editPassword;
-    Button button_login, button_cadastro;
+    Button button_login, button_cadastro, recuperarSenhaButton;
     TextView Resultado;
 
     @Override
@@ -29,7 +29,26 @@ public class MainActivity extends AppCompatActivity {
         editPassword = findViewById(R.id.editPassword);
         button_login = findViewById(R.id.button_login);
         button_cadastro = findViewById(R.id.button_cadastro);
+        recuperarSenhaButton = findViewById(R.id.recuperarSenhaButton);
         Resultado = findViewById(R.id.Resultado);
+
+        button_login.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                login(v);
+            }
+        });
+        button_cadastro.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                cadastrar(v);
+            }
+        });
+        recuperarSenhaButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+            }
+        });
     }
 
     public void login(View v) {

@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?><!-- activity_criacao_conta.xml -->
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
@@ -93,8 +94,8 @@
                 android:hint="@string/birthDate"
                 android:padding="8dp"
                 android:textColor="@color/black"
-                android:focusable="false"
-                android:onClick="showDatePickerDialog" />
+                android:focusable="false"/>
+<!--                android:onClick="showDatePickerDialog" -->
 
 
             <EditText

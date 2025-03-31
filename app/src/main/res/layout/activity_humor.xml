@@ -1,0 +1,587 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <!--    <data>-->
+    <!--        <variable-->
+    <!--            name="viewModel"-->
+    <!--            type="com.ufrj.escalaiv2.viewmodel.HumorVM" />-->
+    <!--    </data>-->
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        xmlns:tools="http://schemas.android.com/tools"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_gravity="center"
+        tools:context="com.ufrj.escalaiv2.activity.MenuPrincipalActivity"
+        android:orientation="vertical">
+
+        <com.google.android.material.appbar.AppBarLayout
+            android:id="@+id/topAppBar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="top"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent">
+
+            <com.google.android.material.appbar.MaterialToolbar
+                android:id="@+id/toolbar"
+                android:layout_width="match_parent"
+                android:layout_height="?attr/actionBarSize"
+                android:background="@color/md_theme_light_primaryContainer"
+                app:title="Humor"
+                app:navigationIcon="@drawable/ic_arrow_back"/>
+        </com.google.android.material.appbar.AppBarLayout>
+
+        <!-- Título principal -->
+        <TextView
+            android:id="@+id/titleText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Como foi seu humor ontem?"
+            android:textSize="24sp"
+            android:textStyle="bold"
+            android:textColor="?attr/colorOnSurface"
+            android:gravity="center"
+            android:layout_marginTop="32dp"
+            android:layout_marginHorizontal="16dp"
+            app:layout_constraintTop_toBottomOf="@id/topAppBar"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"/>
+
+        <!-- ScrollView para conter todos os sliders -->
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_marginTop="16dp"
+            android:layout_marginBottom="16dp"
+            app:layout_constraintTop_toBottomOf="@id/titleText"
+            app:layout_constraintBottom_toTopOf="@id/saveButton">
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+                <androidx.constraintlayout.widget.Guideline
+                    android:id="@+id/guideline1"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    app:layout_constraintGuide_percent="0.36" />
+
+                <androidx.constraintlayout.widget.Guideline
+                    android:id="@+id/guideline2"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    app:layout_constraintGuide_percent="0.63" />
+
+
+                <!-- 1. ALEGRIA -->
+                <!-- Container para o label "Alegria" e seu valor -->
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:id="@+id/joyLabelContainer"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:layout_marginHorizontal="16dp"
+                    app:layout_constraintTop_toTopOf="parent">
+
+                    <TextView
+                        android:id="@+id/joyLabel"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Alegria"
+                        android:textSize="18sp"
+                        android:textColor="?attr/colorOnSurface"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintBottom_toBottomOf="parent"/>
+
+                    <TextView
+                        android:id="@+id/joyValue"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Normal"
+                        android:textSize="18sp"
+                        android:textColor="?attr/colorPrimary"
+                        android:textStyle="bold"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintBottom_toBottomOf="parent"/>
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+                <!-- Slider para seleção de humor - Alegria -->
+                <com.google.android.material.slider.Slider
+                    android:id="@+id/joySlider"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:layout_marginHorizontal="16dp"
+                    android:valueFrom="0"
+                    android:valueTo="3"
+                    android:stepSize="1"
+                    android:value="2"
+                    app:tickVisible="true"
+                    app:labelBehavior="gone"
+                    app:layout_constraintTop_toBottomOf="@id/joyLabelContainer"/>
+
+                <!-- Labels para os valores do slider - Alegria -->
+                <TextView
+                    android:id="@+id/sliderLabelNada"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Nada Alegre"
+                    android:textSize="12sp"
+                    android:layout_marginTop="8dp"
+                    android:layout_marginStart="16dp"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toStartOf="@id/guideline1"
+                    app:layout_constraintHorizontal_bias="0.0"
+                    app:layout_constraintTop_toBottomOf="@id/joySlider"/>
+
+                <TextView
+                    android:id="@+id/sliderLabelPouco"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Pouco"
+                    android:textSize="12sp"
+                    android:layout_marginTop="8dp"
+                    app:layout_constraintStart_toEndOf="@id/guideline1"
+                    app:layout_constraintEnd_toStartOf="@id/guideline1"
+                    app:layout_constraintTop_toBottomOf="@id/joySlider"/>
+
+                <TextView
+                    android:id="@+id/sliderLabelAlegre"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Normal"
+                    android:textSize="12sp"
+                    android:layout_marginTop="8dp"
+                    app:layout_constraintStart_toEndOf="@id/guideline2"
+                    app:layout_constraintEnd_toStartOf="@id/guideline2"
+                    app:layout_constraintTop_toBottomOf="@id/joySlider"/>
+
+                <TextView
+                    android:id="@+id/sliderLabelMuito"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Muito Alegre"
+                    android:textSize="12sp"
+                    android:layout_marginTop="8dp"
+                    android:layout_marginEnd="16dp"
+                    app:layout_constraintStart_toEndOf="@id/guideline2"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintHorizontal_bias="1.0"
+                    app:layout_constraintTop_toBottomOf="@id/joySlider"/>
+
+                <!-- 2. TRISTEZA -->
+                <!-- Container para o label "Tristeza" e seu valor -->
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:id="@+id/sadnessLabelContainer"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="32dp"
+                    android:layout_marginHorizontal="16dp"
+                    app:layout_constraintTop_toBottomOf="@id/sliderLabelPouco">
+
+                    <TextView
+                        android:id="@+id/sadnessLabel"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Tristeza"
+                        android:textSize="18sp"
+                        android:textColor="?attr/colorOnSurface"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintBottom_toBottomOf="parent"/>
+
+                    <TextView
+                        android:id="@+id/sadnessValue"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Normal"
+                        android:textSize="18sp"
+                        android:textColor="?attr/colorPrimary"
+                        android:textStyle="bold"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintBottom_toBottomOf="parent"/>
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+                <!-- Slider para seleção de humor - Tristeza -->
+                <com.google.android.material.slider.Slider
+                    android:id="@+id/sadnessSlider"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:layout_marginHorizontal="16dp"
+                    android:valueFrom="0"
+                    android:valueTo="3"
+                    android:stepSize="1"
+                    android:value="2"
+                    app:tickVisible="true"
+                    app:labelBehavior="gone"
+                    app:layout_constraintTop_toBottomOf="@id/sadnessLabelContainer"/>
+
+                <!-- Labels para os valores do slider - Tristeza -->
+                <TextView
+                    android:id="@+id/sadnessLabelNada"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Nada Triste"
+                    android:textSize="12sp"
+                    android:layout_marginTop="8dp"
+                    android:layout_marginStart="16dp"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toStartOf="@id/guideline1"
+                    app:layout_constraintHorizontal_bias="0.0"
+                    app:layout_constraintTop_toBottomOf="@id/sadnessSlider"/>
+
+                <TextView
+                    android:id="@+id/sadnessLabelPouco"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Pouco"
+                    android:textSize="12sp"
+                    android:layout_marginTop="8dp"
+                    app:layout_constraintStart_toEndOf="@id/guideline1"
+                    app:layout_constraintEnd_toStartOf="@id/guideline1"
+                    app:layout_constraintTop_toBottomOf="@id/sadnessSlider"/>
+
+                <TextView
+                    android:id="@+id/sadnessLabelNormal"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Normal"
+                    android:textSize="12sp"
+                    android:layout_marginTop="8dp"
+                    app:layout_constraintStart_toEndOf="@id/guideline2"
+                    app:layout_constraintEnd_toStartOf="@id/guideline2"
+                    app:layout_constraintTop_toBottomOf="@id/sadnessSlider"/>
+
+                <TextView
+                    android:id="@+id/sadnessLabelMuito"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Muito Triste"
+                    android:textSize="12sp"
+                    android:layout_marginTop="8dp"
+                    android:layout_marginEnd="16dp"
+                    app:layout_constraintStart_toEndOf="@id/guideline2"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintHorizontal_bias="1.0"
+                    app:layout_constraintTop_toBottomOf="@id/sadnessSlider"/>
+
+                <!-- 3. ANSIEDADE -->
+                <!-- Container para o label "Ansiedade" e seu valor -->
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:id="@+id/anxietyLabelContainer"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="32dp"
+                    android:layout_marginHorizontal="16dp"
+                    app:layout_constraintTop_toBottomOf="@id/sadnessLabelPouco">
+
+                    <TextView
+                        android:id="@+id/anxietyLabel"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Ansiedade"
+                        android:textSize="18sp"
+                        android:textColor="?attr/colorOnSurface"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintBottom_toBottomOf="parent"/>
+
+                    <TextView
+                        android:id="@+id/anxietyValue"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Normal"
+                        android:textSize="18sp"
+                        android:textColor="?attr/colorPrimary"
+                        android:textStyle="bold"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintBottom_toBottomOf="parent"/>
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+                <!-- Slider para seleção de humor - Ansiedade -->
+                <com.google.android.material.slider.Slider
+                    android:id="@+id/anxietySlider"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:layout_marginHorizontal="16dp"
+                    android:valueFrom="0"
+                    android:valueTo="3"
+                    android:stepSize="1"
+                    android:value="2"
+                    app:tickVisible="true"
+                    app:labelBehavior="gone"
+                    app:layout_constraintTop_toBottomOf="@id/anxietyLabelContainer"/>
+
+                <!-- Labels para os valores do slider - Ansiedade -->
+                <TextView
+                    android:id="@+id/anxietyLabelNada"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Nada Ansioso"
+                    android:textSize="12sp"
+                    android:layout_marginTop="8dp"
+                    android:layout_marginStart="16dp"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toStartOf="@id/guideline1"
+                    app:layout_constraintHorizontal_bias="0.0"
+                    app:layout_constraintTop_toBottomOf="@id/anxietySlider"/>
+
+                <TextView
+                    android:id="@+id/anxietyLabelPouco"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Pouco"
+                    android:textSize="12sp"
+                    android:layout_marginTop="8dp"
+                    app:layout_constraintStart_toEndOf="@id/guideline1"
+                    app:layout_constraintEnd_toStartOf="@id/guideline1"
+                    app:layout_constraintTop_toBottomOf="@id/anxietySlider"/>
+
+                <TextView
+                    android:id="@+id/anxietyLabelNormal"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Normal"
+                    android:textSize="12sp"
+                    android:layout_marginTop="8dp"
+                    app:layout_constraintStart_toEndOf="@id/guideline2"
+                    app:layout_constraintEnd_toStartOf="@id/guideline2"
+                    app:layout_constraintTop_toBottomOf="@id/anxietySlider"/>
+
+                <TextView
+                    android:id="@+id/anxietyLabelMuito"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Muito Ansioso"
+                    android:textSize="12sp"
+                    android:layout_marginTop="8dp"
+                    android:layout_marginEnd="16dp"
+                    app:layout_constraintStart_toEndOf="@id/guideline2"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintHorizontal_bias="1.0"
+                    app:layout_constraintTop_toBottomOf="@id/anxietySlider"/>
+
+                <!-- 4. ESTRESSE/RAIVA -->
+                <!-- Container para o label "Estresse/Raiva" e seu valor -->
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:id="@+id/stressLabelContainer"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="32dp"
+                    android:layout_marginHorizontal="16dp"
+                    app:layout_constraintTop_toBottomOf="@id/anxietyLabelPouco">
+
+                    <TextView
+                        android:id="@+id/stressLabel"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Estresse/Raiva"
+                        android:textSize="18sp"
+                        android:textColor="?attr/colorOnSurface"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintBottom_toBottomOf="parent"/>
+
+                    <TextView
+                        android:id="@+id/stressValue"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Normal"
+                        android:textSize="18sp"
+                        android:textColor="?attr/colorPrimary"
+                        android:textStyle="bold"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintBottom_toBottomOf="parent"/>
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+                <!-- Slider para seleção de humor - Estresse/Raiva -->
+                <com.google.android.material.slider.Slider
+                    android:id="@+id/stressSlider"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:layout_marginHorizontal="16dp"
+                    android:valueFrom="0"
+                    android:valueTo="3"
+                    android:stepSize="1"
+                    android:value="2"
+                    app:tickVisible="true"
+                    app:labelBehavior="gone"
+                    app:layout_constraintTop_toBottomOf="@id/stressLabelContainer"/>
+
+                <!-- Labels para os valores do slider - Estresse/Raiva -->
+                <TextView
+                    android:id="@+id/stressLabelNada"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Nada Estressado"
+                    android:textSize="12sp"
+                    android:layout_marginTop="8dp"
+                    android:layout_marginStart="16dp"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toStartOf="@id/guideline1"
+                    app:layout_constraintHorizontal_bias="0.0"
+                    app:layout_constraintTop_toBottomOf="@id/stressSlider"/>
+
+                <TextView
+                    android:id="@+id/stressLabelPouco"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Pouco"
+                    android:textSize="12sp"
+                    android:layout_marginTop="8dp"
+                    app:layout_constraintStart_toEndOf="@id/guideline1"
+                    app:layout_constraintEnd_toStartOf="@id/guideline1"
+                    app:layout_constraintTop_toBottomOf="@id/stressSlider"/>
+
+                <TextView
+                    android:id="@+id/stressLabelNormal"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Normal"
+                    android:textSize="12sp"
+                    android:layout_marginTop="8dp"
+                    app:layout_constraintStart_toEndOf="@id/guideline2"
+                    app:layout_constraintEnd_toStartOf="@id/guideline2"
+                    app:layout_constraintTop_toBottomOf="@id/stressSlider"/>
+
+                <TextView
+                    android:id="@+id/stressLabelMuito"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Muito Estressado"
+                    android:textSize="12sp"
+                    android:layout_marginTop="8dp"
+                    android:layout_marginEnd="16dp"
+                    app:layout_constraintStart_toEndOf="@id/guideline2"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintHorizontal_bias="1.0"
+                    app:layout_constraintTop_toBottomOf="@id/stressSlider"/>
+
+                <!-- 5. CALMA -->
+                <!-- Container para o label "Calma" e seu valor -->
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:id="@+id/calmLabelContainer"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="32dp"
+                    android:layout_marginHorizontal="16dp"
+                    app:layout_constraintTop_toBottomOf="@id/stressLabelPouco">
+
+                    <TextView
+                        android:id="@+id/calmLabel"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Calma"
+                        android:textSize="18sp"
+                        android:textColor="?attr/colorOnSurface"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintBottom_toBottomOf="parent"/>
+
+                    <TextView
+                        android:id="@+id/calmValue"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Normal"
+                        android:textSize="18sp"
+                        android:textColor="?attr/colorPrimary"
+                        android:textStyle="bold"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintBottom_toBottomOf="parent"/>
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+                <!-- Slider para seleção de humor - Calma -->
+                <com.google.android.material.slider.Slider
+                    android:id="@+id/calmSlider"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:layout_marginHorizontal="16dp"
+                    android:valueFrom="0"
+                    android:valueTo="3"
+                    android:stepSize="1"
+                    android:value="2"
+                    app:tickVisible="true"
+                    app:labelBehavior="gone"
+                    app:layout_constraintTop_toBottomOf="@id/calmLabelContainer"/>
+
+                <!-- Labels para os valores do slider - Calma -->
+                <TextView
+                    android:id="@+id/calmLabelNada"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Nada Calmo"
+                    android:textSize="12sp"
+                    android:layout_marginTop="8dp"
+                    android:layout_marginStart="16dp"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toStartOf="@id/guideline1"
+                    app:layout_constraintHorizontal_bias="0.0"
+                    app:layout_constraintTop_toBottomOf="@id/calmSlider"/>
+
+                <TextView
+                    android:id="@+id/calmLabelPouco"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Pouco"
+                    android:textSize="12sp"
+                    android:layout_marginTop="8dp"
+                    app:layout_constraintStart_toEndOf="@id/guideline1"
+                    app:layout_constraintEnd_toStartOf="@id/guideline1"
+                    app:layout_constraintTop_toBottomOf="@id/calmSlider"/>
+
+                <TextView
+                    android:id="@+id/calmLabelNormal"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Normal"
+                    android:textSize="12sp"
+                    android:layout_marginTop="8dp"
+                    app:layout_constraintStart_toEndOf="@id/guideline2"
+                    app:layout_constraintEnd_toStartOf="@id/guideline2"
+                    app:layout_constraintTop_toBottomOf="@id/calmSlider"/>
+
+                <TextView
+                    android:id="@+id/calmLabelMuito"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Muito Calmo"
+                    android:textSize="12sp"
+                    android:layout_marginTop="8dp"
+                    android:layout_marginEnd="16dp"
+                    android:layout_marginBottom="32dp"
+                    app:layout_constraintStart_toEndOf="@id/guideline2"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintHorizontal_bias="1.0"
+                    app:layout_constraintTop_toBottomOf="@id/calmSlider"
+                    app:layout_constraintBottom_toBottomOf="parent"/>
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+        </ScrollView>
+
+        <!-- Botão para salvar -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/saveButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Salvar"
+            android:layout_marginHorizontal="16dp"
+            android:layout_marginBottom="32dp"
+            android:padding="12dp"
+            app:cornerRadius="8dp"
+            app:layout_constraintBottom_toBottomOf="parent"/>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>

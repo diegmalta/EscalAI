@@ -2,6 +2,7 @@ package com.ufrj.escalaiv2.viewmodel;
 
 import android.app.Application;
 
+import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
@@ -24,7 +25,7 @@ public class CadastroUsuarioVM extends AndroidViewModel {
     private final MutableLiveData<Boolean> cadastroSucesso = new MutableLiveData<>(false);
     private final MutableLiveData<String> dataNascimentoSelecionada = new MutableLiveData<>();
 
-    public CadastroUsuarioVM(Application application) {
+    public CadastroUsuarioVM(@NonNull Application application) {
         super(application);
         repository = new UsuarioRepository(application);
     }

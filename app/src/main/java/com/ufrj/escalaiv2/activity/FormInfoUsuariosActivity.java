@@ -41,7 +41,7 @@ public class FormInfoUsuariosActivity extends AppCompatActivity {
     }
     public void confirmarDados(View v){
         submitButton.setOnClickListener(view -> {
-            infoUsuariosController.handleSubmit(nomeCompleto, peso, pesoDropdown,
+            infoUsuariosController.handleSubmit(peso, pesoDropdown,
                     altura, alturaDropdown, escaladorRadioGroup);
 
         // Navegar para MenuPrincipalActivity

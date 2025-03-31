@@ -12,7 +12,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_gravity="center"
-        tools:context="com.ufrj.escalaiv2.activity.MenuPrincipalActivity"
+        tools:context="com.ufrj.escalaiv2.activity.AguaActivity"
         android:orientation="vertical">
 
         <com.google.android.material.appbar.AppBarLayout
@@ -37,7 +37,7 @@
             android:id="@+id/waterAmount"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="0 ml"
+            android:text="@{String.valueOf(viewModel.getTotalWaterConsumption())}"
             android:textSize="24sp"
             android:textStyle="bold"
             android:layout_marginTop="66dp"
@@ -81,7 +81,7 @@
             android:id="@+id/recommendedWaterComsumption"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="0 L"
+            android:text="Quantidade total de água recomendada: 0 L"
             android:textSize="18sp"
             android:layout_marginTop="5dp"
             android:textColor="@color/black"
@@ -95,8 +95,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Adicionar"
-            android:layout_marginTop="32dp"
-            app:layout_constraintTop_toBottomOf="@id/sliderValue"
+            android:layout_marginTop="12dp"
+            app:layout_constraintTop_toBottomOf="@id/recommendedWaterComsumption"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"/>
 
@@ -107,8 +107,8 @@
             android:backgroundTint="@color/md_theme_light_tertiaryContainer"
             android:text="Zerar"
             android:textColor="@color/md_theme_light_outline"
-            android:layout_marginTop="80dp"
-            app:layout_constraintTop_toBottomOf="@id/sliderValue"
+            android:layout_marginTop="12dp"
+            app:layout_constraintTop_toBottomOf="@id/confirmButton"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"/>
 
