@@ -96,6 +96,7 @@
             app:cardCornerRadius="16dp">
 
             <Button
+                android:id="@+id/humorButton"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:background="@color/md_theme_light_primaryContainer"

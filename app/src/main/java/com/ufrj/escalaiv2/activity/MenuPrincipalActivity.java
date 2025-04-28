@@ -18,5 +18,11 @@ public class MenuPrincipalActivity extends AppCompatActivity {
             Intent intent = new Intent(this, AguaActivity.class);
             startActivity(intent);
         });
+
+        Button humorButton = findViewById(R.id.humorButton);
+        humorButton.setOnClickListener(view -> {
+            Intent intent = new Intent(this, HumorActivity.class);
+            startActivity(intent);
+        });
     }
 }

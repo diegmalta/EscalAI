@@ -1,39 +1,38 @@
-<?xml version="1.0" encoding="utf-8"?>
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
-    <!--    <data>-->
-    <!--        <variable-->
-    <!--            name="viewModel"-->
-    <!--            type="com.ufrj.escalaiv2.viewmodel.HumorVM" />-->
-    <!--    </data>-->
+    <data>
+        <variable
+            name="viewModel"
+            type="com.ufrj.escalaiv2.viewmodel.HumorVM" />
+    </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
         xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_gravity="center"
-        tools:context="com.ufrj.escalaiv2.activity.MenuPrincipalActivity"
+        tools:context="com.ufrj.escalaiv2.activity.HumorActivity"
         android:orientation="vertical">
 
-        <com.google.android.material.appbar.AppBarLayout
-            android:id="@+id/topAppBar"
+    <com.google.android.material.appbar.AppBarLayout
+        android:id="@+id/topAppBar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="top"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <com.google.android.material.appbar.MaterialToolbar
+            android:id="@+id/toolbar"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="top"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent">
+            android:layout_height="?attr/actionBarSize"
+            android:background="@color/md_theme_light_primaryContainer"
+            app:title="Humor"
+            app:navigationIcon="@drawable/ic_arrow_back"/>
+    </com.google.android.material.appbar.AppBarLayout>
 
-            <com.google.android.material.appbar.MaterialToolbar
-                android:id="@+id/toolbar"
-                android:layout_width="match_parent"
-                android:layout_height="?attr/actionBarSize"
-                android:background="@color/md_theme_light_primaryContainer"
-                app:title="Humor"
-                app:navigationIcon="@drawable/ic_arrow_back"/>
-        </com.google.android.material.appbar.AppBarLayout>
 
-        <!-- Título principal -->
         <TextView
             android:id="@+id/titleText"
             android:layout_width="match_parent"
@@ -66,6 +65,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
+                    android:visibility="gone"
                     app:layout_constraintGuide_percent="0.36" />
 
                 <androidx.constraintlayout.widget.Guideline
@@ -73,6 +73,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
+                    android:visibility="gone"
                     app:layout_constraintGuide_percent="0.63" />
 
 
@@ -101,7 +102,7 @@
                         android:id="@+id/joyValue"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Normal"
+                        android:text="@{String.valueOf(viewModel.joyText)}"
                         android:textSize="18sp"
                         android:textColor="?attr/colorPrimary"
                         android:textStyle="bold"
@@ -120,7 +121,7 @@
                     android:valueFrom="0"
                     android:valueTo="3"
                     android:stepSize="1"
-                    android:value="2"
+                    android:value="@{viewModel.joyLevel}"
                     app:tickVisible="true"
                     app:labelBehavior="gone"
                     app:layout_constraintTop_toBottomOf="@id/joyLabelContainer"/>
@@ -199,7 +200,7 @@
                         android:id="@+id/sadnessValue"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Normal"
+                        android:text="@{viewModel.sadnessText}"
                         android:textSize="18sp"
                         android:textColor="?attr/colorPrimary"
                         android:textStyle="bold"
@@ -218,7 +219,7 @@
                     android:valueFrom="0"
                     android:valueTo="3"
                     android:stepSize="1"
-                    android:value="2"
+                    android:value="@{viewModel.sadnessLevel}"
                     app:tickVisible="true"
                     app:labelBehavior="gone"
                     app:layout_constraintTop_toBottomOf="@id/sadnessLabelContainer"/>
@@ -297,7 +298,7 @@
                         android:id="@+id/anxietyValue"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Normal"
+                        android:text="@{viewModel.anxietyText}"
                         android:textSize="18sp"
                         android:textColor="?attr/colorPrimary"
                         android:textStyle="bold"
@@ -316,7 +317,7 @@
                     android:valueFrom="0"
                     android:valueTo="3"
                     android:stepSize="1"
-                    android:value="2"
+                    android:value="@{viewModel.anxietyLevel}"
                     app:tickVisible="true"
                     app:labelBehavior="gone"
                     app:layout_constraintTop_toBottomOf="@id/anxietyLabelContainer"/>
@@ -384,7 +385,7 @@
                         android:id="@+id/stressLabel"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Estresse/Raiva"
+                        android:text="Estresse"
                         android:textSize="18sp"
                         android:textColor="?attr/colorOnSurface"
                         app:layout_constraintStart_toStartOf="parent"
@@ -395,7 +396,7 @@
                         android:id="@+id/stressValue"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Normal"
+                        android:text="@{viewModel.stressText}"
                         android:textSize="18sp"
                         android:textColor="?attr/colorPrimary"
                         android:textStyle="bold"
@@ -414,7 +415,7 @@
                     android:valueFrom="0"
                     android:valueTo="3"
                     android:stepSize="1"
-                    android:value="2"
+                    android:value="@{viewModel.stressLevel}"
                     app:tickVisible="true"
                     app:labelBehavior="gone"
                     app:layout_constraintTop_toBottomOf="@id/stressLabelContainer"/>
@@ -493,7 +494,7 @@
                         android:id="@+id/calmValue"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Normal"
+                        android:text="@{viewModel.calmText}"
                         android:textSize="18sp"
                         android:textColor="?attr/colorPrimary"
                         android:textStyle="bold"
@@ -512,7 +513,7 @@
                     android:valueFrom="0"
                     android:valueTo="3"
                     android:stepSize="1"
-                    android:value="2"
+                    android:value="@{viewModel.calmLevel}"
                     app:tickVisible="true"
                     app:labelBehavior="gone"
                     app:layout_constraintTop_toBottomOf="@id/calmLabelContainer"/>

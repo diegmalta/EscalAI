@@ -10,7 +10,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 
-@Entity(tableName = "users_daily_data",
+@Entity(tableName = "user_daily_data",
         foreignKeys = @ForeignKey(
                 entity = Usuario.class,
                 parentColumns = "id",
@@ -28,15 +28,36 @@ public class UserDailyData {
     @ColumnInfo(name = "water_consumed")
     private int waterConsumed;
 
+    @ColumnInfo(name = "joy_level")
+    private int joyLevel;
+
+    @ColumnInfo(name = "stress_level")
+    private int stressLevel;
+
+    @ColumnInfo(name = "anxiety_level")
+    private int anxietyLevel;
+
+    @ColumnInfo(name = "sadness_level")
+    private int sadnessLevel;
+
+    @ColumnInfo(name = "calm_level")
+    private int calmLevel;
+
     @ColumnInfo(name = "date")
     private String date;
-
-    public UserDailyData() {
-        // Set the date to today when creating a new instance
-        this.date = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());
+    public UserDailyData(int userId, String date) {
+        this.userId = userId;
+        this.date = date;
+        this.waterConsumed = 0;
+        // Valores padrão para os níveis de humor
+        this.joyLevel = 0;
+        this.sadnessLevel = 0;
+        this.anxietyLevel = 0;
+        this.stressLevel = 0;
+        this.calmLevel = 0;
     }
 
-    // Getters and setters...
+    // Getters and setters
     public int getId() {
         return id;
     }
@@ -67,5 +88,45 @@ public class UserDailyData {
 
     public void setDate(String date) {
         this.date = date;
+    }
+
+    public int getJoyLevel() {
+        return joyLevel;
+    }
+
+    public void setJoyLevel(int joyLevel) {
+        this.joyLevel = joyLevel;
+    }
+
+    public int getStressLevel() {
+        return stressLevel;
+    }
+
+    public void setStressLevel(int stressLevel) {
+        this.stressLevel = stressLevel;
+    }
+
+    public int getAnxietyLevel() {
+        return anxietyLevel;
+    }
+
+    public void setAnxietyLevel(int anxietyLevel) {
+        this.anxietyLevel = anxietyLevel;
+    }
+
+    public int getSadnessLevel() {
+        return sadnessLevel;
+    }
+
+    public void setSadnessLevel(int sadnessLevel) {
+        this.sadnessLevel = sadnessLevel;
+    }
+
+    public int getCalmLevel() {
+        return calmLevel;
+    }
+
+    public void setCalmLevel(int calmLevel) {
+        this.calmLevel = calmLevel;
     }
 }

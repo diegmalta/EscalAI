@@ -55,7 +55,7 @@ dependencies {
     kapt("androidx.lifecycle:lifecycle-compiler:$lifecycleVersion")
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycleVersion")
     implementation("androidx.lifecycle:lifecycle-livedata-ktx:$lifecycleVersion")
-//    implementation("android.arch.lifecycle:extensions:$lifecycleVersion")
+    /*implementation("android.arch.lifecycle:extensions:$lifecycleVersion")*/
     implementation("androidx.appcompat:appcompat:1.7.0")
     // Material Design 3
     implementation("com.google.android.material:material:1.12.0")

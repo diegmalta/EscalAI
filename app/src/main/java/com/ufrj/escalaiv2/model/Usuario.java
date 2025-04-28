@@ -2,8 +2,10 @@ package com.ufrj.escalaiv2.model;
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
 import androidx.room.ColumnInfo;
+import androidx.room.TypeConverters;
 
 import java.util.Date;
+import com.ufrj.escalaiv2.utils.DateTypeConverter;
 
 @Entity(tableName = "users")
 public class Usuario {
@@ -27,6 +29,7 @@ public class Usuario {
     private double peso; // em Kg
     @ColumnInfo(name = "height")
     private double altura; // em cm
+    @TypeConverters(DateTypeConverter.class)
     @ColumnInfo(name = "weight_height_last_update")
     private Date lastUpdateDate;
 

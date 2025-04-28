@@ -4,11 +4,13 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
 import android.os.Bundle;
 
+import com.google.android.material.snackbar.BaseTransientBottomBar;
 import com.ufrj.escalaiv2.databinding.ActivityAguaBinding;
 import com.google.android.material.snackbar.Snackbar;
 import androidx.databinding.DataBindingUtil;
 import com.ufrj.escalaiv2.R;
 import com.ufrj.escalaiv2.viewmodel.AguaVM;
+import com.ufrj.escalaiv2.viewmodel.AguaVMFactory;
 
 public class AguaActivity extends AppCompatActivity {
     private ActivityAguaBinding binding;
@@ -19,13 +21,15 @@ public class AguaActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         binding = DataBindingUtil.setContentView(this, R.layout.activity_agua);
 
-        // Opcional: setar o ViewModel no binding se estiver usando data binding
-        aguaVM = new ViewModelProvider(this).get(AguaVM.class);
+        AguaVMFactory factory = new AguaVMFactory(getApplication());
+        aguaVM = new ViewModelProvider(this, factory).get(AguaVM.class);
         binding.setLifecycleOwner(this);
         binding.setViewModel(aguaVM);
 
+        //TODO testar comentando o setContentView
         setContentView(binding.getRoot());
         setupUI();
+        observeViewModel();
     }
 
     private void setupUI() {
@@ -34,7 +38,7 @@ public class AguaActivity extends AppCompatActivity {
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         }
-        binding.toolbar.setNavigationOnClickListener(v -> onBackPressed());
+        binding.toolbar.setNavigationOnClickListener(v -> getOnBackPressedDispatcher());
 
         // Configurar o slider
         binding.waterSlider.addOnChangeListener((slider, value, fromUser) -> {
@@ -60,7 +64,7 @@ public class AguaActivity extends AppCompatActivity {
             Snackbar.make(
                     binding.getRoot(),
                     "Consumo de água registrado!",
-                    Snackbar.LENGTH_SHORT
+                    BaseTransientBottomBar.LENGTH_SHORT
             ).show();
         });
     }
