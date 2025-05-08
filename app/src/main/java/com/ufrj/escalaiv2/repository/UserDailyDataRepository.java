@@ -166,4 +166,52 @@ public class UserDailyDataRepository {
             }
         });
     }
+
+    public boolean saveDorData(int userId, int areaDor, int subareaDor, int especificacaoDor, int intensidadeDor) {
+        try {
+            // Usando AtomicBoolean para retornar valor de thread secundária
+            AtomicBoolean success = new AtomicBoolean(false);
+            // Usando CountDownLatch para aguardar execução
+            CountDownLatch latch = new CountDownLatch(1);
+
+            databaseWriteExecutor.execute(() -> {
+                try {
+                    String today = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());
+                    UserDailyData userDailyData = userDailyDataDao.getUserDailyDataForToday(userId, today);
+
+                    if (userDailyData == null) {
+                        userDailyData = new UserDailyData(userId, today);
+                    }
+
+                    userDailyData.setAreaDorN1(areaDor);
+                    userDailyData.setAreaDorN2(subareaDor);
+                    userDailyData.setAreaDorN3(especificacaoDor);
+                    userDailyData.setIntensidadeDor(intensidadeDor);
+
+                    if (userDailyData.getId() == 0) {
+                        long id = userDailyDataDao.insert(userDailyData);
+                        success.set(id > 0);
+                    } else {
+                        userDailyDataDao.update(userDailyData);
+                        success.set(true);
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    success.set(false);
+                } finally {
+                    latch.countDown();
+                }
+            });
+            latch.await(2, TimeUnit.SECONDS);
+            return success.get();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public UserDailyData getTodayDorData(int userId) {
+        String today = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());
+        return userDailyDataDao.getUserDailyDataForToday(userId, today);
+    }
 }

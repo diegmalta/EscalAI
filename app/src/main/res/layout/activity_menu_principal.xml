@@ -80,9 +80,9 @@
                 android:id="@+id/aguaButton"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:background="?attr/colorPrimaryContainer"
+                android:background="@color/md_theme_light_primaryContainer"
                 android:text="@string/bloco1"
-                android:textColor="#ffffff"
+                android:textColor="@color/md_theme_light_onPrimary"
                 android:gravity="center" />
 
         </androidx.cardview.widget.CardView>
@@ -101,7 +101,7 @@
                 android:layout_height="match_parent"
                 android:background="@color/md_theme_light_primaryContainer"
                 android:text="@string/bloco2"
-                android:textColor="#ffffff"
+                android:textColor="@color/md_theme_light_onPrimary"
                 android:gravity="center" />
 
         </androidx.cardview.widget.CardView>
@@ -115,11 +115,12 @@
             app:cardCornerRadius="16dp">
 
             <Button
+                android:id="@+id/dorButton"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:background="@color/md_theme_dark_primaryContainer"
+                android:background="@color/md_theme_light_primaryContainer"
                 android:text="@string/bloco3"
-                android:textColor="#ffffff"
+                android:textColor="@color/md_theme_light_onPrimary"
                 android:gravity="center" />
 
         </androidx.cardview.widget.CardView>
@@ -137,7 +138,7 @@
                 android:layout_height="match_parent"
                 android:background="@color/md_theme_light_primaryContainer"
                 android:text="@string/bloco4"
-                android:textColor="#ffffff"
+                android:textColor="@color/md_theme_light_onPrimary"
                 android:gravity="center" />
 
         </androidx.cardview.widget.CardView>
@@ -155,7 +156,7 @@
                 android:layout_height="match_parent"
                 android:background="@color/md_theme_light_primaryContainer"
                 android:text="@string/bloco5"
-                android:textColor="#ffffff"
+                android:textColor="@color/md_theme_light_onPrimary"
                 android:gravity="center" />
 
         </androidx.cardview.widget.CardView>
@@ -173,7 +174,7 @@
                 android:layout_height="match_parent"
                 android:background="@color/md_theme_light_primaryContainer"
                 android:text="@string/bloco6"
-                android:textColor="#ffffff"
+                android:textColor="@color/md_theme_light_onPrimary"
                 android:gravity="center" />
 
         </androidx.cardview.widget.CardView>

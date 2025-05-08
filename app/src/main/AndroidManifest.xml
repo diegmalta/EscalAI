@@ -38,6 +38,8 @@
         </activity>
         <activity android:name="com.ufrj.escalaiv2.activity.HumorActivity"
             android:exported="true" />
+        <activity android:name="com.ufrj.escalaiv2.activity.DorActivity"
+            android:exported="true" />
     </application>
 
 </manifest>

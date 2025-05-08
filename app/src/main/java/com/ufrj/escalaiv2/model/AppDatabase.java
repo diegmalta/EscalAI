@@ -13,7 +13,7 @@ import com.ufrj.escalaiv2.dao.UsuarioDao;
 import com.ufrj.escalaiv2.utils.DateTypeConverter;
 import androidx.room.TypeConverters;
 
-@Database(entities = {Usuario.class, UserDailyData.class}, version = 2, exportSchema = false)
+@Database(entities = {Usuario.class, UserDailyData.class}, version = 3, exportSchema = false)
 @TypeConverters({DateTypeConverter.class})
 public abstract class AppDatabase extends RoomDatabase {
 
