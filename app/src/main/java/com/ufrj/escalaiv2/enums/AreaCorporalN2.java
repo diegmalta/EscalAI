@@ -26,6 +26,7 @@ public enum AreaCorporalN2 {
     TORNOZELO(15, 3, "Tornozelo"),
     PE_DEDOS_DO_PE(16, 3, "Pé/dedos do pé");
 
+
     private final int id;
     private final int areaId;
     private final String nome;
