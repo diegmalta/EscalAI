@@ -8,6 +8,9 @@ import androidx.lifecycle.MutableLiveData;
 import com.ufrj.escalaiv2.enums.Event;
 import com.ufrj.escalaiv2.model.UserDailyData;
 import com.ufrj.escalaiv2.repository.UserDailyDataRepository;
+import com.ufrj.escalaiv2.enums.AreaCorporalN1;
+import com.ufrj.escalaiv2.enums.AreaCorporalN2;
+import com.ufrj.escalaiv2.enums.AreaCorporalN3;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -66,50 +69,33 @@ public class DorVM extends AndroidViewModel {
 
         // Inicializar os dados para os dropdowns
         areas = new ArrayList<>();
-        areas.add("Área 1");
-        areas.add("Área 2");
-        areas.add("Área 3");
+        for (AreaCorporalN1 area : AreaCorporalN1.values()) {
+            areas.add(area.getNome());
+        }
 
         subareas = new HashMap<>();
-
-        // Subáreas para Área 1
-        List<String> subareasArea1 = new ArrayList<>();
-        subareasArea1.add("Subárea 1A");
-        subareasArea1.add("Subárea 1B");
-        subareasArea1.add("Subárea 1C");
-        subareas.put(0, subareasArea1);
-
-        // Subáreas para Área 2
-        List<String> subareasArea2 = new ArrayList<>();
-        subareasArea2.add("Subárea 2A");
-        subareasArea2.add("Subárea 2B");
-        subareasArea2.add("Subárea 2C");
-        subareas.put(1, subareasArea2);
-
-        // Subáreas para Área 3
-        List<String> subareasArea3 = new ArrayList<>();
-        subareasArea3.add("Subárea 3A");
-        subareasArea3.add("Subárea 3B");
-        subareasArea3.add("Subárea 3C");
-        subareas.put(2, subareasArea3);
+        // Para cada área corporal N1
+        for (AreaCorporalN1 area : AreaCorporalN1.values()) {
+            List<String> subareasForArea = new ArrayList<>();
+            // Obter todas as subáreas relacionadas a esta área
+            AreaCorporalN2[] relatedSubareas = AreaCorporalN2.getByRegiaoCorporalId(area.getId());
+            for (AreaCorporalN2 subarea : relatedSubareas) {
+                subareasForArea.add(subarea.getNome());
+            }
+            subareas.put(area.getId(), subareasForArea);
+        }
 
         especificacoes = new HashMap<>();
-
-        // Especificações para cada subárea
-        // Para Área 1
-        especificacoes.put("Subárea 1A", createEspecificacoes("1A"));
-        especificacoes.put("Subárea 1B", createEspecificacoes("1B"));
-        especificacoes.put("Subárea 1C", createEspecificacoes("1C"));
-
-        // Para Área 2
-        especificacoes.put("Subárea 2A", createEspecificacoes("2A"));
-        especificacoes.put("Subárea 2B", createEspecificacoes("2B"));
-        especificacoes.put("Subárea 2C", createEspecificacoes("2C"));
-
-        // Para Área 3
-        especificacoes.put("Subárea 3A", createEspecificacoes("3A"));
-        especificacoes.put("Subárea 3B", createEspecificacoes("3B"));
-        especificacoes.put("Subárea 3C", createEspecificacoes("3C"));
+        // Para cada subárea corporal N2
+        for (AreaCorporalN2 subarea : AreaCorporalN2.values()) {
+            List<String> especificacoesForSubarea = new ArrayList<>();
+            // Obter todas as especificações relacionadas a esta subárea
+            AreaCorporalN3[] relatedEspecificacoes = AreaCorporalN3.getByAreaRegiaoCorporalId(subarea.getId());
+            for (AreaCorporalN3 especificacao : relatedEspecificacoes) {
+                especificacoesForSubarea.add(especificacao.getNome());
+            }
+            especificacoes.put(subarea.getNome(), especificacoesForSubarea);
+        }
 
         // Carregar dados do banco se existirem
         loadDailyDorData();

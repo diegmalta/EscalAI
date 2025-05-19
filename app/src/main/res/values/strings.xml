@@ -15,14 +15,12 @@
 
     <string name="hello">Olá, </string>
 
-    <string name="bloco1">Água</string>
-    <string name="bloco2">Humor</string>
-    <string name="bloco3">Dor</string>
-    <string name="bloco4">Sono</string>
-    <string name="bloco5">Treino</string>
-    <string name="bloco6">Relatório</string>
-    <string name="bloco7">Vídeos</string>
-    <string name="bloco8">Textos</string>
+    <string name="bloco1">Hidratação</string>
+    <string name="bloco2">Emocional</string>
+    <string name="bloco3">Dores</string>
+    <string name="bloco4">Registro de Sono</string>
+    <string name="bloco5">Treinos</string>
+    <string name="bloco6">Relatórios</string>
 
     <string name="lorem_ipsum">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</string>
     <string name="lorem_ipsum_10x">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. .\n\n

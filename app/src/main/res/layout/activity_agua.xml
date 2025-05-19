@@ -27,7 +27,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize"
                 android:background="@color/md_theme_light_primaryContainer"
-                app:title="Consumo de Água"
+                app:title="@string/bloco1"
                 app:navigationIcon="@drawable/ic_arrow_back"
                 app:layout_constraintTop_toTopOf="parent"/>
 

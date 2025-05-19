@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <data>
+        <variable
+            name="viewModel"
+            type="com.ufrj.escalaiv2.viewmodel.SonoVM" />
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        xmlns:tools="http://schemas.android.com/tools"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_gravity="center"
+        tools:context="com.ufrj.escalaiv2.activity.SonoActivity"
+        android:orientation="vertical">
+
+        <com.google.android.material.appbar.AppBarLayout
+            android:id="@+id/topAppBar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="top"
+            tools:ignore="MissingConstraints">
+
+            <com.google.android.material.appbar.MaterialToolbar
+                android:id="@+id/toolbar"
+                android:layout_width="match_parent"
+                android:layout_height="?attr/actionBarSize"
+                android:background="@color/md_theme_light_primaryContainer"
+                app:title="Registro de Sono"
+                app:navigationIcon="@drawable/ic_arrow_back"
+                app:layout_constraintTop_toTopOf="parent"/>
+
+        </com.google.android.material.appbar.AppBarLayout>
+
+        <TextView
+            android:id="@+id/sleepDuration"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@{viewModel.totalSleepTime}"
+            android:textSize="24sp"
+            android:textStyle="bold"
+            android:layout_marginTop="66dp"
+            app:layout_constraintTop_toBottomOf="@id/topAppBar"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"/>
+
+        <ImageView
+            android:id="@+id/sleepIcon"
+            android:layout_width="144dp"
+            android:layout_height="144dp"
+            android:layout_marginTop="24dp"
+            app:layout_constraintTop_toBottomOf="@id/sleepDuration"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:src="@drawable/bed"
+            android:contentDescription="Ícone de sono"/>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/sleepTimeLayout"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="32dp"
+            android:layout_marginHorizontal="16dp"
+            app:layout_constraintTop_toBottomOf="@id/sleepIcon"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+            android:hint="Hora que dormiu">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/sleepTimeInput"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="time"
+                android:focusable="false"
+                android:clickable="true"
+                android:text="@{viewModel.sleepTime}" />
+
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/wakeTimeLayout"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:layout_marginHorizontal="16dp"
+            app:layout_constraintTop_toBottomOf="@id/sleepTimeLayout"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+            android:hint="Hora que acordou">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/wakeTimeInput"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="time"
+                android:focusable="false"
+                android:clickable="true"
+                android:text="@{viewModel.wakeTime}" />
+
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <TextView
+            android:id="@+id/sleepQualityLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Qualidade do sono:"
+            android:textSize="16sp"
+            android:layout_marginTop="24dp"
+            android:layout_marginStart="16dp"
+            app:layout_constraintTop_toBottomOf="@id/wakeTimeLayout"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <com.google.android.material.slider.Slider
+            android:id="@+id/sleepQualitySlider"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:layout_marginHorizontal="16dp"
+            android:valueFrom="1"
+            android:valueTo="5"
+            android:stepSize="1"
+            android:value="3"
+            app:layout_constraintTop_toBottomOf="@id/sleepQualityLabel" />
+
+        <TextView
+            android:id="@+id/sleepQualityValue"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@{viewModel.sleepQualityText}"
+            android:textSize="16sp"
+            android:layout_marginTop="8dp"
+            app:layout_constraintTop_toBottomOf="@id/sleepQualitySlider"
+            app:layout_constraintStart_toStartOf="@id/sleepQualitySlider"
+            app:layout_constraintEnd_toEndOf="@id/sleepQualitySlider" />
+
+        <TextView
+            android:id="@+id/recommendedSleepTime"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@{`Tempo de sono recomendado: ` + viewModel.recommendedSleep}"
+            android:textSize="16sp"
+            android:layout_marginTop="16dp"
+            android:textColor="@color/black"
+            app:layout_constraintTop_toBottomOf="@id/sleepQualityValue"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/saveButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Salvar registro"
+            android:layout_marginTop="24dp"
+            app:layout_constraintTop_toBottomOf="@id/recommendedSleepTime"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/resetButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:backgroundTint="@color/md_theme_light_tertiaryContainer"
+            android:text="Limpar"
+            android:textColor="@color/md_theme_light_outline"
+            android:layout_marginTop="12dp"
+            app:layout_constraintTop_toBottomOf="@id/saveButton"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>

@@ -3,23 +3,23 @@
     <item
         android:id="@+id/item_1"
         android:enabled="true"
-        android:icon="@drawable/ic_arrow_back"
+        android:icon="@drawable/house"
         android:title="Home"/>
     <item
         android:id="@+id/item_2"
         android:enabled="true"
-        android:icon="@drawable/ic_arrow_back"
-        android:title="Gráficos"/>
+        android:icon="@drawable/house"
+        android:title="Relatórios"/>
 
     <item
         android:id="@+id/item_3"
         android:enabled="true"
         android:icon="@drawable/ic_arrow_back"
-        android:title="Vídeos"/>
+        android:title="Exercícios"/>
 
     <item
         android:id="@+id/item_4"
         android:enabled="true"
         android:icon="@drawable/ic_arrow_back"
-        android:title="Alguma coisa"/>
+        android:title="Configurações"/>
 </menu>

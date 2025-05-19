@@ -47,6 +47,12 @@ public class MenuPrincipalActivity extends AppCompatActivity {
             Intent intent = new Intent(this, DorActivity.class);
             startActivity(intent);
         });
+
+        Button sonoButton = findViewById(R.id.sonoButton);
+        sonoButton.setOnClickListener(view -> {
+            Intent intent = new Intent(this, SonoActivity.class);
+            startActivity(intent);
+        });
     }
 
     private int getCurrentUserId() {

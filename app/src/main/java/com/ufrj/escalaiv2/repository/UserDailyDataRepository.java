@@ -8,6 +8,8 @@ import com.ufrj.escalaiv2.model.AppDatabase;
 import com.ufrj.escalaiv2.enums.HumorValues;
 import com.ufrj.escalaiv2.model.UserDailyData;
 
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
@@ -214,4 +216,51 @@ public class UserDailyDataRepository {
         String today = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());
         return userDailyDataDao.getUserDailyDataForToday(userId, today);
     }
+
+    // Método para salvar dados de sono
+    public boolean saveSleepData(int userId, String date, String sleepTime, String wakeTime, Integer totalSleepMinutes, Integer quality) {
+        try {
+            // Usando AtomicBoolean para retornar valor de thread secundária
+            AtomicBoolean success = new AtomicBoolean(false);
+            // Usando CountDownLatch para aguardar execução
+            CountDownLatch latch = new CountDownLatch(1);
+
+            databaseWriteExecutor.execute(() -> {
+                try {
+                    UserDailyData userDailyData = userDailyDataDao.getUserDailyDataForToday(userId, date);
+
+                    if (userDailyData == null) {
+                        userDailyData = new UserDailyData(userId, date);
+                    }
+
+                    // Definir dados de sono
+                    userDailyData.setSleepTime(sleepTime);
+                    userDailyData.setWakeTime(wakeTime);
+                    userDailyData.setTotalSleepTimeInMinutes(totalSleepMinutes);
+                    userDailyData.setSleepQuality(quality);
+
+                    if (userDailyData.getId() == 0) {
+                        long id = userDailyDataDao.insert(userDailyData);
+                        success.set(id > 0);
+                    } else {
+                        userDailyDataDao.update(userDailyData);
+                        success.set(true);
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    success.set(false);
+                } finally {
+                    latch.countDown();
+                }
+            });
+
+            // Esperar pela conclusão (cuidado com ANR)
+            latch.await(2, TimeUnit.SECONDS);
+            return success.get();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
 }

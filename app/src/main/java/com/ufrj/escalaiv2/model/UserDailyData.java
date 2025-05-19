@@ -56,6 +56,19 @@ public class UserDailyData {
     @ColumnInfo(name = "intensidade_dor")
     private int intensidadeDor = 5;
 
+    // Campos para rastreamento de sono
+    @ColumnInfo(name = "sleep_time")
+    private String sleepTime;
+
+    @ColumnInfo(name = "wake_time")
+    private String wakeTime;
+
+    @ColumnInfo(name = "total_sleep_time")
+    private int totalSleepTimeInMinutes;
+
+    @ColumnInfo(name = "sleep_quality")
+    private int sleepQuality = 3; // Valor padrão: OK (3)
+
     @ColumnInfo(name = "date")
     private String date;
 
@@ -69,9 +82,14 @@ public class UserDailyData {
         this.anxietyLevel = 0;
         this.stressLevel = 0;
         this.calmLevel = 0;
+        // Valores padrão para sono
+        this.sleepTime = "00:00";
+        this.wakeTime = "08:00";
+        this.totalSleepTimeInMinutes = 480;
+        this.sleepQuality = 3;
     }
 
-    // Getters and setters
+    // Getters and setters originais
     public int getId() {
         return id;
     }
@@ -174,5 +192,37 @@ public class UserDailyData {
 
     public void setIntensidadeDor(int intensidadeDor) {
         this.intensidadeDor = intensidadeDor;
+    }
+
+    public String getSleepTime() {
+        return sleepTime;
+    }
+
+    public void setSleepTime(String sleepTime) {
+        this.sleepTime = sleepTime;
+    }
+
+    public String getWakeTime() {
+        return wakeTime;
+    }
+
+    public void setWakeTime(String wakeTime) {
+        this.wakeTime = wakeTime;
+    }
+
+    public int getTotalSleepTimeInMinutes() {
+        return totalSleepTimeInMinutes;
+    }
+
+    public void setTotalSleepTimeInMinutes(int totalSleepTimeInMinutes) {
+        this.totalSleepTimeInMinutes = totalSleepTimeInMinutes;
+    }
+
+    public int getSleepQuality() {
+        return sleepQuality;
+    }
+
+    public void setSleepQuality(int sleepQuality) {
+        this.sleepQuality = sleepQuality;
     }
 }
