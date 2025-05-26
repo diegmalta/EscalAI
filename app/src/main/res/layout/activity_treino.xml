@@ -1,18 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
     <data>
+        <import type="android.view.View" />
+        <import type="java.util.Map" />
         <variable
             name="viewModel"
-            type="com.ufrj.escalaiv2.viewmodel.SonoVM" />
+            type="com.ufrj.escalaiv2.viewmodel.TreinoVM" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
-        xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_gravity="center"
-        tools:context="com.ufrj.escalaiv2.activity.SonoActivity"
+        tools:context="com.ufrj.escalaiv2.activity.TreinoActivity"
         android:orientation="vertical">
 
         <com.google.android.material.appbar.AppBarLayout
@@ -20,155 +23,235 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="top"
-            tools:ignore="MissingConstraints">
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent">
 
             <com.google.android.material.appbar.MaterialToolbar
                 android:id="@+id/toolbar"
                 android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize"
                 android:background="@color/md_theme_light_primaryContainer"
-                app:title="Registro de Sono"
-                app:navigationIcon="@drawable/ic_arrow_back"
-                app:layout_constraintTop_toTopOf="parent"/>
-
+                app:title="Registro de Escalada e Treinos"
+                app:navigationIcon="@drawable/ic_arrow_back"/>
         </com.google.android.material.appbar.AppBarLayout>
 
         <TextView
-            android:id="@+id/sleepDuration"
-            android:layout_width="wrap_content"
+            android:id="@+id/titleText"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@{viewModel.totalSleepTime}"
+            android:text="Registre sua atividade física"
             android:textSize="24sp"
             android:textStyle="bold"
-            android:layout_marginTop="66dp"
+            android:textColor="?attr/colorOnSurface"
+            android:gravity="center"
+            android:layout_marginTop="24dp"
+            android:layout_marginHorizontal="16dp"
             app:layout_constraintTop_toBottomOf="@id/topAppBar"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"/>
 
         <ImageView
-            android:id="@+id/sleepIcon"
-            android:layout_width="144dp"
-            android:layout_height="144dp"
-            android:layout_marginTop="24dp"
-            app:layout_constraintTop_toBottomOf="@id/sleepDuration"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            android:src="@drawable/bed"
-            android:contentDescription="Ícone de sono"/>
-
-        <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/sleepTimeLayout"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="32dp"
-            android:layout_marginHorizontal="16dp"
-            app:layout_constraintTop_toBottomOf="@id/sleepIcon"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
-            android:hint="Hora que dormiu">
-
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/sleepTimeInput"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:inputType="time"
-                android:focusable="false"
-                android:clickable="true"
-                android:text="@{viewModel.sleepTime}" />
-
-        </com.google.android.material.textfield.TextInputLayout>
-
-        <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/wakeTimeLayout"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
+            android:id="@+id/treinoIcon"
+            android:layout_width="72dp"
+            android:layout_height="72dp"
+            android:src="@drawable/icon_dumbbell"
             android:layout_marginTop="16dp"
-            android:layout_marginHorizontal="16dp"
-            app:layout_constraintTop_toBottomOf="@id/sleepTimeLayout"
+            app:layout_constraintTop_toBottomOf="@id/titleText"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
-            android:hint="Hora que acordou">
+            android:contentDescription="Ícone de treino" />
 
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/wakeTimeInput"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:inputType="time"
-                android:focusable="false"
-                android:clickable="true"
-                android:text="@{viewModel.wakeTime}" />
-
-        </com.google.android.material.textfield.TextInputLayout>
-
-        <TextView
-            android:id="@+id/sleepQualityLabel"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Qualidade do sono:"
-            android:textSize="16sp"
-            android:layout_marginTop="24dp"
-            android:layout_marginStart="16dp"
-            app:layout_constraintTop_toBottomOf="@id/wakeTimeLayout"
-            app:layout_constraintStart_toStartOf="parent" />
-
-        <com.google.android.material.slider.Slider
-            android:id="@+id/sleepQualitySlider"
+        <ScrollView
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:layout_marginHorizontal="16dp"
-            android:valueFrom="1"
-            android:valueTo="5"
-            android:stepSize="1"
-            android:value="3"
-            app:layout_constraintTop_toBottomOf="@id/sleepQualityLabel" />
-
-        <TextView
-            android:id="@+id/sleepQualityValue"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@{viewModel.sleepQualityText}"
-            android:textSize="16sp"
-            android:layout_marginTop="8dp"
-            app:layout_constraintTop_toBottomOf="@id/sleepQualitySlider"
-            app:layout_constraintStart_toStartOf="@id/sleepQualitySlider"
-            app:layout_constraintEnd_toEndOf="@id/sleepQualitySlider" />
-
-        <TextView
-            android:id="@+id/recommendedSleepTime"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@{`Tempo de sono recomendado: ` + viewModel.recommendedSleep}"
-            android:textSize="16sp"
+            android:layout_height="0dp"
             android:layout_marginTop="16dp"
-            android:textColor="@color/black"
-            app:layout_constraintTop_toBottomOf="@id/sleepQualityValue"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent" />
+            android:layout_marginBottom="16dp"
+            app:layout_constraintTop_toBottomOf="@id/treinoIcon"
+            app:layout_constraintBottom_toTopOf="@id/saveButton">
 
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="16dp">
+
+                <!-- Tipo de Treino Dropdown -->
+                <TextView
+                    android:id="@+id/tipoTreinoLabel"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Tipo de Atividade"
+                    android:textSize="18sp"
+                    android:textColor="?attr/colorOnSurface"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"/>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/tipoTreinoDropdownLayout"
+                    style="@style/Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:hint="Selecione o tipo de atividade"
+                    app:layout_constraintTop_toBottomOf="@id/tipoTreinoLabel"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent">
+
+                    <AutoCompleteTextView
+                        android:id="@+id/tipoTreinoDropdown"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="none"
+                        android:text="@{viewModel.selectedTreinoTipoText}"/>
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <!-- Duração do Treino (Slider) -->
+                <TextView
+                    android:id="@+id/duracaoLabel"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Duração da Atividade"
+                    android:textSize="18sp"
+                    android:textColor="?attr/colorOnSurface"
+                    android:layout_marginTop="24dp"
+                    app:layout_constraintTop_toBottomOf="@id/tipoTreinoDropdownLayout"
+                    app:layout_constraintStart_toStartOf="parent"/>
+
+                <TextView
+                    android:id="@+id/duracaoValue"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text='@{viewModel.duracaoTreinoHoras + " horas"}'
+                    android:textSize="18sp"
+                    android:textColor="?attr/colorPrimary"
+                    android:textStyle="bold"
+                    app:layout_constraintTop_toTopOf="@id/duracaoLabel"
+                    app:layout_constraintBottom_toBottomOf="@id/duracaoLabel"
+                    app:layout_constraintEnd_toEndOf="parent"/>
+
+                <com.google.android.material.slider.Slider
+                    android:id="@+id/duracaoSlider"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:valueFrom="0.5"
+                    android:valueTo="4"
+                    android:stepSize="0.5"
+                    android:value="@{viewModel.duracaoTreinoHoras}"
+                    app:tickVisible="true"
+                    app:labelBehavior="floating"
+                    app:layout_constraintTop_toBottomOf="@id/duracaoLabel"/>
+
+                <TextView
+                    android:id="@+id/sliderLabelMinimo"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="0.5h"
+                    android:textSize="12sp"
+                    android:layout_marginTop="8dp"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/duracaoSlider"/>
+
+                <TextView
+                    android:id="@+id/sliderLabelMaximo"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="4h"
+                    android:textSize="12sp"
+                    android:layout_marginTop="8dp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/duracaoSlider"/>
+
+                <!-- Resumo dos Treinos -->
+                <TextView
+                    android:id="@+id/resumoLabel"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Resumo de Atividades Hoje"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    android:textColor="?attr/colorOnSurface"
+                    android:layout_marginTop="32dp"
+                    app:layout_constraintTop_toBottomOf="@id/sliderLabelMinimo"
+                    app:layout_constraintStart_toStartOf="parent"/>
+
+                <androidx.cardview.widget.CardView
+                    android:id="@+id/resumoCard"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    app:cardCornerRadius="8dp"
+                    app:cardElevation="4dp"
+                    app:layout_constraintTop_toBottomOf="@id/resumoLabel"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent">
+
+                    <TableLayout
+                        android:id="@+id/resumoTable"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:padding="16dp"
+                        android:stretchColumns="0,1">
+
+                        <!-- Header Row -->
+                        <TableRow
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:background="@color/md_theme_light_primaryContainer"
+                            android:padding="8dp">
+
+                            <TextView
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="0.7"
+                                android:text="Tipo de Atividade"
+                                android:textStyle="bold"
+                                android:textColor="?attr/colorOnPrimaryContainer"/>
+
+                            <TextView
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="0.3"
+                                android:text="Horas"
+                                android:textStyle="bold"
+                                android:gravity="end"
+                                android:textColor="?attr/colorOnPrimaryContainer"/>
+                        </TableRow>
+
+                        <!-- Conteúdo dinâmico será adicionado pela Activity -->
+
+                    </TableLayout>
+                </androidx.cardview.widget.CardView>
+
+                <TextView
+                    android:id="@+id/emptyStateText"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Nenhuma atividade registrada hoje"
+                    android:textSize="16sp"
+                    android:textStyle="italic"
+                    android:gravity="center"
+                    android:padding="16dp"
+                    android:visibility="gone"
+                    app:layout_constraintTop_toBottomOf="@id/resumoLabel"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"/>
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+        </ScrollView>
+
+        <!-- Botão para salvar -->
         <com.google.android.material.button.MaterialButton
             android:id="@+id/saveButton"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Salvar registro"
-            android:layout_marginTop="24dp"
-            app:layout_constraintTop_toBottomOf="@id/recommendedSleepTime"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent" />
-
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/resetButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:backgroundTint="@color/md_theme_light_tertiaryContainer"
-            android:text="Limpar"
-            android:textColor="@color/md_theme_light_outline"
-            android:layout_marginTop="12dp"
-            app:layout_constraintTop_toBottomOf="@id/saveButton"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent" />
+            android:text="Registrar Atividade"
+            android:layout_marginHorizontal="16dp"
+            android:layout_marginBottom="32dp"
+            android:padding="12dp"
+            app:cornerRadius="8dp"
+            app:layout_constraintBottom_toBottomOf="parent"/>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

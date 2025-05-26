@@ -53,6 +53,12 @@ public class MenuPrincipalActivity extends AppCompatActivity {
             Intent intent = new Intent(this, SonoActivity.class);
             startActivity(intent);
         });
+
+        Button treinoButton = findViewById(R.id.treinoButton);
+        treinoButton.setOnClickListener(view -> {
+            Intent intent = new Intent(this, TreinoActivity.class);
+            startActivity(intent);
+        });
     }
 
     private int getCurrentUserId() {

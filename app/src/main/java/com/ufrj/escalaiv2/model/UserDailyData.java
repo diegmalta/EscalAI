@@ -69,6 +69,12 @@ public class UserDailyData {
     @ColumnInfo(name = "sleep_quality")
     private int sleepQuality = 3; // Valor padrão: OK (3)
 
+    @ColumnInfo(name = "treino_tipo")
+    private int treinoTipo = -1; // -1 indica nenhum treino registrado
+
+    @ColumnInfo(name = "treino_duracao_minutos")
+    private int treinoDuracaoMinutos = 0;
+
     @ColumnInfo(name = "date")
     private String date;
 
@@ -224,5 +230,21 @@ public class UserDailyData {
 
     public void setSleepQuality(int sleepQuality) {
         this.sleepQuality = sleepQuality;
+    }
+
+    public int getTreinoTipo() {
+        return treinoTipo;
+    }
+
+    public void setTreinoTipo(int treinoTipo) {
+        this.treinoTipo = treinoTipo;
+    }
+
+    public int getTreinoDuracaoMinutos() {
+        return treinoDuracaoMinutos;
+    }
+
+    public void setTreinoDuracaoMinutos(int treinoDuracaoMinutos) {
+        this.treinoDuracaoMinutos = treinoDuracaoMinutos;
     }
 }

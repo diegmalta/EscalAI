@@ -3,12 +3,12 @@
     <item
         android:id="@+id/item_1"
         android:enabled="true"
-        android:icon="@drawable/house"
+        android:icon="@drawable/icon_house"
         android:title="Home"/>
     <item
         android:id="@+id/item_2"
         android:enabled="true"
-        android:icon="@drawable/house"
+        android:icon="@drawable/icon_chart"
         android:title="Relatórios"/>
 
     <item
@@ -21,5 +21,5 @@
         android:id="@+id/item_4"
         android:enabled="true"
         android:icon="@drawable/ic_arrow_back"
-        android:title="Configurações"/>
+        android:title="Perfil"/>
 </menu>

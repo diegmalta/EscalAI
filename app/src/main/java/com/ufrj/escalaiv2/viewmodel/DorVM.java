@@ -96,17 +96,6 @@ public class DorVM extends AndroidViewModel {
             }
             especificacoes.put(subarea.getNome(), especificacoesForSubarea);
         }
-
-        // Carregar dados do banco se existirem
-        loadDailyDorData();
-    }
-
-    private List<String> createEspecificacoes(String prefix) {
-        List<String> esp = new ArrayList<>();
-        esp.add("Esp " + prefix + "1");
-        esp.add("Esp " + prefix + "2");
-        esp.add("Esp " + prefix + "3");
-        return esp;
     }
 
     private void loadDailyDorData() {
@@ -162,7 +151,6 @@ public class DorVM extends AndroidViewModel {
         return especificacoes.get(subarea);
     }
 
-    // Getters para os LiveData
     public LiveData<Integer> getSelectedArea() {
         return selectedArea;
     }

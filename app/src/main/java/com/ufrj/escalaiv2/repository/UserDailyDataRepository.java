@@ -18,6 +18,10 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import com.ufrj.escalaiv2.enums.TipoTreino;
+import java.util.HashMap;
+import java.util.Map;
+
 
 public class UserDailyDataRepository {
     private final UserDailyDataDao userDailyDataDao;
@@ -261,6 +265,70 @@ public class UserDailyDataRepository {
             e.printStackTrace();
             return false;
         }
+    }
+
+    public boolean saveTreinoData(int userId, int tipoTreino, int duracaoMinutos) {
+        try {
+            // Usando AtomicBoolean para retornar valor de thread secundária
+            AtomicBoolean success = new AtomicBoolean(false);
+            // Usando CountDownLatch para aguardar execução
+            CountDownLatch latch = new CountDownLatch(1);
+
+            databaseWriteExecutor.execute(() -> {
+                try {
+                    String today = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());
+                    UserDailyData userDailyData = userDailyDataDao.getUserDailyDataForToday(userId, today);
+
+                    if (userDailyData == null) {
+                        userDailyData = new UserDailyData(userId, today);
+                    }
+
+                    // Salvamos o treino atual
+                    userDailyData.setTreinoTipo(tipoTreino);
+                    userDailyData.setTreinoDuracaoMinutos(duracaoMinutos);
+
+                    if (userDailyData.getId() == 0) {
+                        long id = userDailyDataDao.insert(userDailyData);
+                        success.set(id > 0);
+                    } else {
+                        userDailyDataDao.update(userDailyData);
+                        success.set(true);
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    success.set(false);
+                } finally {
+                    latch.countDown();
+                }
+            });
+
+            // Esperar pela conclusão (cuidado com ANR)
+            latch.await(2, TimeUnit.SECONDS);
+            return success.get();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public Map<String, Float> getTodayTrainingData(int userId) {
+        Map<String, Float> resumoTreinos = new HashMap<>();
+
+        try {
+            String today = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());
+            UserDailyData userDailyData = userDailyDataDao.getUserDailyDataForToday(userId, today);
+
+            if (userDailyData != null && userDailyData.getTreinoTipo() >= 0) {
+                TipoTreino tipoTreino = TipoTreino.getById(userDailyData.getTreinoTipo());
+                float horasTreino = userDailyData.getTreinoDuracaoMinutos() / 60.0f;
+
+                resumoTreinos.put(tipoTreino.getNome(), horasTreino);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return resumoTreinos;
     }
 
 }

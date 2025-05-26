@@ -42,6 +42,8 @@
             android:exported="true" />
         <activity android:name="com.ufrj.escalaiv2.activity.SonoActivity"
             android:exported="true" />
+        <activity android:name="com.ufrj.escalaiv2.activity.TreinoActivity"
+            android:exported="true" />
     </application>
 
 </manifest>

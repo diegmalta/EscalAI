@@ -53,7 +53,7 @@
             app:layout_constraintTop_toBottomOf="@id/sleepDuration"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            android:src="@drawable/bed"
+            android:src="@drawable/icon_bed"
             android:contentDescription="Ícone de sono"/>
 
         <com.google.android.material.textfield.TextInputLayout
