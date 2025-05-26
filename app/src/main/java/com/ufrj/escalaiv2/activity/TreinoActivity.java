@@ -130,8 +130,8 @@ public class TreinoActivity extends AppCompatActivity {
     private void handleUiEvent(Event event) {
         switch (event) {
             case SHOW_SUCCESS_MESSAGE:
-                Toast.makeText(this, "Atividade registrada com sucesso!", Toast.LENGTH_SHORT).show();
-                // Limpar seleções após sucesso
+                Toast.makeText(this, "Atividade adicionada com sucesso! 🎉", Toast.LENGTH_SHORT).show();
+                // Limpar seleções após sucesso para permitir novo registro
                 clearForm();
                 break;
             case SHOW_ERROR_MESSAGE:
@@ -192,7 +192,12 @@ public class TreinoActivity extends AppCompatActivity {
 
         // TextView para as horas
         TextView horasTextView = new TextView(this);
-        String horasText = String.format("%.1fh", horas);
+        String horasText;
+        if (horas == 1.0f) {
+            horasText = "1h";
+        } else {
+            horasText = String.format("%.1fh", horas);
+        }
         horasTextView.setText(horasText);
         horasTextView.setLayoutParams(new TableRow.LayoutParams(0, TableRow.LayoutParams.WRAP_CONTENT, 0.3f));
         horasTextView.setTextSize(16);
@@ -205,16 +210,14 @@ public class TreinoActivity extends AppCompatActivity {
         // Adicionar linha à tabela
         tableLayout.addView(row);
 
-        // Adicionar separador visual (linha divisória)
-        if (tableLayout.getChildCount() > 2) {
-            View divider = new View(this);
-            divider.setLayoutParams(new TableRow.LayoutParams(
-                    TableRow.LayoutParams.MATCH_PARENT,
-                    1
-            ));
-            divider.setBackgroundColor(getResources().getColor(android.R.color.darker_gray, getTheme()));
-            tableLayout.addView(divider);
-        }
+        // Adicionar separador visual (linha divisória) apenas se não for a última linha
+        View divider = new View(this);
+        divider.setLayoutParams(new TableRow.LayoutParams(
+                TableRow.LayoutParams.MATCH_PARENT,
+                1
+        ));
+        divider.setBackgroundColor(getResources().getColor(android.R.color.darker_gray, getTheme()));
+        tableLayout.addView(divider);
     }
 
     @Override

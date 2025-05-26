@@ -5,6 +5,7 @@ import androidx.room.Dao;
 import androidx.room.Insert;
 import androidx.room.Query;
 import androidx.room.Update;
+import java.util.List;
 
 import com.ufrj.escalaiv2.model.UserDailyData;
 
@@ -27,4 +28,7 @@ public interface UserDailyDataDao {
 
     @Query("SELECT water_consumed FROM user_daily_data WHERE userId = :userId AND date = :today")
     LiveData<Integer> getTotalWaterConsumptionLiveData(int userId, String today);
+
+    @Query("SELECT * FROM user_daily_data WHERE userId = :userId AND date = :date")
+    List<UserDailyData> getAllUserDailyDataForToday(int userId, String date);
 }

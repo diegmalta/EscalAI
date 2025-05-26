@@ -21,6 +21,7 @@ import java.util.concurrent.TimeUnit;
 import com.ufrj.escalaiv2.enums.TipoTreino;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.List;
 
 
 public class UserDailyDataRepository {
@@ -81,6 +82,7 @@ public class UserDailyDataRepository {
             return false;
         }
     }
+
     public UserDailyData getUserDailyData(int userId) {
         String today = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());
         final UserDailyData userDailyData = userDailyDataDao.getUserDailyDataForToday(userId, today);
@@ -269,31 +271,21 @@ public class UserDailyDataRepository {
 
     public boolean saveTreinoData(int userId, int tipoTreino, int duracaoMinutos) {
         try {
-            // Usando AtomicBoolean para retornar valor de thread secundária
             AtomicBoolean success = new AtomicBoolean(false);
-            // Usando CountDownLatch para aguardar execução
             CountDownLatch latch = new CountDownLatch(1);
 
             databaseWriteExecutor.execute(() -> {
                 try {
                     String today = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());
-                    UserDailyData userDailyData = userDailyDataDao.getUserDailyDataForToday(userId, today);
 
-                    if (userDailyData == null) {
-                        userDailyData = new UserDailyData(userId, today);
-                    }
+                    // Criar um novo registro para cada treino
+                    UserDailyData novoTreino = new UserDailyData(userId, today);
+                    novoTreino.setTreinoTipo(tipoTreino);
+                    novoTreino.setTreinoDuracaoMinutos(duracaoMinutos);
 
-                    // Salvamos o treino atual
-                    userDailyData.setTreinoTipo(tipoTreino);
-                    userDailyData.setTreinoDuracaoMinutos(duracaoMinutos);
+                    long id = userDailyDataDao.insert(novoTreino);
+                    success.set(id > 0);
 
-                    if (userDailyData.getId() == 0) {
-                        long id = userDailyDataDao.insert(userDailyData);
-                        success.set(id > 0);
-                    } else {
-                        userDailyDataDao.update(userDailyData);
-                        success.set(true);
-                    }
                 } catch (Exception e) {
                     e.printStackTrace();
                     success.set(false);
@@ -302,7 +294,6 @@ public class UserDailyDataRepository {
                 }
             });
 
-            // Esperar pela conclusão (cuidado com ANR)
             latch.await(2, TimeUnit.SECONDS);
             return success.get();
         } catch (Exception e) {
@@ -311,18 +302,32 @@ public class UserDailyDataRepository {
         }
     }
 
+
     public Map<String, Float> getTodayTrainingData(int userId) {
         Map<String, Float> resumoTreinos = new HashMap<>();
 
         try {
             String today = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());
-            UserDailyData userDailyData = userDailyDataDao.getUserDailyDataForToday(userId, today);
 
-            if (userDailyData != null && userDailyData.getTreinoTipo() >= 0) {
-                TipoTreino tipoTreino = TipoTreino.getById(userDailyData.getTreinoTipo());
-                float horasTreino = userDailyData.getTreinoDuracaoMinutos() / 60.0f;
+            // Buscar todos os registros de treino do dia
+            List<UserDailyData> treinosHoje = userDailyDataDao.getAllUserDailyDataForToday(userId, today);
 
-                resumoTreinos.put(tipoTreino.getNome(), horasTreino);
+            if (treinosHoje != null && !treinosHoje.isEmpty()) {
+                for (UserDailyData treino : treinosHoje) {
+                    if (treino.getTreinoTipo() >= 0 && treino.getTreinoDuracaoMinutos() > 0) {
+                        TipoTreino tipoTreino = TipoTreino.getById(treino.getTreinoTipo());
+                        float horasTreino = treino.getTreinoDuracaoMinutos() / 60.0f;
+
+                        // Se já existe esse tipo de treino, somar as horas
+                        String nomeTreino = tipoTreino.getNome();
+                        if (resumoTreinos.containsKey(nomeTreino)) {
+                            float horasExistentes = resumoTreinos.get(nomeTreino);
+                            resumoTreinos.put(nomeTreino, horasExistentes + horasTreino);
+                        } else {
+                            resumoTreinos.put(nomeTreino, horasTreino);
+                        }
+                    }
+                }
             }
         } catch (Exception e) {
             e.printStackTrace();
