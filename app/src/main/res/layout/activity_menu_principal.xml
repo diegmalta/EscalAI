@@ -1,22 +1,22 @@
-<?xml version="1.0" encoding="utf-8"?><!-- activity_home.xml -->
+<?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:layout_gravity="center"
-    tools:context="com.ufrj.escalaiv2.activity.MenuPrincipalActivity"
-    android:orientation="vertical">
+    tools:context="com.ufrj.escalaiv2.activity.MenuPrincipalActivity">
 
     <com.google.android.material.appbar.AppBarLayout
         android:id="@+id/topAppBar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_gravity="top"
-        tools:ignore="MissingConstraints">
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
 
         <com.google.android.material.appbar.MaterialToolbar
+            android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
             android:background="@color/md_theme_light_primaryContainer"
@@ -37,8 +37,6 @@
                     android:clickable="true"
                     android:focusable="true"
                     android:contentDescription="Access profile"/>
-<!--                    app:shapeAppearanceOverlay="@style/circleImageView"-->
-<!--                    android:src="@drawable/default_profile_image"-->
 
                 <TextView
                     android:id="@+id/txtNomeUsuario"
@@ -55,152 +53,15 @@
 
     </com.google.android.material.appbar.AppBarLayout>
 
-    <GridLayout
-        android:id="@+id/gridLayout"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_margin="10dp"
-        android:rowCount="4"
-        android:columnCount="2"
-        android:layout_gravity="center"
-        app:layout_constraintTop_toBottomOf="@+id/topAppBar"
+    <!-- Container para os Fragments -->
+    <FrameLayout
+        android:id="@+id/fragment_container"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintTop_toBottomOf="@id/topAppBar"
+        app:layout_constraintBottom_toTopOf="@id/bottom_navigation"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintBottom_toTopOf="@id/bottom_navigation">
-
-        <androidx.cardview.widget.CardView
-            android:layout_width="125dp"
-            android:layout_height="125dp"
-            android:layout_column="0"
-            android:layout_row="0"
-            android:layout_margin="10dp"
-            app:cardCornerRadius="16dp">
-
-            <Button
-                android:id="@+id/aguaButton"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:background="@color/md_theme_light_primaryContainer"
-                android:text="@string/bloco1"
-                android:textColor="@color/md_theme_light_onPrimary"
-                android:gravity="center" />
-
-        </androidx.cardview.widget.CardView>
-
-        <androidx.cardview.widget.CardView
-            android:layout_width="125dp"
-            android:layout_height="125dp"
-            android:layout_column="1"
-            android:layout_row="0"
-            android:layout_margin="8dp"
-            app:cardCornerRadius="16dp">
-
-            <Button
-                android:id="@+id/humorButton"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:background="@color/md_theme_light_primaryContainer"
-                android:text="@string/bloco2"
-                android:textColor="@color/md_theme_light_onPrimary"
-                android:gravity="center" />
-
-        </androidx.cardview.widget.CardView>
-
-        <androidx.cardview.widget.CardView
-            android:layout_width="125dp"
-            android:layout_height="125dp"
-            android:layout_column="0"
-            android:layout_row="1"
-            android:layout_margin="8dp"
-            app:cardCornerRadius="16dp">
-
-            <Button
-                android:id="@+id/dorButton"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:background="@color/md_theme_light_primaryContainer"
-                android:text="@string/bloco3"
-                android:textColor="@color/md_theme_light_onPrimary"
-                android:gravity="center" />
-
-        </androidx.cardview.widget.CardView>
-
-        <androidx.cardview.widget.CardView
-            android:layout_width="125dp"
-            android:layout_height="125dp"
-            android:layout_column="1"
-            android:layout_row="1"
-            android:layout_margin="8dp"
-            app:cardCornerRadius="16dp">
-
-            <Button
-                android:id="@+id/sonoButton"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:background="@color/md_theme_light_primaryContainer"
-                android:text="@string/bloco4"
-                android:textColor="@color/md_theme_light_onPrimary"
-                android:gravity="center" />
-
-        </androidx.cardview.widget.CardView>
-
-        <androidx.cardview.widget.CardView
-            android:layout_width="125dp"
-            android:layout_height="125dp"
-            android:layout_column="0"
-            android:layout_row="2"
-            android:layout_margin="8dp"
-            app:cardCornerRadius="16dp">
-
-            <Button
-                android:id="@+id/treinoButton"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:background="@color/md_theme_light_primaryContainer"
-                android:text="@string/bloco5"
-                android:textColor="@color/md_theme_light_onPrimary"
-                android:gravity="center" />
-
-        </androidx.cardview.widget.CardView>
-
-        <androidx.cardview.widget.CardView
-            android:layout_width="125dp"
-            android:layout_height="125dp"
-            android:layout_column="1"
-            android:layout_row="2"
-            android:layout_margin="8dp"
-            app:cardCornerRadius="16dp">
-
-            <Button
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:background="@color/md_theme_light_primaryContainer"
-                android:text="@string/bloco6"
-                android:textColor="@color/md_theme_light_onPrimary"
-                android:gravity="center" />
-
-        </androidx.cardview.widget.CardView>
-
-
-<!--        <androidx.cardview.widget.CardView-->
-<!--            android:layout_width="125dp"-->
-<!--            android:layout_height="125dp"-->
-<!--            android:layout_column="1"-->
-<!--            android:layout_row="3"-->
-<!--            android:layout_margin="8dp"-->
-<!--            app:cardCornerRadius="16dp">-->
-
-<!--            <Button-->
-<!--                android:layout_width="match_parent"-->
-<!--                android:layout_height="match_parent"-->
-<!--                android:background="@color/md_theme_light_primaryContainer"-->
-<!--                android:text="@string/bloco8"-->
-<!--                android:textColor="#ffffff"-->
-<!--                android:gravity="center" />-->
-
-<!--        </androidx.cardview.widget.CardView>-->
-
-    </GridLayout>
+        app:layout_constraintEnd_toEndOf="parent" />
 
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottom_navigation"
@@ -214,3 +75,4 @@
         tools:ignore="VisualLintBottomNav" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
+

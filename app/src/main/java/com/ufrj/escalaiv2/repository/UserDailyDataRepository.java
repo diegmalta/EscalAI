@@ -7,22 +7,19 @@ import com.ufrj.escalaiv2.dao.UserDailyDataDao;
 import com.ufrj.escalaiv2.model.AppDatabase;
 import com.ufrj.escalaiv2.enums.HumorValues;
 import com.ufrj.escalaiv2.model.UserDailyData;
+import com.ufrj.escalaiv2.enums.TipoTreino; // Importar TipoTreino
 
-import java.time.LocalTime;
-import java.time.format.DateTimeFormatter;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
+import java.util.Map;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
-import com.ufrj.escalaiv2.enums.TipoTreino;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.List;
-
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class UserDailyDataRepository {
     private final UserDailyDataDao userDailyDataDao;
@@ -35,121 +32,83 @@ public class UserDailyDataRepository {
         today = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());
     }
 
-    // Método para salvar ou atualizar dados de humor
-    public boolean saveMoodData(int userId, HumorValues joyLevel, HumorValues sadnessLevel,
-                                HumorValues anxietyLevel, HumorValues stressLevel, HumorValues calmLevel) {
-        try {
-            // Usando AtomicBoolean para retornar valor de thread secundária
-            AtomicBoolean success = new AtomicBoolean(false);
-            // Usando CountDownLatch para aguardar execução
-            CountDownLatch latch = new CountDownLatch(1);
-
-            databaseWriteExecutor.execute(() -> {
-                try {
-                    String today = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());
-                    UserDailyData userDailyData = userDailyDataDao.getUserDailyDataForToday(userId, today);
-
-                    if (userDailyData == null) {
-                        userDailyData = new UserDailyData(userId, today);
-                    }
-
-                    userDailyData.setJoyLevel(joyLevel.ordinal());
-                    userDailyData.setSadnessLevel(sadnessLevel.ordinal());
-                    userDailyData.setAnxietyLevel(anxietyLevel.ordinal());
-                    userDailyData.setStressLevel(stressLevel.ordinal());
-                    userDailyData.setCalmLevel(calmLevel.ordinal());
-
-                    if (userDailyData.getId() == 0) {
-                        long id = userDailyDataDao.insert(userDailyData);
-                        success.set(id > 0);
-                    } else {
-                        userDailyDataDao.update(userDailyData);
-                        success.set(true);
-                    }
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    success.set(false);
-                } finally {
-                    latch.countDown();
-                }
-            });
-
-            // Esperar pela conclusão (cuidado com ANR)
-            latch.await(2, TimeUnit.SECONDS);
-            return success.get();
-        } catch (Exception e) {
-            e.printStackTrace();
-            return false;
-        }
+    public LiveData<List<UserDailyData>> getDailyDataBetweenDatesLiveData(int userId, String startDate, String endDate) {
+        return userDailyDataDao.getDailyDataBetweenDates(userId, startDate, endDate);
     }
 
-    public UserDailyData getUserDailyData(int userId) {
-        String today = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());
-        final UserDailyData userDailyData = userDailyDataDao.getUserDailyDataForToday(userId, today);
+    public boolean saveMoodData(int userId, HumorValues joyLevel, HumorValues sadnessLevel,
+                                HumorValues anxietyLevel, HumorValues stressLevel, HumorValues calmLevel) {
+        AtomicBoolean success = new AtomicBoolean(false);
+        CountDownLatch latch = new CountDownLatch(1);
+        databaseWriteExecutor.execute(() -> {
+            try {
+                String todayDate = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());
+                UserDailyData userDailyData = userDailyDataDao.getUserDailyData(userId, todayDate);
 
-        if (userDailyData == null) {
-            AppDatabase.databaseWriteExecutor.execute(() -> {
-                userDailyDataDao.insert(userDailyData);
-            });
+                if (userDailyData == null) {
+                    userDailyData = new UserDailyData(userId, todayDate);
+                }
+
+                userDailyData.setJoyLevel(joyLevel.ordinal());
+                userDailyData.setSadnessLevel(sadnessLevel.ordinal());
+                userDailyData.setAnxietyLevel(anxietyLevel.ordinal());
+                userDailyData.setStressLevel(stressLevel.ordinal());
+                userDailyData.setCalmLevel(calmLevel.ordinal());
+
+                if (userDailyData.getId() == 0) {
+                    long id = userDailyDataDao.insert(userDailyData);
+                    success.set(id > 0);
+                } else {
+                    userDailyDataDao.update(userDailyData);
+                    success.set(true);
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+                success.set(false);
+            } finally {
+                latch.countDown();
+            }
+        });
+        try {
+            latch.await(2, TimeUnit.SECONDS);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            e.printStackTrace();
         }
+        return success.get();
+    }
 
-        return userDailyData;
+    // Busca ou cria o registro do dia
+    private UserDailyData getOrCreateUserDailyData(int userId, String date) {
+        UserDailyData data = userDailyDataDao.getUserDailyData(userId, date);
+        if (data == null) {
+            data = new UserDailyData(userId, date);
+            // Não insere aqui, a inserção/update acontece no método que chama este
+        }
+        if (data.getTreinosMap() == null) {
+            data.setTreinosMap(new HashMap<>());
+        }
+        return data;
     }
 
     // Método para adicionar consumo de água
     public void addWaterConsumption(int userId, int amount) {
-        String today = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());
         databaseWriteExecutor.execute(() -> {
-            UserDailyData data = userDailyDataDao.getUserDailyDataForToday(userId, today);
-            if (data == null) {
-                data = new UserDailyData(userId, today);
-                data.setUserId(userId);
-                data.setDate(today);
-                data.setWaterConsumed(amount);
+            String todayDate = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());
+            UserDailyData data = getOrCreateUserDailyData(userId, todayDate);
+            data.setWaterConsumed(data.getWaterConsumed() + amount);
+            if (data.getId() == 0) {
                 userDailyDataDao.insert(data);
             } else {
-                data.setWaterConsumed(data.getWaterConsumed() + amount);
                 userDailyDataDao.update(data);
             }
         });
     }
-//    public boolean addWaterConsumption(int userId, int waterAmount) {
-//        try {
-//            // Verificar se já existe um registro para hoje
-//            UserDailyData userDailyData = userDailyDataDao.getUserDailyDataForToday(userId);
-//
-//            if (userDailyData == null) {
-//                // Criar novo registro se não existir
-//                userDailyData = new UserDailyData();
-//                userDailyData.setUserId(userId);
-//                userDailyData.setDate(today);
-//                // Valores padrão para humor usando a enumeração (MODERATE é o valor 2)
-//                userDailyData.setJoyLevel(HumorValues.MODERATE.ordinal());
-//                userDailyData.setSadnessLevel(HumorValues.MODERATE.ordinal());
-//                userDailyData.setAnxietyLevel(HumorValues.MODERATE.ordinal());
-//                userDailyData.setStressLevel(HumorValues.MODERATE.ordinal());
-//                userDailyData.setCalmLevel(HumorValues.MODERATE.ordinal());
-//                userDailyData.setWaterConsumed(waterAmount);
-//
-//                long id = userDailyDataDao.insert(userDailyData);
-//                return id > 0;
-//            } else {
-//                // Atualizar consumo de água
-//                int currentWater = userDailyData.getWaterConsumed();
-//                userDailyData.setWaterConsumed(currentWater + waterAmount);
-//                userDailyDataDao.update(userDailyData);
-//                return true;
-//            }
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//            return false;
-//        }
-//    }
 
-    // Obter total de água consumida hoje
+    // Obter total de água consumida hoje (síncrono, cuidado na UI thread)
     public int getTotalWaterConsumption(int userId) {
-        String today = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());
-        UserDailyData userDailyData = userDailyDataDao.getUserDailyDataForToday(userId, today);
+        String todayDate = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());
+        UserDailyData userDailyData = userDailyDataDao.getUserDailyData(userId, todayDate);
         return userDailyData != null ? userDailyData.getWaterConsumed() : 0;
     }
 
@@ -157,17 +116,15 @@ public class UserDailyDataRepository {
         return userDailyDataDao.getTotalWaterConsumptionLiveData(userId, date);
     }
 
-    // Obter dados de humor do dia atual
     public UserDailyData getTodayMoodData(int userId) {
-        String today = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());
-        return userDailyDataDao.getUserDailyDataForToday(userId, today);
+        String todayDate = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());
+        return userDailyDataDao.getUserDailyData(userId, todayDate);
     }
 
-    // Resetar consumo de água para o dia atual
     public void resetWaterConsumption(int userId) {
-        String today = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());
         databaseWriteExecutor.execute(() -> {
-            UserDailyData data = userDailyDataDao.getUserDailyDataForToday(userId, today);
+            String todayDate = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());
+            UserDailyData data = userDailyDataDao.getUserDailyData(userId, todayDate);
             if (data != null) {
                 data.setWaterConsumed(0);
                 userDailyDataDao.update(data);
@@ -176,164 +133,178 @@ public class UserDailyDataRepository {
     }
 
     public boolean saveDorData(int userId, int areaDor, int subareaDor, int especificacaoDor, int intensidadeDor) {
-        try {
-            // Usando AtomicBoolean para retornar valor de thread secundária
-            AtomicBoolean success = new AtomicBoolean(false);
-            // Usando CountDownLatch para aguardar execução
-            CountDownLatch latch = new CountDownLatch(1);
+        AtomicBoolean success = new AtomicBoolean(false);
+        CountDownLatch latch = new CountDownLatch(1);
+        databaseWriteExecutor.execute(() -> {
+            try {
+                String todayDate = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());
+                UserDailyData userDailyData = getOrCreateUserDailyData(userId, todayDate);
 
-            databaseWriteExecutor.execute(() -> {
-                try {
-                    String today = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());
-                    UserDailyData userDailyData = userDailyDataDao.getUserDailyDataForToday(userId, today);
+                userDailyData.setAreaDorN1(areaDor);
+                userDailyData.setAreaDorN2(subareaDor);
+                userDailyData.setAreaDorN3(especificacaoDor);
+                userDailyData.setIntensidadeDor(intensidadeDor);
 
-                    if (userDailyData == null) {
-                        userDailyData = new UserDailyData(userId, today);
-                    }
-
-                    userDailyData.setAreaDorN1(areaDor);
-                    userDailyData.setAreaDorN2(subareaDor);
-                    userDailyData.setAreaDorN3(especificacaoDor);
-                    userDailyData.setIntensidadeDor(intensidadeDor);
-
-                    if (userDailyData.getId() == 0) {
-                        long id = userDailyDataDao.insert(userDailyData);
-                        success.set(id > 0);
-                    } else {
-                        userDailyDataDao.update(userDailyData);
-                        success.set(true);
-                    }
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    success.set(false);
-                } finally {
-                    latch.countDown();
+                if (userDailyData.getId() == 0) {
+                    long id = userDailyDataDao.insert(userDailyData);
+                    success.set(id > 0);
+                } else {
+                    userDailyDataDao.update(userDailyData);
+                    success.set(true);
                 }
-            });
+            } catch (Exception e) {
+                e.printStackTrace();
+                success.set(false);
+            } finally {
+                latch.countDown();
+            }
+        });
+        try {
             latch.await(2, TimeUnit.SECONDS);
-            return success.get();
-        } catch (Exception e) {
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
             e.printStackTrace();
-            return false;
         }
+        return success.get();
     }
 
     public UserDailyData getTodayDorData(int userId) {
-        String today = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());
-        return userDailyDataDao.getUserDailyDataForToday(userId, today);
+        String todayDate = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());
+        return userDailyDataDao.getUserDailyData(userId, todayDate);
     }
 
-    // Método para salvar dados de sono
     public boolean saveSleepData(int userId, String date, String sleepTime, String wakeTime, Integer totalSleepMinutes, Integer quality) {
-        try {
-            // Usando AtomicBoolean para retornar valor de thread secundária
-            AtomicBoolean success = new AtomicBoolean(false);
-            // Usando CountDownLatch para aguardar execução
-            CountDownLatch latch = new CountDownLatch(1);
+        AtomicBoolean success = new AtomicBoolean(false);
+        CountDownLatch latch = new CountDownLatch(1);
+        databaseWriteExecutor.execute(() -> {
+            try {
+                UserDailyData userDailyData = getOrCreateUserDailyData(userId, date);
 
-            databaseWriteExecutor.execute(() -> {
-                try {
-                    UserDailyData userDailyData = userDailyDataDao.getUserDailyDataForToday(userId, date);
+                userDailyData.setSleepTime(sleepTime);
+                userDailyData.setWakeTime(wakeTime);
+                userDailyData.setTotalSleepTimeInMinutes(totalSleepMinutes != null ? totalSleepMinutes : 0);
+                userDailyData.setSleepQuality(quality != null ? quality : 3);
 
-                    if (userDailyData == null) {
-                        userDailyData = new UserDailyData(userId, date);
-                    }
-
-                    // Definir dados de sono
-                    userDailyData.setSleepTime(sleepTime);
-                    userDailyData.setWakeTime(wakeTime);
-                    userDailyData.setTotalSleepTimeInMinutes(totalSleepMinutes);
-                    userDailyData.setSleepQuality(quality);
-
-                    if (userDailyData.getId() == 0) {
-                        long id = userDailyDataDao.insert(userDailyData);
-                        success.set(id > 0);
-                    } else {
-                        userDailyDataDao.update(userDailyData);
-                        success.set(true);
-                    }
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    success.set(false);
-                } finally {
-                    latch.countDown();
-                }
-            });
-
-            // Esperar pela conclusão (cuidado com ANR)
-            latch.await(2, TimeUnit.SECONDS);
-            return success.get();
-        } catch (Exception e) {
-            e.printStackTrace();
-            return false;
-        }
-    }
-
-    public boolean saveTreinoData(int userId, int tipoTreino, int duracaoMinutos) {
-        try {
-            AtomicBoolean success = new AtomicBoolean(false);
-            CountDownLatch latch = new CountDownLatch(1);
-
-            databaseWriteExecutor.execute(() -> {
-                try {
-                    String today = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());
-
-                    // Criar um novo registro para cada treino
-                    UserDailyData novoTreino = new UserDailyData(userId, today);
-                    novoTreino.setTreinoTipo(tipoTreino);
-                    novoTreino.setTreinoDuracaoMinutos(duracaoMinutos);
-
-                    long id = userDailyDataDao.insert(novoTreino);
+                if (userDailyData.getId() == 0) {
+                    long id = userDailyDataDao.insert(userDailyData);
                     success.set(id > 0);
-
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    success.set(false);
-                } finally {
-                    latch.countDown();
+                } else {
+                    userDailyDataDao.update(userDailyData);
+                    success.set(true);
                 }
-            });
-
+            } catch (Exception e) {
+                e.printStackTrace();
+                success.set(false);
+            } finally {
+                latch.countDown();
+            }
+        });
+        try {
             latch.await(2, TimeUnit.SECONDS);
-            return success.get();
-        } catch (Exception e) {
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
             e.printStackTrace();
-            return false;
         }
+        return success.get();
     }
 
+    // --- Métodos de Treino Atualizados ---
 
-    public Map<String, Float> getTodayTrainingData(int userId) {
-        Map<String, Float> resumoTreinos = new HashMap<>();
+    /**
+     * Salva ou atualiza os dados de um treino para o usuário no dia atual.
+     * Adiciona a duração ao tipo de treino especificado no mapa de treinos do dia.
+     *
+     * @param userId ID do usuário.
+     * @param tipoTreinoIndex Índice do TipoTreino (enum ordinal).
+     * @param duracaoMinutos Duração do treino em minutos.
+     * @return true se o salvamento foi bem-sucedido, false caso contrário.
+     */
+    public boolean saveTreinoData(int userId, int tipoTreinoIndex, int duracaoMinutos) {
+        AtomicBoolean success = new AtomicBoolean(false);
+        CountDownLatch latch = new CountDownLatch(1);
+
+        databaseWriteExecutor.execute(() -> {
+            try {
+                String todayDate = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());
+                UserDailyData userDailyData = getOrCreateUserDailyData(userId, todayDate);
+
+                // Obter o nome/chave do tipo de treino a partir do índice
+                TipoTreino tipoTreino = TipoTreino.getById(tipoTreinoIndex); // Assumindo que getById existe e usa o índice
+                if (tipoTreino == null) {
+                    throw new IllegalArgumentException("Índice de tipo de treino inválido: " + tipoTreinoIndex);
+                }
+                String treinoKey = tipoTreino.name(); // Usar o nome do enum como chave é mais robusto
+
+                // Obter o mapa atual de treinos (garantido não ser nulo por getOrCreateUserDailyData)
+                Map<String, Integer> treinosMap = userDailyData.getTreinosMap();
+
+                // Adicionar a nova duração à duração existente para este tipo de treino
+                int duracaoAtual = treinosMap.getOrDefault(treinoKey, 0);
+                treinosMap.put(treinoKey, duracaoAtual + duracaoMinutos);
+
+                // Atualizar o mapa na entidade (necessário por causa do TypeConverter)
+                userDailyData.setTreinosMap(treinosMap);
+
+                // Salvar (inserir ou atualizar) a entidade UserDailyData
+                if (userDailyData.getId() == 0) {
+                    long id = userDailyDataDao.insert(userDailyData);
+                    success.set(id > 0);
+                } else {
+                    userDailyDataDao.update(userDailyData);
+                    success.set(true);
+                }
+
+            } catch (Exception e) {
+                e.printStackTrace();
+                success.set(false);
+            } finally {
+                latch.countDown();
+            }
+        });
 
         try {
-            String today = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());
+            latch.await(2, TimeUnit.SECONDS);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            e.printStackTrace();
+        }
+        return success.get();
+    }
+    public Map<String, Float> getTodayTrainingData(int userId) {
+        Map<String, Float> resumoTreinosHoras = new HashMap<>();
+        try {
+            String todayDate = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());
+            UserDailyData userDailyData = userDailyDataDao.getUserDailyData(userId, todayDate);
 
-            // Buscar todos os registros de treino do dia
-            List<UserDailyData> treinosHoje = userDailyDataDao.getAllUserDailyDataForToday(userId, today);
+            if (userDailyData != null && userDailyData.getTreinosMap() != null) {
+                Map<String, Integer> treinosMapMinutos = userDailyData.getTreinosMap();
 
-            if (treinosHoje != null && !treinosHoje.isEmpty()) {
-                for (UserDailyData treino : treinosHoje) {
-                    if (treino.getTreinoTipo() >= 0 && treino.getTreinoDuracaoMinutos() > 0) {
-                        TipoTreino tipoTreino = TipoTreino.getById(treino.getTreinoTipo());
-                        float horasTreino = treino.getTreinoDuracaoMinutos() / 60.0f;
+                for (Map.Entry<String, Integer> entry : treinosMapMinutos.entrySet()) {
+                    String treinoKey = entry.getKey();
+                    Integer duracaoMinutos = entry.getValue();
 
-                        // Se já existe esse tipo de treino, somar as horas
-                        String nomeTreino = tipoTreino.getNome();
-                        if (resumoTreinos.containsKey(nomeTreino)) {
-                            float horasExistentes = resumoTreinos.get(nomeTreino);
-                            resumoTreinos.put(nomeTreino, horasExistentes + horasTreino);
-                        } else {
-                            resumoTreinos.put(nomeTreino, horasTreino);
+                    if (duracaoMinutos != null && duracaoMinutos > 0) {
+                        // Tentar converter a chave (nome do enum) de volta para TipoTreino para obter o nome amigável
+                        String nomeTreino;
+                        try {
+                            TipoTreino tipo = TipoTreino.valueOf(treinoKey);
+                            nomeTreino = tipo.getNome();
+                        } catch (IllegalArgumentException e) {
+                            // Se a chave não for um nome de enum válido (caso raro), usar a própria chave
+                            nomeTreino = treinoKey;
                         }
+                        float horasTreino = duracaoMinutos / 60.0f;
+                        resumoTreinosHoras.put(nomeTreino, horasTreino);
                     }
                 }
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            e.printStackTrace(); // Logar o erro
         }
-
-        return resumoTreinos;
+        return resumoTreinosHoras;
     }
-
+//    public LiveData<List<UserDailyData>> getUserDailyDataLiveData(int userId, String date) {
+//        return userDailyDataDao.getUserDailyDataLiveData(userId, date);
+//    }
 }
+

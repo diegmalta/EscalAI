@@ -1,17 +1,25 @@
 package com.ufrj.escalaiv2.activity;
 
-import android.content.Intent;
 import android.os.Bundle;
-import android.widget.Button;
-import androidx.appcompat.app.AppCompatActivity;
+import android.view.MenuItem;
 import android.widget.TextView;
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 
+import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.google.android.material.navigation.NavigationBarView;
 import com.ufrj.escalaiv2.R;
 import com.ufrj.escalaiv2.model.AppDatabase;
+import com.ufrj.escalaiv2.ui.HomeFragment;
+import com.ufrj.escalaiv2.ui.RelatoriosFragment;
 
 public class MenuPrincipalActivity extends AppCompatActivity {
 
     private TextView txtNomeUsuario;
+    private BottomNavigationView bottomNavigationView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -19,50 +27,55 @@ public class MenuPrincipalActivity extends AppCompatActivity {
         setContentView(R.layout.activity_menu_principal);
 
         txtNomeUsuario = findViewById(R.id.txtNomeUsuario);
+        bottomNavigationView = findViewById(R.id.bottom_navigation);
 
-        // Assuming you have a way to get the current user's ID
-        int currentUserId = getCurrentUserId(); // Implement this method to get the current user ID
-
-        // Fetch the user's name from the database
+        int currentUserId = getCurrentUserId();
         AppDatabase db = AppDatabase.getInstance(this);
         new Thread(() -> {
             String userName = db.usuarioDao().getUserNameById(currentUserId);
-            runOnUiThread(() -> txtNomeUsuario.setText(userName));
+            runOnUiThread(() -> txtNomeUsuario.setText(userName != null ? userName : "Usuário"));
         }).start();
 
-        Button aguaButton = findViewById(R.id.aguaButton);
-        aguaButton.setOnClickListener(view -> {
-            Intent intent = new Intent(this, AguaActivity.class);
-            startActivity(intent);
-        });
+        if (savedInstanceState == null) {
+            loadFragment(new HomeFragment());
+        }
 
-        Button humorButton = findViewById(R.id.humorButton);
-        humorButton.setOnClickListener(view -> {
-            Intent intent = new Intent(this, HumorActivity.class);
-            startActivity(intent);
-        });
+        bottomNavigationView.setOnItemSelectedListener(new NavigationBarView.OnItemSelectedListener() {
+            @Override
+            public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+                Fragment selectedFragment = null;
+                int itemId = item.getItemId();
 
-        Button dorButton = findViewById(R.id.dorButton);
-        dorButton.setOnClickListener(view -> {
-            Intent intent = new Intent(this, DorActivity.class);
-            startActivity(intent);
-        });
+                if (itemId == R.id.home) {
+                    selectedFragment = new HomeFragment();
+                } else if (itemId == R.id.relatorios) {
+                    selectedFragment = new RelatoriosFragment();
+                } else if (itemId == R.id.exercises) {
+                    // selectedFragment = new ExerciciosFragment();
+                } else if (itemId == R.id.profile) {
+                    // selectedFragment = new PerfilFragment();
+                }
 
-        Button sonoButton = findViewById(R.id.sonoButton);
-        sonoButton.setOnClickListener(view -> {
-            Intent intent = new Intent(this, SonoActivity.class);
-            startActivity(intent);
+                if (selectedFragment != null) {
+                    loadFragment(selectedFragment);
+                    return true;
+                }
+                return false;
+            }
         });
+    }
 
-        Button treinoButton = findViewById(R.id.treinoButton);
-        treinoButton.setOnClickListener(view -> {
-            Intent intent = new Intent(this, TreinoActivity.class);
-            startActivity(intent);
-        });
+    private void loadFragment(Fragment fragment) {
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+        fragmentTransaction.replace(R.id.fragment_container, fragment);
+        fragmentTransaction.addToBackStack(null);
+        fragmentTransaction.commit();
     }
 
     private int getCurrentUserId() {
         // Implement this method to return the current user's ID
-        return 1; // Replace with actual logic to get the current user ID
+        return 1; // Substitua pela lógica real
     }
 }
+

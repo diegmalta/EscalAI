@@ -1,13 +1,21 @@
 package com.ufrj.escalaiv2.activity;
 
-import android.app.DatePickerDialog;
+import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
+import android.text.SpannableString;
+import android.text.Spanned;
+import android.text.TextPaint;
+import android.text.method.LinkMovementMethod;
+import android.text.style.ClickableSpan;
+import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
 
@@ -18,11 +26,13 @@ import com.ufrj.escalaiv2.viewmodel.CadastroUsuarioVMFactory;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Locale;
+import android.app.DatePickerDialog;
 
 public class CadastroUsuarioActivity extends AppCompatActivity {
     private EditText emailEdit, nomeEdit, sobrenomeEdit, dataNascimentoEdit,
             celularEdit, senhaEdit, confirmaSenhaEdit;
     private TextView errosCadastro;
+    private TextView readTermsLink;
     private CheckBox agreeToTermsCheckBox;
     private Button cadastrarButton;
     private CadastroUsuarioVM viewModel;
@@ -37,10 +47,11 @@ public class CadastroUsuarioActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_cadastro_usuario);
-        initializeViewModel(); // Call this before using viewModel
+        initializeViewModel();
         initializeViews();
         setupObservers();
         setupDatePicker();
+        setupTermsLink();
     }
 
     private void initializeViews() {
@@ -52,10 +63,39 @@ public class CadastroUsuarioActivity extends AppCompatActivity {
         senhaEdit = findViewById(R.id.senha);
         confirmaSenhaEdit = findViewById(R.id.confirmaSenha);
         errosCadastro = findViewById(R.id.errosCadastro);
+        readTermsLink = findViewById(R.id.readTermsLink);
         agreeToTermsCheckBox = findViewById(R.id.agreeToTermsCheckBox);
         cadastrarButton = findViewById(R.id.cadastrarButton);
 
         cadastrarButton.setOnClickListener(v -> cadastrarUsuario());
+    }
+
+    private void setupTermsLink() {
+        String fullText = "Leia os termos e condições de uso aqui";
+        SpannableString spannableString = new SpannableString(fullText);
+
+        int startPos = fullText.lastIndexOf("aqui");
+        int endPos = startPos + "aqui".length();
+
+        ClickableSpan clickableSpan = new ClickableSpan() {
+            @Override
+            public void onClick(@NonNull View widget) {
+                Intent intent = new Intent(CadastroUsuarioActivity.this, TermsOfUseActivity.class);
+                startActivity(intent);
+            }
+
+            @Override
+            public void updateDrawState(@NonNull TextPaint ds) {
+                super.updateDrawState(ds);
+                ds.setColor(Color.BLUE);
+                ds.setUnderlineText(true);
+            }
+        };
+
+        spannableString.setSpan(clickableSpan, startPos, endPos, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+
+        readTermsLink.setText(spannableString);
+        readTermsLink.setMovementMethod(LinkMovementMethod.getInstance());
     }
 
     private void setupObservers() {

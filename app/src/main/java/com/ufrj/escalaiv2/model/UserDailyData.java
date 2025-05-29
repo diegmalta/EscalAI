@@ -5,10 +5,11 @@ import androidx.room.Entity;
 import androidx.room.ForeignKey;
 import androidx.room.Index;
 import androidx.room.PrimaryKey;
+import androidx.room.TypeConverters;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Locale;
+import com.ufrj.escalaiv2.utils.MapConverter;
+import java.util.HashMap;
+import java.util.Map;
 
 @Entity(tableName = "user_daily_data",
         foreignKeys = @ForeignKey(
@@ -18,6 +19,7 @@ import java.util.Locale;
                 onDelete = ForeignKey.SET_NULL
         ),
         indices = {@Index("userId")})
+@TypeConverters(MapConverter.class)
 public class UserDailyData {
     @PrimaryKey(autoGenerate = true)
     private int id;
@@ -25,77 +27,69 @@ public class UserDailyData {
     @ColumnInfo(name = "userId")
     private int userId;
 
-    @ColumnInfo(name = "water_consumed")
-    private int waterConsumed;
-
-    @ColumnInfo(name = "joy_level")
-    private int joyLevel;
-
-    @ColumnInfo(name = "stress_level")
-    private int stressLevel;
-
-    @ColumnInfo(name = "anxiety_level")
-    private int anxietyLevel;
-
-    @ColumnInfo(name = "sadness_level")
-    private int sadnessLevel;
-
-    @ColumnInfo(name = "calm_level")
-    private int calmLevel;
-
-    // Campos para rastreamento de dor
-    @ColumnInfo(name = "area_dor_n1")
-    private int areaDorN1;
-
-    @ColumnInfo(name = "area_dor_n2")
-    private int areaDorN2;
-
-    @ColumnInfo(name = "area_dor_n3")
-    private int areaDorN3;
-
-    @ColumnInfo(name = "intensidade_dor")
-    private int intensidadeDor = 5;
-
-    // Campos para rastreamento de sono
-    @ColumnInfo(name = "sleep_time")
-    private String sleepTime;
-
-    @ColumnInfo(name = "wake_time")
-    private String wakeTime;
-
-    @ColumnInfo(name = "total_sleep_time")
-    private int totalSleepTimeInMinutes;
-
-    @ColumnInfo(name = "sleep_quality")
-    private int sleepQuality = 3; // Valor padrão: OK (3)
-
-    @ColumnInfo(name = "treino_tipo")
-    private int treinoTipo = -1; // -1 indica nenhum treino registrado
-
-    @ColumnInfo(name = "treino_duracao_minutos")
-    private int treinoDuracaoMinutos = 0;
-
     @ColumnInfo(name = "date")
     private String date;
 
+    // Agua
+    @ColumnInfo(name = "water_consumed")
+    private int waterConsumed;
+
+    // Humor
+    @ColumnInfo(name = "joy_level")
+    private int joyLevel;
+    @ColumnInfo(name = "stress_level")
+    private int stressLevel;
+    @ColumnInfo(name = "anxiety_level")
+    private int anxietyLevel;
+    @ColumnInfo(name = "sadness_level")
+    private int sadnessLevel;
+    @ColumnInfo(name = "calm_level")
+    private int calmLevel;
+
+    // Dor
+    @ColumnInfo(name = "area_dor_n1")
+    private int areaDorN1;
+    @ColumnInfo(name = "area_dor_n2")
+    private int areaDorN2;
+    @ColumnInfo(name = "area_dor_n3")
+    private int areaDorN3;
+    @ColumnInfo(name = "intensidade_dor")
+    private int intensidadeDor = 5;
+
+    // Sono
+    @ColumnInfo(name = "sleep_time")
+    private String sleepTime;
+    @ColumnInfo(name = "wake_time")
+    private String wakeTime;
+    @ColumnInfo(name = "total_sleep_time")
+    private int totalSleepTimeInMinutes;
+    @ColumnInfo(name = "sleep_quality")
+    private int sleepQuality = 3;
+
+    // Treinos
+    @ColumnInfo(name = "treinos_data") // Coluna para armazenar o JSON do Map de treinos
+    private Map<String, Integer> treinosMap; // Mapa: Chave = TipoTreino.name() ou ID, Valor = Duração total em minutos
+
+    // Construtor
     public UserDailyData(int userId, String date) {
         this.userId = userId;
         this.date = date;
         this.waterConsumed = 0;
-        // Valores padrão para os níveis de humor
         this.joyLevel = 0;
         this.sadnessLevel = 0;
         this.anxietyLevel = 0;
         this.stressLevel = 0;
         this.calmLevel = 0;
-        // Valores padrão para sono
         this.sleepTime = "00:00";
         this.wakeTime = "08:00";
         this.totalSleepTimeInMinutes = 480;
         this.sleepQuality = 3;
+        this.intensidadeDor = 5;
+        this.treinosMap = new HashMap<>();
     }
 
-    // Getters and setters originais
+    // --- Getters e Setters ---
+
     public int getId() {
         return id;
     }
@@ -112,20 +106,20 @@ public class UserDailyData {
         this.userId = userId;
     }
 
-    public int getWaterConsumed() {
-        return waterConsumed;
-    }
-
-    public void setWaterConsumed(int waterConsumed) {
-        this.waterConsumed = waterConsumed;
-    }
-
     public String getDate() {
         return date;
     }
 
     public void setDate(String date) {
         this.date = date;
+    }
+
+    public int getWaterConsumed() {
+        return waterConsumed;
+    }
+
+    public void setWaterConsumed(int waterConsumed) {
+        this.waterConsumed = waterConsumed;
     }
 
     public int getJoyLevel() {
@@ -232,19 +226,12 @@ public class UserDailyData {
         this.sleepQuality = sleepQuality;
     }
 
-    public int getTreinoTipo() {
-        return treinoTipo;
+    public Map<String, Integer> getTreinosMap() {
+        return treinosMap == null ? new HashMap<>() : treinosMap;
     }
 
-    public void setTreinoTipo(int treinoTipo) {
-        this.treinoTipo = treinoTipo;
-    }
-
-    public int getTreinoDuracaoMinutos() {
-        return treinoDuracaoMinutos;
-    }
-
-    public void setTreinoDuracaoMinutos(int treinoDuracaoMinutos) {
-        this.treinoDuracaoMinutos = treinoDuracaoMinutos;
+    public void setTreinosMap(Map<String, Integer> treinosMap) {
+        this.treinosMap = treinosMap;
     }
 }
+

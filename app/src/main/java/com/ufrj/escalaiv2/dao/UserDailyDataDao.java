@@ -31,4 +31,7 @@ public interface UserDailyDataDao {
 
     @Query("SELECT * FROM user_daily_data WHERE userId = :userId AND date = :date")
     List<UserDailyData> getAllUserDailyDataForToday(int userId, String date);
+
+    @Query("SELECT * FROM user_daily_data WHERE userId = :userId AND date BETWEEN :startDate AND :endDate ORDER BY date ASC")
+    LiveData<List<UserDailyData>> getDailyDataBetweenDates(int userId, String startDate, String endDate);
 }
