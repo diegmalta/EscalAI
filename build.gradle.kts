@@ -5,13 +5,13 @@ buildscript {
         mavenCentral()
     }
     dependencies{
-        classpath("com.android.tools.build:gradle:4.1.3")
+        classpath("com.android.tools.build:gradle:8.10.1")
         classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:1.9.23")
     }
 }
 
 plugins {
-    id("com.android.application") version "8.1.2" apply false
-    id("org.jetbrains.kotlin.android") version "1.9.23" apply false
+    id("com.android.application") version "8.10.1" apply false
+    id("org.jetbrains.kotlin.android") version "2.1.21" apply false
     id("org.jetbrains.kotlin.kapt") version "1.9.23" apply false
 }

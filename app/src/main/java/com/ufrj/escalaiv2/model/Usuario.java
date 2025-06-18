@@ -21,6 +21,12 @@ public class Usuario {
     private String dataNasc;
     @ColumnInfo(name = "phone_number")
     private String celular;
+
+
+    @ColumnInfo(name = "sexo")
+    private String sexo;
+    @ColumnInfo(name = "gender")
+    private String gender;
     @ColumnInfo(name = "password")
     private String senha;
 
@@ -28,7 +34,13 @@ public class Usuario {
     @ColumnInfo(name = "weight")
     private double peso; // em Kg
     @ColumnInfo(name = "height")
-    private double altura; // em cm
+    private int altura; // em cm
+    @ColumnInfo(name = "grau_escalada_redpoint")
+    private int grauEscaladaRedpoint;
+    @ColumnInfo(name = "grau_escalada_on_sight")
+    private int grauEscaladaOnsight;
+    @ColumnInfo(name = "grau_escalada_boulder")
+    private int grauEscaladaBoulder;
     @TypeConverters(DateTypeConverter.class)
     @ColumnInfo(name = "weight_height_last_update")
     private Date lastUpdateDate;
@@ -110,12 +122,51 @@ public class Usuario {
         this.peso = peso;
     }
 
-    public double getAltura() {
+    public int getAltura() {
         return altura;
     }
 
-    public void setAltura(double altura) {
+    public void setAltura(int altura) {
         this.altura = altura;
     }
 
+    public String getSexo() {
+        return sexo;
+    }
+
+    public void setSexo(String sexo) {
+        this.sexo = sexo;
+    }
+
+    public String getGender() {
+        return gender;
+    }
+
+    public void setGender(String gender) {
+        this.gender = gender;
+    }
+
+    public int getGrauEscaladaRedpoint() {
+        return grauEscaladaRedpoint;
+    }
+
+    public void setGrauEscaladaRedpoint(int grauEscaladaRedpoint) {
+        this.grauEscaladaRedpoint = grauEscaladaRedpoint;
+    }
+
+    public int getGrauEscaladaOnsight() {
+        return grauEscaladaOnsight;
+    }
+
+    public void setGrauEscaladaOnsight(int grauEscaladaOnsight) {
+        this.grauEscaladaOnsight = grauEscaladaOnsight;
+    }
+
+    public int getGrauEscaladaBoulder() {
+        return grauEscaladaBoulder;
+    }
+
+    public void setGrauEscaladaBoulder(int grauEscaladaBoulder) {
+        this.grauEscaladaBoulder = grauEscaladaBoulder;
+    }
 }

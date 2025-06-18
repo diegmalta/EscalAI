@@ -10,7 +10,7 @@
     <androidx.coordinatorlayout.widget.CoordinatorLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:context=".ui.RelatoriosFragment">
+        tools:context=".ui.RelatoriosFragment"> <!-- Ajuste o contexto se necessário -->
 
         <com.google.android.material.appbar.AppBarLayout
             android:id="@+id/appBarLayout"
@@ -22,7 +22,7 @@
                 style="@style/Widget.Material3.Toolbar.OnSurface"
                 android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize"
-                app:title="Relatórios" />
+                app:title="Relatórios" /> <!-- Considere usar @string/titulo_relatorios -->
 
         </com.google.android.material.appbar.AppBarLayout>
 
@@ -55,7 +55,7 @@
                             style="@style/TextAppearance.Material3.TitleMedium"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Água Consumida (Últimos 7 dias)" /> <!-- Considere usar @string/relatorio_agua_titulo -->
+                            android:text="Água Consumida (Últimos 7 dias)" />
 
                         <com.github.mikephil.charting.charts.LineChart
                             android:id="@+id/chart_agua"
@@ -84,7 +84,7 @@
                             style="@style/TextAppearance.Material3.TitleMedium"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Duração do Sono (Últimos 7 dias)" /> <!-- Considere usar @string/relatorio_sono_titulo -->
+                            android:text="Duração do Sono (Últimos 7 dias)" />
 
                         <com.github.mikephil.charting.charts.LineChart
                             android:id="@+id/chart_sono"
@@ -95,7 +95,7 @@
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
 
-                <!-- Gráfico de Dores -->
+                <!-- Tabela de Dores -->
                 <com.google.android.material.card.MaterialCardView
                     android:id="@+id/card_dor"
                     style="@style/Widget.Material3.CardView.Elevated"
@@ -113,13 +113,72 @@
                             style="@style/TextAppearance.Material3.TitleMedium"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Intensidade da Dor (Últimos 7 dias)" /> <!-- Considere usar @string/relatorio_dor_titulo -->
+                            android:text="Relatório de Dores (Últimos 7 dias)" />
 
-                        <com.github.mikephil.charting.charts.LineChart
-                            android:id="@+id/chart_dor"
+                        <!-- Cabeçalho da Tabela -->
+                        <LinearLayout
                             android:layout_width="match_parent"
-                            android:layout_height="200dp"
-                            android:layout_marginTop="8dp" />
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            android:paddingTop="8dp"
+                            android:paddingBottom="4dp"
+                            android:paddingStart="8dp"
+                            android:paddingEnd="8dp"
+                            android:background="?attr/colorSurfaceVariant">
+
+                            <TextView
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="2"
+                                android:text="Local"
+                                android:textStyle="bold"
+                                android:textSize="12sp" />
+
+                            <TextView
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:text="Início"
+                                android:gravity="center"
+                                android:textStyle="bold"
+                                android:textSize="12sp" />
+
+                            <TextView
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:text="Máx"
+                                android:gravity="center"
+                                android:textStyle="bold"
+                                android:textSize="12sp" />
+
+                            <TextView
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:text="Média"
+                                android:gravity="center"
+                                android:textStyle="bold"
+                                android:textSize="12sp" />
+
+                            <TextView
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:text="Sem Dor"
+                                android:gravity="center"
+                                android:textStyle="bold"
+                                android:textSize="12sp" />
+                        </LinearLayout>
+
+                        <androidx.recyclerview.widget.RecyclerView
+                            android:id="@+id/recyclerViewDores"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="4dp"
+                            android:nestedScrollingEnabled="false"
+                            tools:listitem="@layout/item_pain_report"
+                            tools:itemCount="3" />
 
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
@@ -142,7 +201,7 @@
                             style="@style/TextAppearance.Material3.TitleMedium"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Duração dos Treinos (Últimos 7 dias)" /> <!-- Considere usar @string/relatorio_treino_titulo -->
+                            android:text="Duração dos Treinos (Últimos 7 dias)" />
 
                         <com.github.mikephil.charting.charts.BarChart
                             android:id="@+id/chart_treino"
@@ -171,7 +230,7 @@
                             style="@style/TextAppearance.Material3.TitleMedium"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Níveis de Humor (Últimos 7 dias)" /> <!-- Considere usar @string/relatorio_humor_titulo -->
+                            android:text="Níveis de Humor (Últimos 7 dias)" />
 
                         <com.github.mikephil.charting.charts.LineChart
                             android:id="@+id/chart_humor"

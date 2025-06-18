@@ -9,6 +9,7 @@ import com.ufrj.escalaiv2.databinding.ActivityAguaBinding;
 import com.google.android.material.snackbar.Snackbar;
 import androidx.databinding.DataBindingUtil;
 import com.ufrj.escalaiv2.R;
+import com.ufrj.escalaiv2.enums.Event;
 import com.ufrj.escalaiv2.viewmodel.AguaVM;
 import com.ufrj.escalaiv2.viewmodel.AguaVMFactory;
 
@@ -49,6 +50,9 @@ public class AguaActivity extends AppCompatActivity {
 
         // Configurar o botão de confirmar
         binding.confirmButton.setOnClickListener(v -> aguaVM.confirmarConsumoAgua());
+        
+        // Configurar o botão de zerar
+        binding.resetButton.setOnClickListener(v -> aguaVM.resetarConsumoAgua());
     }
 
     private void observeViewModel() {
@@ -61,11 +65,19 @@ public class AguaActivity extends AppCompatActivity {
         });
 
         aguaVM.getUiEvent().observe(this, event -> {
-            Snackbar.make(
-                    binding.getRoot(),
-                    "Consumo de água registrado!",
-                    BaseTransientBottomBar.LENGTH_SHORT
-            ).show();
+            if (event == Event.SHOW_SUCCESS_MESSAGE) {
+                Snackbar.make(
+                        binding.getRoot(),
+                        "Consumo de água registrado!",
+                        BaseTransientBottomBar.LENGTH_SHORT
+                ).show();
+            } else if (event == Event.RESET_COMPLETED) {
+                Snackbar.make(
+                        binding.getRoot(),
+                        "Consumo de água do dia zerado!",
+                        BaseTransientBottomBar.LENGTH_SHORT
+                ).show();
+            }
         });
     }
 }

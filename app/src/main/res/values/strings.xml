@@ -52,4 +52,8 @@
     <string name="questionDoYouClimb">Você já pratica escalada?</string>
     <string name="confirmData">Confirmar dados</string>
     <string name="profile">Perfil</string>
+
+    <string name="termos_de_uso_label">Li e aceito os Termos e Condições de Uso aqui</string>
+    <string name="termos_de_uso_link">aqui</string>
+
 </resources>
