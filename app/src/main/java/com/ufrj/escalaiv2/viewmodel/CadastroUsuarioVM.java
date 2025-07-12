@@ -75,24 +75,27 @@ public class CadastroUsuarioVM extends AndroidViewModel {
     }
 
 
-    public void setDataNascimento(String data) {
-        dataNascimentoSelecionada.setValue(data);
-    }
-
     /**
      * Inicia o processo de cadastro chamando a API remota.
-     * Envia apenas email e senha.
      *
      * @param email O email do usuário.
      * @param senha A senha do usuário.
      * @param confirmaSenha A confirmação da senha.
      * @param aceitouTermos Se o usuário aceitou os termos.
      */
-    public LiveData cadastrarUsuario(String email, String nome, String sobrenome, String dataNascimento, String senha, String confirmaSenha, boolean aceitouTermos) {
+    public LiveData cadastrarUsuario(String email, String nome, String sobrenome, String celular, String dataNascimento, String senha, String confirmaSenha, boolean aceitouTermos) {
         isLoading.setValue(true);
         registrationResult.setValue(null); // Limpa resultado anterior
 
         List<String> listaErros = validarCadastro(email, nome, sobrenome, dataNascimento, "123", senha, confirmaSenha, aceitouTermos);
+
+        try {
+            SimpleDateFormat originalFormat = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
+            SimpleDateFormat apiFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+            dataNascimento = apiFormat.format(originalFormat.parse(dataNascimento));
+        } catch (Exception e) {
+            listaErros.add("Erro desconhecido ao validar data.");
+        }
 
         if (!listaErros.isEmpty()) {
             erros.setValue(listaErros);
@@ -107,7 +110,11 @@ public class CadastroUsuarioVM extends AndroidViewModel {
         }
 
         // Chama o repositório para registrar via API
-        return authRepository.registerUser(email, nome, sobrenome, dataNascimento, senha);
+        return authRepository.registerUser(email, nome, sobrenome, celular, dataNascimento, senha);
+    }
+
+    public void setDataNascimento(String data) {
+        dataNascimentoSelecionada.setValue(data);
     }
 
     /**
@@ -180,9 +187,9 @@ public class CadastroUsuarioVM extends AndroidViewModel {
      * Método chamado pela Activity para obter o LiveData do repositório após iniciar a chamada.
      * A Activity observará este LiveData para obter a resposta da API.
      */
-    public LiveData<ApiResponse<Void>> getApiRegistrationResponse(String email, String nome, String sobrenome, String dataNascimento, String password) {
+    public LiveData<ApiResponse<Void>> getApiRegistrationResponse(String email, String nome, String sobrenome, String celular, String dataNascimento, String password) {
         // Retorna o LiveData do repositório para a Activity observar
-        return authRepository.registerUser(email, nome, sobrenome, dataNascimento, password);
+        return authRepository.registerUser(email, nome, sobrenome, celular, dataNascimento, password);
     }
 
     /**

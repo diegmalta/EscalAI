@@ -10,6 +10,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
+import androidx.lifecycle.ViewModelProvider;
 
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
@@ -20,12 +21,16 @@ import com.ufrj.escalaiv2.repository.AuthRepository;
 import com.ufrj.escalaiv2.ui.HomeFragment;
 import com.ufrj.escalaiv2.ui.RelatoriosFragment;
 
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
 public class MenuPrincipalActivity extends AppCompatActivity {
 
     private TextView txtNomeUsuario;
     private BottomNavigationView bottomNavigationView;
     private MaterialToolbar toolbar;
     private AuthRepository authRepository;
+    private final ExecutorService executorService = Executors.newSingleThreadExecutor();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,12 +61,8 @@ public class MenuPrincipalActivity extends AppCompatActivity {
             return false;
         });
 
-        int currentUserId = getCurrentUserId();
-        AppDatabase db = AppDatabase.getInstance(this);
-        new Thread(() -> {
-            String userName = db.usuarioDao().getUserNameById(currentUserId);
-            runOnUiThread(() -> txtNomeUsuario.setText(userName != null ? userName : "Usuário"));
-        }).start();
+        // Carrega o nome do usuário de forma segura
+        loadUserName();
 
         if (savedInstanceState == null) {
             loadFragment(new HomeFragment());
@@ -88,6 +89,30 @@ public class MenuPrincipalActivity extends AppCompatActivity {
                     return true;
                 }
                 return false;
+            }
+        });
+    }
+
+    private void loadUserName() {
+        int currentUserId = getCurrentUserId();
+        AppDatabase db = AppDatabase.getInstance(this);
+
+        executorService.execute(() -> {
+            try {
+                String userName = db.usuarioDao().getUserNameById(currentUserId);
+                runOnUiThread(() -> {
+                    if (!isFinishing()) {
+                        txtNomeUsuario.setText(userName != null ? userName : "Usuário");
+                    }
+                });
+            } catch (Exception e) {
+                // Log do erro mas não crasha a aplicação
+                e.printStackTrace();
+                runOnUiThread(() -> {
+                    if (!isFinishing()) {
+                        txtNomeUsuario.setText("Usuário");
+                    }
+                });
             }
         });
     }
@@ -124,5 +149,14 @@ public class MenuPrincipalActivity extends AppCompatActivity {
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(intent);
         finish();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        // Shutdown do executor para evitar memory leaks
+        if (!executorService.isShutdown()) {
+            executorService.shutdown();
+        }
     }
 }

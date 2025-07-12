@@ -4,13 +4,13 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <data>
-         <variable name="viewModel" type="com.ufrj.escalaiv2.viewmodel.RelatoriosVM" />
+        <variable name="viewModel" type="com.ufrj.escalaiv2.viewmodel.RelatoriosVM" />
     </data>
 
     <androidx.coordinatorlayout.widget.CoordinatorLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:context=".ui.RelatoriosFragment"> <!-- Ajuste o contexto se necessário -->
+        tools:context=".ui.RelatoriosFragment">
 
         <com.google.android.material.appbar.AppBarLayout
             android:id="@+id/appBarLayout"
@@ -22,7 +22,7 @@
                 style="@style/Widget.Material3.Toolbar.OnSurface"
                 android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize"
-                app:title="Relatórios" /> <!-- Considere usar @string/titulo_relatorios -->
+                app:title="Relatórios" />
 
         </com.google.android.material.appbar.AppBarLayout>
 
@@ -63,6 +63,19 @@
                             android:layout_height="200dp"
                             android:layout_marginTop="8dp" />
 
+                        <TextView
+                            android:id="@+id/tv_no_data_agua"
+                            android:layout_width="match_parent"
+                            android:layout_height="200dp"
+                            android:layout_marginTop="8dp"
+                            android:text="Não foram encontrados dados dos últimos 7 dias"
+                            android:textAlignment="center"
+                            android:gravity="center"
+                            android:textColor="?attr/colorOnSurfaceVariant"
+                            android:textSize="14sp"
+                            android:visibility="gone"
+                            tools:visibility="visible" />
+
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
 
@@ -92,6 +105,19 @@
                             android:layout_height="200dp"
                             android:layout_marginTop="8dp" />
 
+                        <TextView
+                            android:id="@+id/tv_no_data_sono"
+                            android:layout_width="match_parent"
+                            android:layout_height="200dp"
+                            android:layout_marginTop="8dp"
+                            android:text="Não foram encontrados dados dos últimos 7 dias"
+                            android:textAlignment="center"
+                            android:gravity="center"
+                            android:textColor="?attr/colorOnSurfaceVariant"
+                            android:textSize="14sp"
+                            android:visibility="gone"
+                            tools:visibility="visible" />
+
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
 
@@ -117,6 +143,7 @@
 
                         <!-- Cabeçalho da Tabela -->
                         <LinearLayout
+                            android:id="@+id/header_dores"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:orientation="horizontal"
@@ -180,6 +207,19 @@
                             tools:listitem="@layout/item_pain_report"
                             tools:itemCount="3" />
 
+                        <TextView
+                            android:id="@+id/tv_no_data_dores"
+                            android:layout_width="match_parent"
+                            android:layout_height="120dp"
+                            android:layout_marginTop="8dp"
+                            android:text="Não foram encontrados dados dos últimos 7 dias"
+                            android:textAlignment="center"
+                            android:gravity="center"
+                            android:textColor="?attr/colorOnSurfaceVariant"
+                            android:textSize="14sp"
+                            android:visibility="gone"
+                            tools:visibility="visible" />
+
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
 
@@ -209,6 +249,19 @@
                             android:layout_height="200dp"
                             android:layout_marginTop="8dp" />
 
+                        <TextView
+                            android:id="@+id/tv_no_data_treino"
+                            android:layout_width="match_parent"
+                            android:layout_height="200dp"
+                            android:layout_marginTop="8dp"
+                            android:text="Não foram encontrados dados dos últimos 7 dias"
+                            android:textAlignment="center"
+                            android:gravity="center"
+                            android:textColor="?attr/colorOnSurfaceVariant"
+                            android:textSize="14sp"
+                            android:visibility="gone"
+                            tools:visibility="visible" />
+
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
 
@@ -237,6 +290,19 @@
                             android:layout_width="match_parent"
                             android:layout_height="200dp"
                             android:layout_marginTop="8dp" />
+
+                        <TextView
+                            android:id="@+id/tv_no_data_humor"
+                            android:layout_width="match_parent"
+                            android:layout_height="200dp"
+                            android:layout_marginTop="8dp"
+                            android:text="Não foram encontrados dados dos últimos 7 dias"
+                            android:textAlignment="center"
+                            android:gravity="center"
+                            android:textColor="?attr/colorOnSurfaceVariant"
+                            android:textSize="14sp"
+                            android:visibility="gone"
+                            tools:visibility="visible" />
 
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>

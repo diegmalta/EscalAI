@@ -1,0 +1,567 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+        <variable
+            name="viewModel"
+            type="com.ufrj.escalaiv2.viewmodel.LesaoVM" />
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_gravity="center"
+        tools:context="com.ufrj.escalaiv2.activity.LesaoActivity"
+        android:orientation="vertical">
+
+        <com.google.android.material.appbar.AppBarLayout
+            android:id="@+id/topAppBar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="top"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent">
+
+            <com.google.android.material.appbar.MaterialToolbar
+                android:id="@+id/toolbar"
+                android:layout_width="match_parent"
+                android:layout_height="?attr/actionBarSize"
+                android:background="@color/md_theme_light_primaryContainer"
+                app:title="Registro de Lesão"
+                app:navigationIcon="@drawable/ic_arrow_back"/>
+        </com.google.android.material.appbar.AppBarLayout>
+
+        <TextView
+            android:id="@+id/titleText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Informações sobre sua lesão"
+            android:textSize="24sp"
+            android:textStyle="bold"
+            android:textColor="?attr/colorOnSurface"
+            android:gravity="center"
+            android:layout_marginTop="16dp"
+            android:layout_marginHorizontal="16dp"
+            app:layout_constraintTop_toBottomOf="@id/topAppBar"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"/>
+
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="16dp"
+            app:layout_constraintTop_toBottomOf="@id/titleText"
+            app:layout_constraintBottom_toTopOf="@id/saveButton">
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="16dp">
+
+                <!-- Seção: Área da Lesão -->
+                <TextView
+                    android:id="@+id/secaoAreaLesao"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Área da Lesão"
+                    android:textSize="20sp"
+                    android:textStyle="bold"
+                    android:textColor="?attr/colorPrimary"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"/>
+
+                <!-- Área Dropdown -->
+                <TextView
+                    android:id="@+id/areaLabel"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Área da lesão"
+                    android:textSize="18sp"
+                    android:textColor="?attr/colorOnSurface"
+                    android:layout_marginTop="16dp"
+                    app:layout_constraintTop_toBottomOf="@id/secaoAreaLesao"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"/>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/areaDropdownLayout"
+                    style="@style/Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:hint="Selecione a área"
+                    app:layout_constraintTop_toBottomOf="@id/areaLabel"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent">
+
+                    <AutoCompleteTextView
+                        android:id="@+id/areaDropdown"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="none"
+                        android:text="@{viewModel.selectedAreaText}"/>
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <!-- Subárea Dropdown -->
+                <TextView
+                    android:id="@+id/subareaLabel"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Membro da lesão"
+                    android:textSize="18sp"
+                    android:textColor="?attr/colorOnSurface"
+                    android:layout_marginTop="16dp"
+                    app:layout_constraintTop_toBottomOf="@id/areaDropdownLayout"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"/>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/subareaDropdownLayout"
+                    style="@style/Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:hint="Selecione o membro"
+                    android:enabled="@{viewModel.subareaEnabled}"
+                    app:layout_constraintTop_toBottomOf="@id/subareaLabel"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent">
+
+                    <AutoCompleteTextView
+                        android:id="@+id/subareaDropdown"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="none"
+                        android:text="@{viewModel.selectedSubareaText}"/>
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <!-- Especificação Dropdown -->
+                <TextView
+                    android:id="@+id/especificacaoLabel"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Especifique:"
+                    android:textSize="18sp"
+                    android:textColor="?attr/colorOnSurface"
+                    android:layout_marginTop="16dp"
+                    app:layout_constraintTop_toBottomOf="@id/subareaDropdownLayout"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"/>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/especificacaoDropdownLayout"
+                    style="@style/Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:hint="Selecione"
+                    android:enabled="@{viewModel.especificacaoEnabled}"
+                    app:layout_constraintTop_toBottomOf="@id/especificacaoLabel"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent">
+
+                    <AutoCompleteTextView
+                        android:id="@+id/especificacaoDropdown"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="none"
+                        android:text="@{viewModel.selectedEspecificacaoText}"/>
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <!-- Seção: Dados do Usuário -->
+                <TextView
+                    android:id="@+id/secaoDadosUsuario"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Dados do Usuário"
+                    android:textSize="20sp"
+                    android:textStyle="bold"
+                    android:textColor="?attr/colorPrimary"
+                    android:layout_marginTop="24dp"
+                    app:layout_constraintTop_toBottomOf="@id/especificacaoDropdownLayout"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"/>
+
+                <!-- Massa -->
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/massaInputLayout"
+                    style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:layout_marginEnd="8dp"
+                    android:hint="Massa (kg)"
+                    app:layout_constraintTop_toBottomOf="@id/secaoDadosUsuario"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toStartOf="@id/alturaInputLayout">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/massaInput"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="numberDecimal"
+                        android:text="@{String.valueOf(viewModel.massa)}"/>
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <!-- Altura -->
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/alturaInputLayout"
+                    style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:layout_marginStart="8dp"
+                    android:hint="Altura (cm)"
+                    app:layout_constraintTop_toBottomOf="@id/secaoDadosUsuario"
+                    app:layout_constraintStart_toEndOf="@id/massaInputLayout"
+                    app:layout_constraintEnd_toEndOf="parent">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/alturaInput"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="number"
+                        android:text="@{String.valueOf(viewModel.altura)}"/>
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <!-- Grau de Escalada -->
+                <TextView
+                    android:id="@+id/grauEscaladaLabel"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Grau de Escalada Brasileiro"
+                    android:textSize="18sp"
+                    android:textColor="?attr/colorOnSurface"
+                    android:layout_marginTop="16dp"
+                    app:layout_constraintTop_toBottomOf="@id/massaInputLayout"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"/>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/grauEscaladaDropdownLayout"
+                    style="@style/Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:hint="Selecione o grau"
+                    app:layout_constraintTop_toBottomOf="@id/grauEscaladaLabel"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent">
+
+                    <AutoCompleteTextView
+                        android:id="@+id/grauEscaladaDropdown"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="none"
+                        android:text="@{viewModel.grauEscaladaText}"/>
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <!-- Seção: Prática de Escalada -->
+                <TextView
+                    android:id="@+id/secaoPraticaEscalada"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Prática de Escalada"
+                    android:textSize="20sp"
+                    android:textStyle="bold"
+                    android:textColor="?attr/colorPrimary"
+                    android:layout_marginTop="24dp"
+                    app:layout_constraintTop_toBottomOf="@id/grauEscaladaDropdownLayout"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"/>
+
+                <!-- Tempo de Prática -->
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/tempoPraticaInputLayout"
+                    style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:hint="Há quanto tempo pratica escalada (meses)"
+                    app:layout_constraintTop_toBottomOf="@id/secaoPraticaEscalada"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/tempoPraticaInput"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="number"
+                        android:text="@{String.valueOf(viewModel.tempoPraticaMeses)}"/>
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <!-- Frequência Semanal -->
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/frequenciaInputLayout"
+                    style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:layout_marginEnd="8dp"
+                    android:hint="Frequência semanal"
+                    app:layout_constraintTop_toBottomOf="@id/tempoPraticaInputLayout"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toStartOf="@id/horasInputLayout">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/frequenciaInput"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="number"
+                        android:text="@{String.valueOf(viewModel.frequenciaSemanal)}"/>
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <!-- Horas Semanais -->
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/horasInputLayout"
+                    style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:layout_marginStart="8dp"
+                    android:hint="Horas semanais"
+                    app:layout_constraintTop_toBottomOf="@id/tempoPraticaInputLayout"
+                    app:layout_constraintStart_toEndOf="@id/frequenciaInputLayout"
+                    app:layout_constraintEnd_toEndOf="parent">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/horasInput"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="number"
+                        android:text="@{String.valueOf(viewModel.horasSemanais)}"/>
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <!-- Lesões Prévias -->
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/lesoesPreviasInputLayout"
+                    style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:hint="Quantas lesões já teve"
+                    app:layout_constraintTop_toBottomOf="@id/frequenciaInputLayout"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/lesoesPreviasInput"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="number"
+                        android:text="@{String.valueOf(viewModel.lesoesPrevias)}"/>
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <!-- Seção: Informações da Lesão -->
+                <TextView
+                    android:id="@+id/secaoInfoLesao"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Informações da Lesão"
+                    android:textSize="20sp"
+                    android:textStyle="bold"
+                    android:textColor="?attr/colorPrimary"
+                    android:layout_marginTop="24dp"
+                    app:layout_constraintTop_toBottomOf="@id/lesoesPreviasInputLayout"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"/>
+
+                <!-- Reincidência -->
+                <com.google.android.material.switchmaterial.SwitchMaterial
+                    android:id="@+id/reincidenciaSwitch"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Já teve lesão neste mesmo local (reincidência)"
+                    android:textSize="16sp"
+                    android:layout_marginTop="16dp"
+                    android:checked="@{viewModel.reincidencia}"
+                    app:layout_constraintTop_toBottomOf="@id/secaoInfoLesao"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"/>
+
+                <!-- Buscou Atendimento -->
+                <com.google.android.material.switchmaterial.SwitchMaterial
+                    android:id="@+id/buscouAtendimentoSwitch"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Buscou atendimento médico"
+                    android:textSize="16sp"
+                    android:layout_marginTop="16dp"
+                    android:checked="@{viewModel.buscouAtendimento}"
+                    app:layout_constraintTop_toBottomOf="@id/reincidenciaSwitch"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"/>
+
+                <!-- Profissional de Atendimento -->
+                <TextView
+                    android:id="@+id/profAtendimentoLabel"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Qual profissional atendeu"
+                    android:textSize="18sp"
+                    android:textColor="?attr/colorOnSurface"
+                    android:layout_marginTop="16dp"
+                    android:enabled="@{viewModel.atendimentoFieldsEnabled}"
+                    android:alpha="@{viewModel.atendimentoFieldsEnabled ? 1.0f : 0.5f}"
+                    app:layout_constraintTop_toBottomOf="@id/buscouAtendimentoSwitch"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"/>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/profAtendimentoDropdownLayout"
+                    style="@style/Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:hint="Selecione o profissional"
+                    android:enabled="@{viewModel.atendimentoFieldsEnabled}"
+                    app:layout_constraintTop_toBottomOf="@id/profAtendimentoLabel"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent">
+
+                    <AutoCompleteTextView
+                        android:id="@+id/profAtendimentoDropdown"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="none"
+                        android:text="@{viewModel.profissionalAtendimentoText}"/>
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <!-- Diagnóstico -->
+                <TextView
+                    android:id="@+id/diagnosticoLabel"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Qual o diagnóstico"
+                    android:textSize="18sp"
+                    android:textColor="?attr/colorOnSurface"
+                    android:layout_marginTop="16dp"
+                    android:enabled="@{viewModel.atendimentoFieldsEnabled}"
+                    android:alpha="@{viewModel.atendimentoFieldsEnabled ? 1.0f : 0.5f}"
+                    app:layout_constraintTop_toBottomOf="@id/profAtendimentoDropdownLayout"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"/>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/diagnosticoDropdownLayout"
+                    style="@style/Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:hint="Selecione o diagnóstico"
+                    android:enabled="@{viewModel.atendimentoFieldsEnabled}"
+                    app:layout_constraintTop_toBottomOf="@id/diagnosticoLabel"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent">
+
+                    <AutoCompleteTextView
+                        android:id="@+id/diagnosticoDropdown"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="none"
+                        android:text="@{viewModel.diagnosticoText}"/>
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <!-- Profissional de Tratamento -->
+                <TextView
+                    android:id="@+id/profTratamentoLabel"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Qual profissional está tratando"
+                    android:textSize="18sp"
+                    android:textColor="?attr/colorOnSurface"
+                    android:layout_marginTop="16dp"
+                    android:enabled="@{viewModel.atendimentoFieldsEnabled}"
+                    android:alpha="@{viewModel.atendimentoFieldsEnabled ? 1.0f : 0.5f}"
+                    app:layout_constraintTop_toBottomOf="@id/diagnosticoDropdownLayout"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"/>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/profTratamentoDropdownLayout"
+                    style="@style/Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:hint="Selecione o profissional"
+                    android:enabled="@{viewModel.atendimentoFieldsEnabled}"
+                    app:layout_constraintTop_toBottomOf="@id/profTratamentoLabel"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent">
+
+                    <AutoCompleteTextView
+                        android:id="@+id/profTratamentoDropdown"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="none"
+                        android:text="@{viewModel.profissionalTratamentoText}"/>
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <!-- Modalidade Praticada -->
+                <TextView
+                    android:id="@+id/modalidadeLabel"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Modalidade praticada durante a lesão"
+                    android:textSize="18sp"
+                    android:textColor="?attr/colorOnSurface"
+                    android:layout_marginTop="16dp"
+                    android:enabled="@{viewModel.atendimentoFieldsEnabled}"
+                    android:alpha="@{viewModel.atendimentoFieldsEnabled ? 1.0f : 0.5f}"
+                    app:layout_constraintTop_toBottomOf="@id/profTratamentoDropdownLayout"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"/>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/modalidadeDropdownLayout"
+                    style="@style/Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:hint="Selecione a modalidade"
+                    android:enabled="@{viewModel.atendimentoFieldsEnabled}"
+                    app:layout_constraintTop_toBottomOf="@id/modalidadeLabel"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent">
+
+                    <AutoCompleteTextView
+                        android:id="@+id/modalidadeDropdown"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="none"
+                        android:text="@{viewModel.modalidadePraticadaText}"/>
+                </com.google.android.material.textfield.TextInputLayout>
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+        </ScrollView>
+
+        <!-- Botão para salvar -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/saveButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Salvar"
+            android:layout_marginHorizontal="16dp"
+            android:layout_marginBottom="16dp"
+            android:padding="12dp"
+            app:cornerRadius="8dp"
+            app:layout_constraintBottom_toBottomOf="parent"/>
+
+        <!-- Loading Indicator -->
+        <ProgressBar
+            android:id="@+id/loadingIndicator"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="@{viewModel.isLoading ? android.view.View.VISIBLE : android.view.View.GONE}"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"/>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>

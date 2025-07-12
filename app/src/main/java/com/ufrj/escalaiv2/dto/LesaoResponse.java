@@ -1,6 +1,7 @@
 package com.ufrj.escalaiv2.dto;
 
 import com.google.gson.annotations.SerializedName;
+import java.util.List;
 
 public class LesaoResponse {
     @SerializedName("success")
@@ -11,6 +12,9 @@ public class LesaoResponse {
     
     @SerializedName("data")
     private LesaoData data;
+    
+    @SerializedName("lesoes")
+    private List<LesaoData> lesoes;
     
     public static class LesaoData {
         @SerializedName("id")
@@ -258,5 +262,13 @@ public class LesaoResponse {
 
     public void setData(LesaoData data) {
         this.data = data;
+    }
+
+    public List<LesaoData> getLesoes() {
+        return lesoes;
+    }
+
+    public void setLesoes(List<LesaoData> lesoes) {
+        this.lesoes = lesoes;
     }
 }

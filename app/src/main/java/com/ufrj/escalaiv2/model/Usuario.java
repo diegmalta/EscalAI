@@ -27,8 +27,6 @@ public class Usuario {
     private String sexo;
     @ColumnInfo(name = "gender")
     private String gender;
-    @ColumnInfo(name = "password")
-    private String senha;
 
     // Informacoes complementares
     @ColumnInfo(name = "weight")
@@ -100,14 +98,6 @@ public class Usuario {
 
     public void setEmail(String email) {
         this.email = email;
-    }
-
-    public String getSenha() {
-        return senha;
-    }
-
-    public void setSenha(String senha) {
-        this.senha = senha;
     }
 
     public String getNomeCompleto() {

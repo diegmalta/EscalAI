@@ -3,6 +3,7 @@ package com.ufrj.escalaiv2.activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ProgressBar;
@@ -16,7 +17,7 @@ import androidx.lifecycle.ViewModelProvider;
 import com.ufrj.escalaiv2.R;
 import com.ufrj.escalaiv2.dto.ApiResponse;
 import com.ufrj.escalaiv2.dto.LoginResponse;
-import com.ufrj.escalaiv2.viewmodel.LoginViewModel;
+import com.ufrj.escalaiv2.viewmodel.LoginVM;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -24,15 +25,18 @@ public class MainActivity extends AppCompatActivity {
     private Button button_login, button_cadastro, recuperarSenhaButton;
     private TextView Resultado;
     private ProgressBar progressBar;
-    private LoginViewModel viewModel;
+    private LoginVM viewModel;
 
     @Override
     protected void onCreate(Bundle SavedInstanceState) {
         super.onCreate(SavedInstanceState);
         setContentView(R.layout.activity_main);
 
+        // Configurações para evitar problemas com IME
+        getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
+
         // Inicializa o ViewModel
-        viewModel = new ViewModelProvider(this).get(LoginViewModel.class);
+        viewModel = new ViewModelProvider(this).get(LoginVM.class);
 
         // Verifica se já está autenticado
         if (viewModel.isAuthenticated()) {
@@ -53,9 +57,30 @@ public class MainActivity extends AppCompatActivity {
         button_cadastro = findViewById(R.id.button_cadastro);
         recuperarSenhaButton = findViewById(R.id.recuperarSenhaButton);
         Resultado = findViewById(R.id.Resultado);
+        progressBar = findViewById(R.id.progressBar);
 
-        // Adicione um ProgressBar ao seu layout e inicialize aqui
-        // progressBar = findViewById(R.id.progressBar);
+        // Configurações adicionais para os EditText
+        setupEditTextConfigurations();
+    }
+
+    private void setupEditTextConfigurations() {
+        // Configurações para evitar problemas com IME
+        editEmail.setImeOptions(android.view.inputmethod.EditorInfo.IME_ACTION_NEXT);
+        editPassword.setImeOptions(android.view.inputmethod.EditorInfo.IME_ACTION_DONE);
+
+        // Configurar navegação entre campos
+        editEmail.setNextFocusDownId(R.id.editPassword);
+        editPassword.setNextFocusDownId(R.id.button_login);
+
+        // Configurar listeners para melhor controle do IME
+        editPassword.setOnEditorActionListener((v, actionId, event) -> {
+            if (actionId == android.view.inputmethod.EditorInfo.IME_ACTION_DONE) {
+                hideKeyboard();
+                login();
+                return true;
+            }
+            return false;
+        });
     }
 
     private void setupObservers() {
@@ -65,6 +90,8 @@ public class MainActivity extends AppCompatActivity {
                 progressBar.setVisibility(isLoading ? View.VISIBLE : View.GONE);
             }
             button_login.setEnabled(!isLoading);
+            button_cadastro.setEnabled(!isLoading);
+            recuperarSenhaButton.setEnabled(!isLoading);
         });
 
         // Observa mensagens de erro
@@ -79,14 +106,31 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void setupListeners() {
-        button_login.setOnClickListener(v -> login());
+        button_login.setOnClickListener(v -> {
+            hideKeyboard();
+            login();
+        });
 
-        button_cadastro.setOnClickListener(v -> cadastrar());
+        button_cadastro.setOnClickListener(v -> {
+            hideKeyboard();
+            cadastrar();
+        });
 
         recuperarSenhaButton.setOnClickListener(v -> {
+            hideKeyboard();
             // Implementação futura para recuperação de senha
             Toast.makeText(MainActivity.this, "Funcionalidade em desenvolvimento", Toast.LENGTH_SHORT).show();
         });
+    }
+
+    private void hideKeyboard() {
+        android.view.inputmethod.InputMethodManager imm = (android.view.inputmethod.InputMethodManager) getSystemService(android.content.Context.INPUT_METHOD_SERVICE);
+        if (imm != null) {
+            View currentFocus = getCurrentFocus();
+            if (currentFocus != null) {
+                imm.hideSoftInputFromWindow(currentFocus.getWindowToken(), 0);
+            }
+        }
     }
 
     private void login() {
@@ -97,19 +141,28 @@ public class MainActivity extends AppCompatActivity {
         Resultado.setText("");
         Resultado.setVisibility(View.GONE);
 
+        // Define estado de carregamento
+        viewModel.setLoading(true);
+
         // Chama o ViewModel para fazer login via API
-        viewModel.login(email, senha).observe(this, this::handleLoginResponse);
+        viewModel.login(email, senha).observe(this, response -> {
+            viewModel.setLoading(false);
+            handleLoginResponse(response);
+        });
     }
 
     private void handleLoginResponse(ApiResponse<LoginResponse> response) {
-        if (response.isSuccess()) {
+        if (response != null && response.isSuccess()) {
             Resultado.setText("Login efetuado com sucesso");
             Resultado.setVisibility(View.VISIBLE);
-            navigateToMainScreen();
+            // Pequeno delay para mostrar a mensagem antes de navegar
+            editEmail.postDelayed(this::navigateToMainScreen, 500);
         } else {
-            Resultado.setText(response.getMessage() != null ?
-                    response.getMessage() : "Erro ao fazer login");
+            String errorMsg = response != null && response.getMessage() != null ?
+                    response.getMessage() : "Erro ao fazer login";
+            Resultado.setText(errorMsg);
             Resultado.setVisibility(View.VISIBLE);
+            viewModel.setErrorMessage(errorMsg);
             limpar();
         }
     }
@@ -138,5 +191,19 @@ public class MainActivity extends AppCompatActivity {
     private void limpar() {
         editPassword.setText("");
         editEmail.requestFocus();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        // Esconde o teclado quando a activity é pausada
+        hideKeyboard();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        // Limpa referências para evitar memory leaks
+        viewModel = null;
     }
 }

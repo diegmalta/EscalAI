@@ -111,47 +111,52 @@ public class RelatoriosFragment extends Fragment {
         chart.invalidate();
     }
 
+    private void toggleViews(View dataView, View emptyView, boolean hasData) {
+        dataView.setVisibility(hasData ? View.VISIBLE : View.GONE);
+        emptyView.setVisibility(hasData ? View.GONE : View.VISIBLE);
+    }
+
     private void setupObservers() {
-        viewModel.getWaterConsumptionLast7Days().observe(getViewLifecycleOwner(), waterDataMap -> {
-            if (waterDataMap != null && !waterDataMap.isEmpty()) {
-                updateLineChart(binding.chartAgua, waterDataMap, "Água Consumida", Color.BLUE);
-            }
-        });
 
-        viewModel.getSleepDurationLast7Days().observe(getViewLifecycleOwner(), sleepDataMap -> {
-            if (sleepDataMap != null && !sleepDataMap.isEmpty()) {
-                updateLineChart(binding.chartSono, sleepDataMap, "Duração do Sono", Color.MAGENTA);
-            }
-        });
+        viewModel.getWaterConsumptionLast7Days()
+                .observe(getViewLifecycleOwner(), map -> {
+                    boolean hasData = map != null && !map.isEmpty();
+                    toggleViews(binding.chartAgua, binding.tvNoDataAgua, hasData);
+                    if (hasData) updateLineChart(binding.chartAgua, map,
+                            "Água Consumida", Color.BLUE);
+                });
 
-        // Observador para a nova tabela de dores
-        viewModel.getPainReportData().observe(getViewLifecycleOwner(), painReportItems -> {
-            if (painReportItems != null) {
-                painReportAdapter.submitList(painReportItems);
-                // Opcional: Mostrar/ocultar o card se não houver dados
-                binding.cardDor.setVisibility(painReportItems.isEmpty() ? View.GONE : View.VISIBLE);
-            }
-        });
+        viewModel.getSleepDurationLast7Days()
+                .observe(getViewLifecycleOwner(), map -> {
+                    boolean hasData = map != null && !map.isEmpty();
+                    toggleViews(binding.chartSono, binding.tvNoDataSono, hasData);
+                    if (hasData) updateLineChart(binding.chartSono, map,
+                            "Duração do Sono", Color.MAGENTA);
+                });
 
-        /* // Observador antigo do gráfico de dor - REMOVIDO
-        viewModel.getPainIntensityLast7Days().observe(getViewLifecycleOwner(), painDataMap -> {
-            if (painDataMap != null && !painDataMap.isEmpty()) {
-                updateLineChart(binding.chartDor, painDataMap, "Intensidade da Dor", Color.RED);
-            }
-        });
-        */
+        viewModel.getTrainingDurationLast7Days()
+                .observe(getViewLifecycleOwner(), map -> {
+                    boolean hasData = map != null && !map.isEmpty();
+                    toggleViews(binding.chartTreino, binding.tvNoDataTreino, hasData);
+                    if (hasData) updateBarChart(binding.chartTreino, map,
+                            "Duração do Treino", Color.GREEN);
+                });
 
-        viewModel.getTrainingDurationLast7Days().observe(getViewLifecycleOwner(), trainingDataMap -> {
-            if (trainingDataMap != null && !trainingDataMap.isEmpty()) {
-                updateBarChart(binding.chartTreino, trainingDataMap, "Duração do Treino", Color.GREEN);
-            }
-        });
+        viewModel.getMoodLevelsLast7Days()
+                .observe(getViewLifecycleOwner(), map -> {
+                    boolean hasData = map != null && !map.isEmpty();
+                    toggleViews(binding.chartHumor, binding.tvNoDataHumor, hasData);
+                    if (hasData) updateMoodChart(binding.chartHumor, map);
+                });
 
-        viewModel.getMoodLevelsLast7Days().observe(getViewLifecycleOwner(), moodDataMap -> {
-            if (moodDataMap != null && !moodDataMap.isEmpty()) {
-                updateMoodChart(binding.chartHumor, moodDataMap);
-            }
-        });
+        viewModel.getPainReportData()
+                .observe(getViewLifecycleOwner(), list -> {
+                    boolean hasData = list != null && !list.isEmpty();
+                    painReportAdapter.submitList(list);
+                    // tabela e cabeçalho
+                    toggleViews(binding.recyclerViewDores, binding.tvNoDataDores, hasData);
+                    binding.headerDores.setVisibility(hasData ? View.VISIBLE : View.GONE);
+                });
     }
 
     // Métodos updateLineChart, updateBarChart, updateMoodChart permanecem os mesmos

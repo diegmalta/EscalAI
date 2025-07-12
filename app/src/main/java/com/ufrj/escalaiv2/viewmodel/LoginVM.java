@@ -13,13 +13,13 @@ import com.ufrj.escalaiv2.repository.AuthRepository;
 /**
  * ViewModel para a tela de login, gerenciando a autenticação via API.
  */
-public class LoginViewModel extends AndroidViewModel {
+public class LoginVM extends AndroidViewModel {
 
     private final AuthRepository authRepository;
     private final MutableLiveData<Boolean> isLoading = new MutableLiveData<>(false);
     private final MutableLiveData<String> errorMessage = new MutableLiveData<>();
 
-    public LoginViewModel(@NonNull Application application) {
+    public LoginVM(@NonNull Application application) {
         super(application);
         // Passa o contexto da aplicação para o AuthRepository para permitir o uso do EncryptedSharedPreferences
         authRepository = new AuthRepository(application);
@@ -60,17 +60,7 @@ public class LoginViewModel extends AndroidViewModel {
         }
 
         // Chama o repositório para fazer login
-        LiveData<ApiResponse<LoginResponse>> result = authRepository.login(email, password);
-
-        // Observa o resultado para atualizar o estado de carregamento
-        result.observeForever(response -> {
-            isLoading.setValue(false);
-            if (response != null && !response.isSuccess()) {
-                errorMessage.setValue(response.getMessage());
-            }
-        });
-
-        return result;
+        return authRepository.login(email, password);
     }
 
     /**
@@ -100,5 +90,19 @@ public class LoginViewModel extends AndroidViewModel {
      */
     public LiveData<String> getErrorMessage() {
         return errorMessage;
+    }
+
+    /**
+     * Atualiza o estado de carregamento.
+     */
+    public void setLoading(boolean loading) {
+        isLoading.setValue(loading);
+    }
+
+    /**
+     * Define a mensagem de erro.
+     */
+    public void setErrorMessage(String message) {
+        errorMessage.setValue(message);
     }
 }

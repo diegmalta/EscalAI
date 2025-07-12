@@ -5,6 +5,7 @@
     <uses-permission android:name="android.permission.INTERNET" />
 
     <application
+        android:name=".EscalAIApplication"
         android:usesCleartextTraffic="true"
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
@@ -29,7 +30,9 @@
             android:exported="true"/>
         <activity
             android:name="com.ufrj.escalaiv2.activity.MainActivity"
-            android:exported="true">
+            android:exported="true"
+            android:windowSoftInputMode="adjustResize"
+            android:launchMode="singleTop">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -45,6 +48,10 @@
         <activity android:name="com.ufrj.escalaiv2.activity.TreinoActivity"
             android:exported="true" />
         <activity android:name="com.ufrj.escalaiv2.activity.LesaoActivity"
+            android:exported="true" />
+        <activity android:name="com.ufrj.escalaiv2.activity.LesaoListActivity"
+            android:exported="true" />
+        <activity android:name="com.ufrj.escalaiv2.activity.RegistrarLesaoActivity"
             android:exported="true" />
         <activity android:name="com.ufrj.escalaiv2.activity.TermsOfUseActivity"
             android:exported="true" />

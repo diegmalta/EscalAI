@@ -11,7 +11,7 @@ import java.util.concurrent.TimeUnit;
  */
 public class RetrofitClient {
 
-    private static final String BASE_URL = "https://escalai.free.beeceptor.com/";
+    private static final String BASE_URL = "http://192.168.0.21:8000/";
 
     private static Retrofit retrofitInstance = null;
     private static AuthApiService authApiServiceInstance = null;

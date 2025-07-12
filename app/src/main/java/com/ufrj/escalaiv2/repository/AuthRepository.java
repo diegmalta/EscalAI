@@ -19,6 +19,8 @@ import com.ufrj.escalaiv2.network.RetrofitClient;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.util.Date;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -41,10 +43,12 @@ public class AuthRepository {
     private Context context;
     private EncryptedSharedPreferences encryptedPrefs;
     private AppDatabase appDatabase;
+    private final ExecutorService executorService;
 
     // Construtor sem contexto (para compatibilidade com código existente)
     public AuthRepository() {
         this.authApiService = RetrofitClient.getAuthApiService();
+        this.executorService = Executors.newSingleThreadExecutor();
     }
 
     // Construtor com contexto (para funcionalidades de EncryptedSharedPreferences e Room)
@@ -52,6 +56,7 @@ public class AuthRepository {
         this.context = context;
         this.authApiService = RetrofitClient.getAuthApiService();
         this.appDatabase = AppDatabase.getInstance(context);
+        this.executorService = Executors.newSingleThreadExecutor();
         initEncryptedPrefs();
     }
 
@@ -88,9 +93,9 @@ public class AuthRepository {
      * @param password A senha do usuário.
      * @return LiveData contendo a resposta da API (sucesso/falha e mensagem).
      */
-    public LiveData<ApiResponse<Void>> registerUser(String email, String nome, String sobrenome, String dataNascimento, String password) {
+    public LiveData<ApiResponse<Void>> registerUser(String email, String nome, String sobrenome, String celular, String dataNascimento, String password) {
         MutableLiveData<ApiResponse<Void>> result = new MutableLiveData<>();
-        RegisterRequest request = new RegisterRequest(email, nome, sobrenome, dataNascimento, password);
+        RegisterRequest request = new RegisterRequest(email, nome, sobrenome, celular, dataNascimento, password);
 
         authApiService.registerUser(request).enqueue(new Callback<ApiResponse<Void>>() {
             @Override
@@ -152,12 +157,12 @@ public class AuthRepository {
                     // Login bem-sucedido
                     ApiResponse<LoginResponse> apiResponse = response.body();
 
-                    if (apiResponse.isSuccess() && apiResponse.getData() != null) {
-                        // Salva o token e a data de expiração se o contexto estiver disponível
+                    // Corrige caso o campo 'success' não esteja vindo como true do servidor
+                    apiResponse.setSuccess(true);
+
+                    if (apiResponse.getData() != null) {
                         if (context != null) {
                             saveAuthToken(apiResponse.getData().getToken(), apiResponse.getData().getExpiresIn());
-
-                            // Salva os dados do usuário no banco de dados local
                             saveUserDataToRoom(apiResponse.getData().getUser());
                         }
                     }
@@ -211,7 +216,7 @@ public class AuthRepository {
             return;
         }
 
-        new Thread(() -> {
+        executorService.execute(() -> {
             try {
                 // Verifica se o usuário já existe no banco
                 Usuario existingUser = appDatabase.usuarioDao().getUserById((int) userData.getId());
@@ -248,7 +253,7 @@ public class AuthRepository {
             } catch (Exception e) {
                 Log.e(TAG, "Erro ao salvar dados do usuário no banco local", e);
             }
-        }).start();
+        });
     }
 
     /**

@@ -206,7 +206,7 @@ public class CadastroUsuarioActivity extends AppCompatActivity {
         String nome = nomeEdit.getText().toString().trim();
         String sobrenome = sobrenomeEdit.getText().toString().trim();
         String dataNascimentoStr = dataNascimentoEdit.getText().toString().trim();
-        //String celular = celularEdit.getText().toString().trim();
+        String celular = celularEdit.getText().toString().trim();
         String senha = senhaEdit.getText().toString();
         String confirmaSenha = confirmaSenhaEdit.getText().toString();
         boolean aceitouTermos = agreeToTermsCheckBox.isChecked();
@@ -214,7 +214,7 @@ public class CadastroUsuarioActivity extends AppCompatActivity {
         errosCadastro.setVisibility(View.GONE);
         errosCadastro.setText("");
 
-        LiveData<ApiResponse<Void>> apiCallLiveData = viewModel.cadastrarUsuario(email, nome, sobrenome, dataNascimentoStr, senha, confirmaSenha, aceitouTermos);
+        LiveData<ApiResponse<Void>> apiCallLiveData = viewModel.cadastrarUsuario(email, nome, sobrenome, celular, dataNascimentoStr, senha, confirmaSenha, aceitouTermos);
 
         // Este LiveData será ativado apenas uma vez com o resultado da chamada
         apiCallLiveData.observe(this, apiResponse -> {

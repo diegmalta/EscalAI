@@ -43,8 +43,8 @@ public interface UsuarioDao {
     @Query("SELECT * FROM users")
     LiveData<List<Usuario>> getAllUsuarios();
 
-    @Query("SELECT * FROM users WHERE email = :email AND password = :senha")
-    Usuario selecionaUsuario(String email, String senha);
+    @Query("SELECT * FROM users WHERE email = :email")
+    Usuario selecionaUsuario(String email);
 
     @Query("SELECT name FROM users WHERE id = :userId LIMIT 1")
     String getUserNameById(int userId);
