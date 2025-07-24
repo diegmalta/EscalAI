@@ -17,6 +17,7 @@ import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.navigation.NavigationBarView;
 import com.ufrj.escalaiv2.R;
 import com.ufrj.escalaiv2.model.AppDatabase;
+import com.ufrj.escalaiv2.model.Usuario;
 import com.ufrj.escalaiv2.repository.AuthRepository;
 import com.ufrj.escalaiv2.ui.HomeFragment;
 import com.ufrj.escalaiv2.ui.RelatoriosFragment;
@@ -93,16 +94,33 @@ public class MenuPrincipalActivity extends AppCompatActivity {
         });
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        // Verifica se o usuário está autenticado
+        if (authRepository != null && !authRepository.isAuthenticated()) {
+            Intent intent = new Intent(this, MainActivity.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(intent);
+            finish();
+        }
+    }
+
     private void loadUserName() {
-        int currentUserId = getCurrentUserId();
         AppDatabase db = AppDatabase.getInstance(this);
 
         executorService.execute(() -> {
             try {
-                String userName = db.usuarioDao().getUserNameById(currentUserId);
+                // Busca o primeiro usuário da tabela
+                String userName = null;
+                Usuario usuario = db.usuarioDao().getFirstUser();
+                if (usuario != null) {
+                    userName = usuario.getNome();
+                }
+                final String finalUserName = userName;
                 runOnUiThread(() -> {
                     if (!isFinishing()) {
-                        txtNomeUsuario.setText(userName != null ? userName : "Usuário");
+                        txtNomeUsuario.setText(finalUserName != null ? finalUserName : "Usuário");
                     }
                 });
             } catch (Exception e) {
@@ -126,8 +144,7 @@ public class MenuPrincipalActivity extends AppCompatActivity {
     }
 
     private int getCurrentUserId() {
-        // Implement this method to return the current user's ID
-        return 1; // Substitua pela lógica real
+        return authRepository.getCurrentUserId();
     }
 
     /**

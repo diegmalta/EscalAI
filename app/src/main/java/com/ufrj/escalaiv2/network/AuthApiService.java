@@ -18,7 +18,7 @@ public interface AuthApiService {
     Call<ApiResponse<Void>> registerUser(@Body RegisterRequest registerRequest);
 
     @POST("auth/login")
-    Call<ApiResponse<LoginResponse>> login(@Body LoginRequest request);
+    Call<LoginResponse> login(@Body LoginRequest request);
 
     /*
     // Exemplo de endpoint de verificação de email

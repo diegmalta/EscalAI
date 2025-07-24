@@ -37,6 +37,7 @@ public class AuthRepository {
     private static final String KEY_TOKEN = "auth_token";
     private static final String KEY_LAST_USED = "last_used_timestamp";
     private static final String KEY_EXPIRY = "token_expiry";
+    private static final String KEY_USER_ID = "user_id";
     private static final long THREE_DAYS_MS = 3 * 24 * 60 * 60 * 1000L; // 3 dias em milissegundos
 
     private final AuthApiService authApiService;
@@ -150,22 +151,36 @@ public class AuthRepository {
         MutableLiveData<ApiResponse<LoginResponse>> result = new MutableLiveData<>();
         LoginRequest request = new LoginRequest(email, password);
 
-        authApiService.login(request).enqueue(new Callback<ApiResponse<LoginResponse>>() {
+        authApiService.login(request).enqueue(new Callback<LoginResponse>() {
             @Override
-            public void onResponse(Call<ApiResponse<LoginResponse>> call, Response<ApiResponse<LoginResponse>> response) {
+            public void onResponse(Call<LoginResponse> call, Response<LoginResponse> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     // Login bem-sucedido
-                    ApiResponse<LoginResponse> apiResponse = response.body();
+                    LoginResponse loginResponse = response.body();
 
-                    // Corrige caso o campo 'success' não esteja vindo como true do servidor
-                    apiResponse.setSuccess(true);
+                    Log.d(TAG, "Dados do login recebidos: " + loginResponse);
+                    Log.d(TAG, "Token recebido: " + loginResponse.getToken());
+                    Log.d(TAG, "ExpiresIn: " + loginResponse.getExpiresIn());
 
-                    if (apiResponse.getData() != null) {
-                        if (context != null) {
-                            saveAuthToken(apiResponse.getData().getToken(), apiResponse.getData().getExpiresIn());
-                            saveUserDataToRoom(apiResponse.getData().getUser());
-                        }
+                    long expiresIn = loginResponse.getExpiresIn();
+                    if (expiresIn <= 0) {
+                        Log.w(TAG, "expiresIn inválido (" + expiresIn + "), usando valor padrão de 3600 segundos (1 hora)");
+                        expiresIn = 3600;
                     }
+
+                    if (context != null) {
+                        Log.d(TAG, "Contexto disponível, salvando token...");
+                        saveAuthToken(loginResponse.getToken(), expiresIn);
+                        saveUserDataToRoom(loginResponse.getUser());
+                    } else {
+                        Log.e(TAG, "Contexto é null, não foi possível salvar o token");
+                    }
+
+                    // Criar ApiResponse para manter compatibilidade
+                    ApiResponse<LoginResponse> apiResponse = new ApiResponse<>();
+                    apiResponse.setSuccess(true);
+                    apiResponse.setMessage("Login realizado com sucesso");
+                    apiResponse.setData(loginResponse);
 
                     result.setValue(apiResponse);
                     Log.i(TAG, "Login bem-sucedido");
@@ -192,7 +207,7 @@ public class AuthRepository {
             }
 
             @Override
-            public void onFailure(Call<ApiResponse<LoginResponse>> call, Throwable t) {
+            public void onFailure(Call<LoginResponse> call, Throwable t) {
                 // Falha na comunicação com a API
                 ApiResponse<LoginResponse> failureResponse = new ApiResponse<>();
                 failureResponse.setSuccess(false);
@@ -286,6 +301,8 @@ public class AuthRepository {
         long currentTime = System.currentTimeMillis();
         long expiryTime = currentTime + (expiresIn * 1000); // Converte segundos para milissegundos
 
+        Log.d(TAG, "Salvando token. expiresIn: " + expiresIn + " (segundos), expiryTime: " + expiryTime + " (ms), currentTime: " + currentTime);
+
         encryptedPrefs.edit()
                 .putString(KEY_TOKEN, token)
                 .putLong(KEY_LAST_USED, currentTime)
@@ -293,6 +310,64 @@ public class AuthRepository {
                 .apply();
 
         Log.d(TAG, "Token salvo com sucesso. Expira em: " + new Date(expiryTime));
+        Log.d(TAG, "Token salvo: " + token);
+        Log.d(TAG, "Expira em: " + new Date(expiryTime));
+
+        // Verificar se foi salvo corretamente
+        String savedToken = encryptedPrefs.getString(KEY_TOKEN, null);
+        Log.d(TAG, "Token verificado após salvar: " + savedToken);
+        Log.d(TAG, "=== FIM SAVE AUTH TOKEN DEBUG ===");
+    }
+
+    /**
+     * Verifica se o token existe no armazenamento (independente de expiração).
+     *
+     * @return true se o token existe
+     */
+    public boolean hasToken() {
+        if (encryptedPrefs == null) return false;
+        String token = encryptedPrefs.getString(KEY_TOKEN, null);
+        return token != null;
+    }
+
+    /**
+     * Obtém o token de autenticação armazenado (sem verificar expiração).
+     *
+     * @return O token JWT ou null se não existir
+     */
+    public String getAuthTokenRaw() {
+        if (encryptedPrefs == null) return null;
+        return encryptedPrefs.getString(KEY_TOKEN, null);
+    }
+
+    /**
+     * Obtém o token de autenticação armazenado.
+     *
+     * @return O token JWT ou null se não estiver autenticado
+     */
+    public String getAuthToken() {
+        if (encryptedPrefs == null) {
+            Log.e(TAG, "EncryptedSharedPreferences não inicializado");
+            return null;
+        }
+
+        String token = encryptedPrefs.getString(KEY_TOKEN, null);
+        Log.d(TAG, "Token encontrado: " + (token != null ? "SIM" : "NÃO"));
+
+        if (token == null) {
+            Log.d(TAG, "Token é null");
+            return null;
+        }
+
+        boolean isAuth = isAuthenticated();
+        Log.d(TAG, "isAuthenticated(): " + isAuth);
+
+        if (!isAuth) {
+            Log.d(TAG, "Token existe mas não está autenticado");
+            return null;
+        }
+
+        return token;
     }
 
     /**
@@ -330,6 +405,7 @@ public class AuthRepository {
 
         if (expiredByInactivity || expiredByServer) {
             // Token expirado, limpa os dados de autenticação
+            Log.d(TAG, "Token expirado, realizando logout automático");
             logout();
             return false;
         }
@@ -338,31 +414,77 @@ public class AuthRepository {
     }
 
     /**
-     * Obtém o token de autenticação armazenado.
-     *
-     * @return O token JWT ou null se não estiver autenticado
+     * Retorna o ID do usuário logado (síncrono, use apenas em background thread!)
      */
-    public String getAuthToken() {
-        if (encryptedPrefs == null || !isAuthenticated()) return null;
-        return encryptedPrefs.getString(KEY_TOKEN, null);
+    public int getCurrentUserId() {
+        if (appDatabase == null) {
+            Log.e(TAG, "Banco de dados não inicializado");
+            return -1;
+        }
+        try {
+            Usuario usuario = appDatabase.usuarioDao().getFirstUser();
+            if (usuario != null) {
+                Log.d(TAG, "getCurrentUserId(): " + usuario.getId());
+                return usuario.getId();
+            } else {
+                Log.d(TAG, "getCurrentUserId(): nenhum usuário encontrado");
+                return -1;
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "Erro ao buscar usuário no banco", e);
+            return -1;
+        }
     }
 
-    public int getCurrentUserId(){
-        return 1;
+    /**
+     * Retorna o ID do usuário logado de forma assíncrona (seguro para UI thread)
+     */
+    public void getCurrentUserIdAsync(java.util.function.Consumer<Integer> callback) {
+        if (appDatabase == null) {
+            Log.e(TAG, "Banco de dados não inicializado");
+            callback.accept(-1);
+            return;
+        }
+        executorService.execute(() -> {
+            int userId = -1;
+            try {
+                Usuario usuario = appDatabase.usuarioDao().getFirstUser();
+                if (usuario != null) {
+                    userId = usuario.getId();
+                }
+            } catch (Exception e) {
+                Log.e(TAG, "Erro ao buscar usuário no banco", e);
+            }
+            int finalUserId = userId;
+            new android.os.Handler(android.os.Looper.getMainLooper()).post(() -> callback.accept(finalUserId));
+        });
     }
 
     /**
      * Realiza o logout, removendo o token e dados relacionados.
-     * Não remove os dados do usuário do banco local para permitir uso offline.
+     * Remove os dados do usuário do banco local.
      */
     public void logout() {
         if (encryptedPrefs == null) return;
 
+        // Limpar dados de autenticação
         encryptedPrefs.edit()
                 .remove(KEY_TOKEN)
                 .remove(KEY_LAST_USED)
                 .remove(KEY_EXPIRY)
                 .apply();
+
+        // Limpar dados do usuário do Room
+        if (appDatabase != null) {
+            executorService.execute(() -> {
+                try {
+                    appDatabase.usuarioDao().deleteAllUsers();
+                    Log.d(TAG, "Dados do usuário removidos do Room");
+                } catch (Exception e) {
+                    Log.e(TAG, "Erro ao remover dados do usuário do Room", e);
+                }
+            });
+        }
 
         Log.d(TAG, "Logout realizado com sucesso");
     }

@@ -11,11 +11,12 @@ import java.util.concurrent.TimeUnit;
  */
 public class RetrofitClient {
 
-    private static final String BASE_URL = "http://192.168.0.21:8000/";
+    private static final String BASE_URL = "http://192.168.0.18:8000/";
 
     private static Retrofit retrofitInstance = null;
     private static AuthApiService authApiServiceInstance = null;
     private static LesaoApiService lesaoApiServiceInstance = null;
+    private static AtividadesApiService atividadesApiServiceInstance = null;
 
     private static Retrofit getRetrofitInstance() {
         if (retrofitInstance == null) {
@@ -26,9 +27,9 @@ public class RetrofitClient {
 
             OkHttpClient.Builder httpClient = new OkHttpClient.Builder();
             httpClient.addInterceptor(logging);
-            httpClient.connectTimeout(30, TimeUnit.SECONDS); // Timeout de conexão
-            httpClient.readTimeout(30, TimeUnit.SECONDS);    // Timeout de leitura
-            httpClient.writeTimeout(30, TimeUnit.SECONDS);   // Timeout de escrita
+            httpClient.connectTimeout(10, TimeUnit.SECONDS); // Timeout de conexão
+            httpClient.readTimeout(10, TimeUnit.SECONDS);    // Timeout de leitura
+            httpClient.writeTimeout(10, TimeUnit.SECONDS);   // Timeout de escrita
 
             retrofitInstance = new Retrofit.Builder()
                     .baseUrl(BASE_URL)
@@ -61,5 +62,17 @@ public class RetrofitClient {
             lesaoApiServiceInstance = getRetrofitInstance().create(LesaoApiService.class);
         }
         return lesaoApiServiceInstance;
+    }
+
+    /**
+     * Obtém a instância singleton do serviço da API de atividades.
+     *
+     * @return Instância de AtividadesApiService
+     */
+    public static AtividadesApiService getAtividadesApiService() {
+        if (atividadesApiServiceInstance == null) {
+            atividadesApiServiceInstance = getRetrofitInstance().create(AtividadesApiService.class);
+        }
+        return atividadesApiServiceInstance;
     }
 }

@@ -30,7 +30,7 @@ public class LesaoRepository {
 
     public LiveData<LesaoResponse> getUserLesoes(int userId) {
         MutableLiveData<LesaoResponse> result = new MutableLiveData<>();
-        
+
         String token = "Bearer " + authRepository.getAuthToken();
         if (token == null || token.equals("Bearer null")) {
             LesaoResponse errorResponse = new LesaoResponse();
@@ -39,16 +39,18 @@ public class LesaoRepository {
             result.setValue(errorResponse);
             return result;
         }
-        
+
         lesaoApiService.getUserLesoes(userId, token).enqueue(new Callback<LesaoResponse>() {
             @Override
             public void onResponse(Call<LesaoResponse> call, Response<LesaoResponse> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     result.setValue(response.body());
+                    // Atualiza o timestamp de último uso do token
+                    authRepository.updateLastUsedTimestamp();
                 } else {
                     LesaoResponse errorResponse = new LesaoResponse();
                     errorResponse.setSuccess(false);
-                    errorResponse.setMessage("Erro ao buscar dados: " + 
+                    errorResponse.setMessage("Erro ao buscar dados: " +
                             (response.errorBody() != null ? response.code() : "Desconhecido"));
                     result.setValue(errorResponse);
                 }
@@ -63,13 +65,13 @@ public class LesaoRepository {
                 Log.e(TAG, "Falha na chamada de API", t);
             }
         });
-        
+
         return result;
     }
-    
+
     public LiveData<LesaoResponse> saveLesao(LesaoRequest lesaoRequest) {
         MutableLiveData<LesaoResponse> result = new MutableLiveData<>();
-        
+
         String token = "Bearer " + authRepository.getAuthToken();
         if (token == null || token.equals("Bearer null")) {
             LesaoResponse errorResponse = new LesaoResponse();
@@ -78,28 +80,30 @@ public class LesaoRepository {
             result.setValue(errorResponse);
             return result;
         }
-        
+
         // Adiciona o token ao request
         lesaoRequest.setToken(authRepository.getAuthToken());
-        
+
         Call<LesaoResponse> call;
-        if (lesaoRequest.getUserId() > 0) {
+        /*if (lesaoRequest.getUserId() > 0) {*//*
             // Atualização de lesão existente
             call = lesaoApiService.updateLesao(lesaoRequest.getUserId(), lesaoRequest, token);
-        } else {
+        } else {*/
             // Criação de nova lesão
-            call = lesaoApiService.createLesao(lesaoRequest, token);
-        }
-        
+        call = lesaoApiService.createLesao(lesaoRequest, token);
+//        }
+
         call.enqueue(new Callback<LesaoResponse>() {
             @Override
             public void onResponse(Call<LesaoResponse> call, Response<LesaoResponse> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     result.setValue(response.body());
+                    // Atualiza o timestamp de último uso do token
+                    authRepository.updateLastUsedTimestamp();
                 } else {
                     LesaoResponse errorResponse = new LesaoResponse();
                     errorResponse.setSuccess(false);
-                    errorResponse.setMessage("Erro ao salvar dados: " + 
+                    errorResponse.setMessage("Erro ao salvar dados: " +
                             (response.errorBody() != null ? response.code() : "Desconhecido"));
                     result.setValue(errorResponse);
                 }
@@ -114,7 +118,7 @@ public class LesaoRepository {
                 Log.e(TAG, "Falha na chamada de API", t);
             }
         });
-        
+
         return result;
     }
 }

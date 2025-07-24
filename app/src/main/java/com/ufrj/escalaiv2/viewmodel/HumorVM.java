@@ -8,14 +8,15 @@ import androidx.lifecycle.MutableLiveData;
 import com.ufrj.escalaiv2.enums.HumorValues;
 import com.ufrj.escalaiv2.enums.Event;
 import com.ufrj.escalaiv2.model.UserDailyData;
-import com.ufrj.escalaiv2.repository.UserDailyDataRepository;
+import com.ufrj.escalaiv2.repository.AtividadesRepository;
 import com.ufrj.escalaiv2.repository.UsuarioRepository;
+import com.ufrj.escalaiv2.repository.AuthRepository;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class HumorVM extends AndroidViewModel {
-    private final UserDailyDataRepository userDailyDataRepository;
+    private final AtividadesRepository atividadesRepository;
     private final UsuarioRepository usuarioRepository;
     private final ExecutorService executorService;
 
@@ -37,7 +38,7 @@ public class HumorVM extends AndroidViewModel {
 
     public HumorVM(Application application) {
         super(application);
-        userDailyDataRepository = new UserDailyDataRepository(application);
+        atividadesRepository = new AtividadesRepository(application);
         usuarioRepository = new UsuarioRepository(application);
         executorService = Executors.newSingleThreadExecutor();
 
@@ -66,7 +67,7 @@ public class HumorVM extends AndroidViewModel {
 
         executorService.execute(() -> {
             // Carregar valores de humor anteriores se existirem para hoje
-            UserDailyData todayMood = userDailyDataRepository.getTodayMoodData(currentUserId);
+            UserDailyData todayMood = atividadesRepository.getTodayMoodData(currentUserId);
 
             if (todayMood != null) {
                 joyLevel.postValue(todayMood.getJoyLevel());
@@ -192,22 +193,36 @@ public class HumorVM extends AndroidViewModel {
 
         if (joy != null && sadness != null && anxiety != null && stress != null && calm != null) {
             int currentUserId = getCurrentUserId();
+            AuthRepository authRepository = new AuthRepository(getApplication());
+            String token = authRepository.getAuthTokenRaw();
+            if (token == null) {
+                token = authRepository.getAuthToken();
+            }
+            if (token != null && !token.startsWith("Bearer ")) {
+                token = "Bearer " + token;
+            }
 
-            // Save mood data to repository using enums
-            boolean success = userDailyDataRepository.saveMoodData(
+            // Registrar humor usando o novo repositório
+            atividadesRepository.registrarHumor(
                     currentUserId,
                     HumorValues.values()[joy],
                     HumorValues.values()[sadness],
                     HumorValues.values()[anxiety],
                     HumorValues.values()[stress],
-                    HumorValues.values()[calm]
-            );
+                    HumorValues.values()[calm],
+                    token,
+                    new AtividadesRepository.OnActivityCallback() {
+                        @Override
+                        public void onSuccess() {
+                            uiEvent.postValue(Event.SHOW_SUCCESS_MESSAGE);
+                        }
 
-            if (success) {
-                uiEvent.setValue(Event.SHOW_SUCCESS_MESSAGE);
-            } else {
-                uiEvent.setValue(Event.SHOW_ERROR_MESSAGE);
-            }
+                        @Override
+                        public void onError(String message) {
+                            uiEvent.postValue(Event.SHOW_ERROR_MESSAGE);
+                        }
+                    }
+            );
         } else {
             uiEvent.setValue(Event.SHOW_ERROR_MESSAGE);
         }
@@ -215,7 +230,6 @@ public class HumorVM extends AndroidViewModel {
 
     // Method to get current user ID
     private int getCurrentUserId() {
-        // Get the ID of the currently logged in user using SharedPreferences
-        return 1; // Substitua pela implementação real
+        return atividadesRepository.getCurrentUserId();
     }
 }

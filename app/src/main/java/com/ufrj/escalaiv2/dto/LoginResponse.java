@@ -3,7 +3,7 @@ package com.ufrj.escalaiv2.dto;
 import com.google.gson.annotations.SerializedName;
 
 public class LoginResponse {
-    @SerializedName("token")
+    @SerializedName("access_token")
     private String token;
 
     @SerializedName("user")

@@ -5,7 +5,6 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
 import java.lang.reflect.Type;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -24,10 +23,10 @@ public class MapConverter {
     /** JSON -> Map<String,Integer> */
     @TypeConverter
     public static Map<String, Integer> fromString(String value) {
-        if (value == null || value.isEmpty()) return Collections.emptyMap();
+        if (value == null || value.isEmpty()) return new HashMap<>();
         try {
             Map<String, Number> raw = gson.fromJson(value, RAW_TYPE);
-            if (raw == null || raw.isEmpty()) return Collections.emptyMap();
+            if (raw == null || raw.isEmpty()) return new HashMap<>();
 
             Map<String, Integer> clean = new HashMap<>(raw.size());
             for (Map.Entry<String, Number> e : raw.entrySet()) {
@@ -37,7 +36,7 @@ public class MapConverter {
             return clean;
         } catch (Exception e) {
             e.printStackTrace();
-            return Collections.emptyMap();
+            return new HashMap<>();
         }
     }
 

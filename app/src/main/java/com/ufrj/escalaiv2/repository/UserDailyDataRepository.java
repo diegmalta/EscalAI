@@ -229,13 +229,13 @@ public class UserDailyDataRepository {
                 UserDailyData userDailyData = getOrCreateUserDailyData(userId, todayDate);
 
                 // Obter o nome/chave do tipo de treino a partir do índice
-                TipoTreino tipoTreino = TipoTreino.getById(tipoTreinoIndex); // Assumindo que getById existe e usa o índice
+                TipoTreino tipoTreino = TipoTreino.getById(tipoTreinoIndex);
                 if (tipoTreino == null) {
                     throw new IllegalArgumentException("Índice de tipo de treino inválido: " + tipoTreinoIndex);
                 }
-                String treinoKey = tipoTreino.name(); // Usar o nome do enum como chave é mais robusto
+                String treinoKey = tipoTreino.name();
 
-                // Obter o mapa atual de treinos (garantido não ser nulo por getOrCreateUserDailyData)
+                // Obter o mapa atual de treinos (agora sempre será um HashMap modificável)
                 Map<String, Integer> treinosMap = userDailyData.getTreinosMap();
 
                 // Adicionar a nova duração à duração existente para este tipo de treino

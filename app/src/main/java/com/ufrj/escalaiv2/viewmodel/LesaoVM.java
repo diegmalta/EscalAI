@@ -507,44 +507,46 @@ public class LesaoVM extends AndroidViewModel {
     public void saveLesaoData() {
         isLoading.setValue(true);
 
-        LesaoRequest request = new LesaoRequest();
-        request.setUserId(getCurrentUserId());
+        authRepository.getCurrentUserIdAsync(userId -> {
+            LesaoRequest request = new LesaoRequest();
+            request.setUserId(userId);
 
-        // Área da lesão
-        request.setAreaLesaoN1(selectedArea.getValue());
-        request.setAreaLesaoN2(selectedSubarea.getValue());
-        request.setAreaLesaoN3(selectedEspecificacao.getValue());
+            // Área da lesão
+            request.setAreaLesaoN1(selectedArea.getValue());
+            request.setAreaLesaoN2(selectedSubarea.getValue());
+            request.setAreaLesaoN3(selectedEspecificacao.getValue());
 
-        // Dados do usuário
-        request.setMassa(massa.getValue());
-        request.setAltura(altura.getValue());
-        request.setGrauEscalada(grauEscalada.getValue());
+            // Dados do usuário
+            request.setMassa(massa.getValue());
+            request.setAltura(altura.getValue());
+            request.setGrauEscalada(grauEscalada.getValue());
 
-        // Dados de prática
-        request.setTempoPraticaMeses(tempoPraticaMeses.getValue());
-        request.setFrequenciaSemanal(frequenciaSemanal.getValue());
-        request.setHorasSemanais(horasSemanais.getValue());
-        request.setLesoesPrevias(lesoesPrevias.getValue());
+            // Dados de prática
+            request.setTempoPraticaMeses(tempoPraticaMeses.getValue());
+            request.setFrequenciaSemanal(frequenciaSemanal.getValue());
+            request.setHorasSemanais(horasSemanais.getValue());
+            request.setLesoesPrevias(lesoesPrevias.getValue());
 
-        // Dados de lesão
-        request.setReincidencia(reincidencia.getValue());
-        request.setBuscouAtendimento(buscouAtendimento.getValue());
+            // Dados de lesão
+            request.setReincidencia(reincidencia.getValue());
+            request.setBuscouAtendimento(buscouAtendimento.getValue());
 
-        if (buscouAtendimento.getValue()) {
-            request.setProfissionalAtendimento(profissionalAtendimento.getValue());
-            request.setDiagnostico(diagnostico.getValue());
-            request.setProfissionalTratamento(profissionalTratamento.getValue());
-            request.setModalidadePraticada(modalidadePraticada.getValue());
-        }
-
-        lesaoRepository.saveLesao(request).observeForever(response -> {
-            isLoading.setValue(false);
-
-            if (response != null && response.isSuccess()) {
-                uiEvent.setValue(Event.SHOW_SUCCESS_MESSAGE);
-            } else {
-                uiEvent.setValue(Event.SHOW_ERROR_MESSAGE);
+            if (buscouAtendimento.getValue()) {
+                request.setProfissionalAtendimento(profissionalAtendimento.getValue());
+                request.setDiagnostico(diagnostico.getValue());
+                request.setProfissionalTratamento(profissionalTratamento.getValue());
+                request.setModalidadePraticada(modalidadePraticada.getValue());
             }
+
+            lesaoRepository.saveLesao(request).observeForever(response -> {
+                isLoading.setValue(false);
+
+                if (response != null && response.isSuccess()) {
+                    uiEvent.setValue(Event.SHOW_SUCCESS_MESSAGE);
+                } else {
+                    uiEvent.setValue(Event.SHOW_ERROR_MESSAGE);
+                }
+            });
         });
     }
 

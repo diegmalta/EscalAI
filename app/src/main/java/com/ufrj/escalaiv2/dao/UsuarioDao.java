@@ -48,4 +48,10 @@ public interface UsuarioDao {
 
     @Query("SELECT name FROM users WHERE id = :userId LIMIT 1")
     String getUserNameById(int userId);
+
+    @Query("DELETE FROM users")
+    void deleteAllUsers();
+
+    @Query("SELECT * FROM users LIMIT 1")
+    Usuario getFirstUser();
 }
