@@ -18,7 +18,9 @@
         <com.google.android.material.appbar.MaterialToolbar
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
+            android:layout_height="72dp"
+            android:paddingTop="8dp"
+            android:paddingBottom="8dp"
             android:background="@color/md_theme_light_primaryContainer"
             app:menu="@menu/top_navigation_menu">
 
@@ -30,8 +32,8 @@
 
                 <com.google.android.material.imageview.ShapeableImageView
                     android:id="@+id/profileImage"
-                    android:layout_width="50dp"
-                    android:layout_height="50dp"
+                    android:layout_width="56dp"
+                    android:layout_height="56dp"
                     android:padding="4dp"
                     android:scaleType="center"
                     android:clickable="true"
@@ -75,4 +77,3 @@
         tools:ignore="VisualLintBottomNav" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
-

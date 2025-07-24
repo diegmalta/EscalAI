@@ -10,13 +10,15 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
+import android.util.Log;
 
 import com.ufrj.escalaiv2.enums.Event;
-import com.ufrj.escalaiv2.repository.UserDailyDataRepository;
+import com.ufrj.escalaiv2.repository.AtividadesRepository;
+import com.ufrj.escalaiv2.repository.AuthRepository;
 import com.ufrj.escalaiv2.repository.UsuarioRepository;
 
 public class SonoVM extends AndroidViewModel {
-    private final UserDailyDataRepository userDailyDataRepository;
+    private final AtividadesRepository atividadesRepository;
     private final UsuarioRepository usuarioRepository;
 
     // Horários de sono
@@ -44,7 +46,7 @@ public class SonoVM extends AndroidViewModel {
 
     public SonoVM(Application application) {
         super(application);
-        userDailyDataRepository = new UserDailyDataRepository(application);
+        atividadesRepository = new AtividadesRepository(application);
         usuarioRepository = new UsuarioRepository(application);
 
         // Inicializar valores
@@ -174,13 +176,31 @@ public class SonoVM extends AndroidViewModel {
         if (quality != null) {
             int currentUserId = getCurrentUserId();
             String currentDate = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());
+            AuthRepository authRepository = new AuthRepository(getApplication());
+            String token = authRepository.getAuthTokenRaw();
 
-            // Salvar dados no repositório (isso seria implementado no repositório real)
-             userDailyDataRepository.saveSleepData(currentUserId, currentDate, sleepTime.getValue(),
-                 wakeTime.getValue(), totalSleepTimeInMinutes.getValue(), quality);
+            if (token == null) {
+                token = authRepository.getAuthToken();
+            }
 
-            // Acionar evento de UI
-            uiEvent.setValue(Event.SHOW_SUCCESS_MESSAGE);
+            if (token != null && !token.startsWith("Bearer ")) {
+                token = "Bearer " + token;
+            }
+
+            // Registrar sono usando o novo repositório
+            atividadesRepository.registrarSono(currentUserId, currentDate, sleepTime.getValue(),
+                    wakeTime.getValue(), totalSleepTimeInMinutes.getValue(), quality, token,
+                    new AtividadesRepository.OnActivityCallback() {
+                        @Override
+                        public void onSuccess() {
+                            uiEvent.postValue(Event.SHOW_SUCCESS_MESSAGE);
+                        }
+
+                        @Override
+                        public void onError(String message) {
+                            uiEvent.postValue(Event.SHOW_ERROR_MESSAGE);
+                        }
+                    });
         } else {
             uiEvent.setValue(Event.SHOW_ERROR_MESSAGE);
         }
@@ -198,7 +218,6 @@ public class SonoVM extends AndroidViewModel {
 
     // Método para obter o ID do usuário atual
     private int getCurrentUserId() {
-        // Pegar o ID do usuário logado atual, usando SharedPreferences
-        return 1; // Substituir pela implementação real
+        return atividadesRepository.getCurrentUserId();
     }
 }

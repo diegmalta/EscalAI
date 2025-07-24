@@ -8,7 +8,8 @@ import androidx.lifecycle.MutableLiveData;
 import com.ufrj.escalaiv2.enums.Event;
 import com.ufrj.escalaiv2.enums.TipoTreino;
 import com.ufrj.escalaiv2.model.UserDailyData;
-import com.ufrj.escalaiv2.repository.UserDailyDataRepository;
+import com.ufrj.escalaiv2.repository.AtividadesRepository;
+import com.ufrj.escalaiv2.repository.AuthRepository;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -16,7 +17,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class TreinoVM extends AndroidViewModel {
-    private final UserDailyDataRepository userDailyDataRepository;
+    private final AtividadesRepository atividadesRepository;
     private final ExecutorService executorService;
 
     // LiveData para os valores selecionados
@@ -33,7 +34,7 @@ public class TreinoVM extends AndroidViewModel {
 
     public TreinoVM(Application application) {
         super(application);
-        userDailyDataRepository = new UserDailyDataRepository(application);
+        atividadesRepository = new AtividadesRepository(application);
         executorService = Executors.newSingleThreadExecutor();
 
         // Inicialização dos LiveData
@@ -53,15 +54,14 @@ public class TreinoVM extends AndroidViewModel {
 
         executorService.execute(() -> {
             // Buscar os dados de treino já registrados hoje
-            Map<String, Float> resumoMap = userDailyDataRepository.getTodayTrainingData(currentUserId);
+            Map<String, Float> resumoMap = atividadesRepository.getTodayTrainingData(currentUserId);
             resumoTreinosHoje.postValue(resumoMap);
         });
     }
 
     // Método para obter o ID do usuário atual
     private int getCurrentUserId() {
-        // Implementação real para obter o ID do usuário logado
-        return 1; // Substituir pela implementação real
+        return atividadesRepository.getCurrentUserId();
     }
 
     // Getters para LiveData
@@ -117,24 +117,32 @@ public class TreinoVM extends AndroidViewModel {
         }
 
         int currentUserId = getCurrentUserId();
+        AuthRepository authRepository = new AuthRepository(getApplication());
+        String token = authRepository.getAuthTokenRaw();
+        if (token == null) {
+            token = authRepository.getAuthToken();
+        }
+        if (token != null && !token.startsWith("Bearer ")) {
+            token = "Bearer " + token;
+        }
 
-        // Salvar os dados no banco de dados
-        executorService.execute(() -> {
-            boolean success = userDailyDataRepository.saveTreinoData(
-                    currentUserId,
-                    treinoTipo,
-                    duracaoMinutos
-            );
+        // Registrar treino usando o novo repositório
+        atividadesRepository.registrarTreino(currentUserId, treinoTipo, duracaoMinutos,
+                token,
+                new AtividadesRepository.OnActivityCallback() {
+                    @Override
+                    public void onSuccess() {
+                        // Após salvar, recarregar o resumo de treinos
+                        Map<String, Float> resumoMap = atividadesRepository.getTodayTrainingData(currentUserId);
+                        resumoTreinosHoje.postValue(resumoMap);
+                        uiEvent.postValue(Event.SHOW_SUCCESS_MESSAGE);
+                    }
 
-            if (success) {
-                // Após salvar, recarregar o resumo de treinos
-                Map<String, Float> resumoMap = userDailyDataRepository.getTodayTrainingData(currentUserId);
-                resumoTreinosHoje.postValue(resumoMap);
-                uiEvent.postValue(Event.SHOW_SUCCESS_MESSAGE);
-            } else {
-                uiEvent.postValue(Event.SHOW_ERROR_MESSAGE);
-            }
-        });
+                    @Override
+                    public void onError(String message) {
+                        uiEvent.postValue(Event.SHOW_ERROR_MESSAGE);
+                    }
+                });
     }
 
 

@@ -16,8 +16,14 @@ public interface UsuarioDao {
     @Insert
     long insert(Usuario usuario);
 
+    @Insert
+    long insertUser(Usuario usuario);
+
     @Update
     void update(Usuario usuario);
+
+    @Update
+    void updateUser(Usuario usuario);
 
     @Delete
     void delete(Usuario usuario);
@@ -25,61 +31,27 @@ public interface UsuarioDao {
     @Query("SELECT * FROM users WHERE id = :id")
     LiveData<Usuario> getUsuario(int id);
 
+    @Query("SELECT * FROM users WHERE id = :id")
+    Usuario getUserById(int id);
+
+    @Query("SELECT * FROM users WHERE id = :id")
+    LiveData<Usuario> getUserByIdLiveData(int id);
+
     @Query("SELECT * FROM users WHERE email = :email")
     LiveData<Usuario> getUsuarioPorEmail(String email);
 
     @Query("SELECT * FROM users")
     LiveData<List<Usuario>> getAllUsuarios();
 
-    @Query("SELECT * FROM users WHERE email = :email AND password = :senha")
-    Usuario selecionaUsuario(String email, String senha);
+    @Query("SELECT * FROM users WHERE email = :email")
+    Usuario selecionaUsuario(String email);
 
     @Query("SELECT name FROM users WHERE id = :userId LIMIT 1")
     String getUserNameById(int userId);
+
+    @Query("DELETE FROM users")
+    void deleteAllUsers();
+
+    @Query("SELECT * FROM users LIMIT 1")
+    Usuario getFirstUser();
 }
-/*
-public class UsuarioDAO {
-
-    public Usuario selecionaUsuario(String email, String senha) {
-        try {
-            Connection conn = Conexao.conectar();
-            if (conn != null) {
-                String sql = "select * from usuarios where email = '" + email + "' and senha = '" + senha + "'";
-                Statement st = null;
-                st = conn.createStatement();
-
-                ResultSet rs = st.executeQuery(sql);
-                if (rs.next()) {
-                    Usuario usu = new Usuario();
-                    usu.setCodigo(rs.getInt(1));
-                    usu.setEmail(rs.getString(2));
-                    usu.setSenha(rs.getString(3));
-
-                    conn.close();
-                    return usu;
-                }
-            }
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-            Log.e("Erro", e.getMessage());
-        } catch (SQLException throwables) {
-            throwables.printStackTrace();
-            Log.e("Erro", throwables.getMessage());
-        }
-
-        return null;
-    }
-
-    public void cadastrarUsuario(Usuario u) throws SQLException, ClassNotFoundException {
-        Connection conn = Conexao.conectar();
-        if (conn != null) {
-            String sql = "insert into usuarios (email, nome, dataNasc, celular, senha) values ('" + u.getEmail() + "','" + u.getNome() + "'," +
-                    "'" + u.getDataNasc() + "','" + u.getCelular() + "','" + u.getSenha() + "')";
-            Statement st = conn.createStatement();
-            st.executeQuery(sql);
-            conn.close();
-        }
-    }
-
-}
-*/

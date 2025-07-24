@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <data>
-         <variable name="viewModel" type="com.ufrj.escalaiv2.viewmodel.RelatoriosVM" />
+        <variable name="viewModel" type="com.ufrj.escalaiv2.viewmodel.RelatoriosVM" />
     </data>
 
     <androidx.coordinatorlayout.widget.CoordinatorLayout
@@ -55,13 +55,26 @@
                             style="@style/TextAppearance.Material3.TitleMedium"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Água Consumida (Últimos 7 dias)" /> <!-- Considere usar @string/relatorio_agua_titulo -->
+                            android:text="Água Consumida (Últimos 7 dias)" />
 
                         <com.github.mikephil.charting.charts.LineChart
                             android:id="@+id/chart_agua"
                             android:layout_width="match_parent"
                             android:layout_height="200dp"
                             android:layout_marginTop="8dp" />
+
+                        <TextView
+                            android:id="@+id/tv_no_data_agua"
+                            android:layout_width="match_parent"
+                            android:layout_height="200dp"
+                            android:layout_marginTop="8dp"
+                            android:text="Não foram encontrados dados dos últimos 7 dias"
+                            android:textAlignment="center"
+                            android:gravity="center"
+                            android:textColor="?attr/colorOnSurfaceVariant"
+                            android:textSize="14sp"
+                            android:visibility="gone"
+                            tools:visibility="visible" />
 
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
@@ -84,7 +97,7 @@
                             style="@style/TextAppearance.Material3.TitleMedium"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Duração do Sono (Últimos 7 dias)" /> <!-- Considere usar @string/relatorio_sono_titulo -->
+                            android:text="Duração do Sono (Últimos 7 dias)" />
 
                         <com.github.mikephil.charting.charts.LineChart
                             android:id="@+id/chart_sono"
@@ -92,10 +105,23 @@
                             android:layout_height="200dp"
                             android:layout_marginTop="8dp" />
 
+                        <TextView
+                            android:id="@+id/tv_no_data_sono"
+                            android:layout_width="match_parent"
+                            android:layout_height="200dp"
+                            android:layout_marginTop="8dp"
+                            android:text="Não foram encontrados dados dos últimos 7 dias"
+                            android:textAlignment="center"
+                            android:gravity="center"
+                            android:textColor="?attr/colorOnSurfaceVariant"
+                            android:textSize="14sp"
+                            android:visibility="gone"
+                            tools:visibility="visible" />
+
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
 
-                <!-- Gráfico de Dores -->
+                <!-- Tabela de Dores -->
                 <com.google.android.material.card.MaterialCardView
                     android:id="@+id/card_dor"
                     style="@style/Widget.Material3.CardView.Elevated"
@@ -113,13 +139,86 @@
                             style="@style/TextAppearance.Material3.TitleMedium"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Intensidade da Dor (Últimos 7 dias)" /> <!-- Considere usar @string/relatorio_dor_titulo -->
+                            android:text="Relatório de Dores (Últimos 7 dias)" />
 
-                        <com.github.mikephil.charting.charts.LineChart
-                            android:id="@+id/chart_dor"
+                        <!-- Cabeçalho da Tabela -->
+                        <LinearLayout
+                            android:id="@+id/header_dores"
                             android:layout_width="match_parent"
-                            android:layout_height="200dp"
-                            android:layout_marginTop="8dp" />
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            android:paddingTop="8dp"
+                            android:paddingBottom="4dp"
+                            android:paddingStart="8dp"
+                            android:paddingEnd="8dp"
+                            android:background="?attr/colorSurfaceVariant">
+
+                            <TextView
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="2"
+                                android:text="Local"
+                                android:textStyle="bold"
+                                android:textSize="12sp" />
+
+                            <TextView
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:text="Início"
+                                android:gravity="center"
+                                android:textStyle="bold"
+                                android:textSize="12sp" />
+
+                            <TextView
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:text="Máx"
+                                android:gravity="center"
+                                android:textStyle="bold"
+                                android:textSize="12sp" />
+
+                            <TextView
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:text="Média"
+                                android:gravity="center"
+                                android:textStyle="bold"
+                                android:textSize="12sp" />
+
+                            <TextView
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:text="Sem Dor"
+                                android:gravity="center"
+                                android:textStyle="bold"
+                                android:textSize="12sp" />
+                        </LinearLayout>
+
+                        <androidx.recyclerview.widget.RecyclerView
+                            android:id="@+id/recyclerViewDores"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="4dp"
+                            android:nestedScrollingEnabled="false"
+                            tools:listitem="@layout/item_pain_report"
+                            tools:itemCount="3" />
+
+                        <TextView
+                            android:id="@+id/tv_no_data_dores"
+                            android:layout_width="match_parent"
+                            android:layout_height="120dp"
+                            android:layout_marginTop="8dp"
+                            android:text="Não foram encontrados dados dos últimos 7 dias"
+                            android:textAlignment="center"
+                            android:gravity="center"
+                            android:textColor="?attr/colorOnSurfaceVariant"
+                            android:textSize="14sp"
+                            android:visibility="gone"
+                            tools:visibility="visible" />
 
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
@@ -142,13 +241,26 @@
                             style="@style/TextAppearance.Material3.TitleMedium"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Duração dos Treinos (Últimos 7 dias)" /> <!-- Considere usar @string/relatorio_treino_titulo -->
+                            android:text="Duração dos Treinos (Últimos 7 dias)" />
 
                         <com.github.mikephil.charting.charts.BarChart
                             android:id="@+id/chart_treino"
                             android:layout_width="match_parent"
                             android:layout_height="200dp"
                             android:layout_marginTop="8dp" />
+
+                        <TextView
+                            android:id="@+id/tv_no_data_treino"
+                            android:layout_width="match_parent"
+                            android:layout_height="200dp"
+                            android:layout_marginTop="8dp"
+                            android:text="Não foram encontrados dados dos últimos 7 dias"
+                            android:textAlignment="center"
+                            android:gravity="center"
+                            android:textColor="?attr/colorOnSurfaceVariant"
+                            android:textSize="14sp"
+                            android:visibility="gone"
+                            tools:visibility="visible" />
 
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
@@ -171,13 +283,26 @@
                             style="@style/TextAppearance.Material3.TitleMedium"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Níveis de Humor (Últimos 7 dias)" /> <!-- Considere usar @string/relatorio_humor_titulo -->
+                            android:text="Níveis de Humor (Últimos 7 dias)" />
 
                         <com.github.mikephil.charting.charts.LineChart
                             android:id="@+id/chart_humor"
                             android:layout_width="match_parent"
                             android:layout_height="200dp"
                             android:layout_marginTop="8dp" />
+
+                        <TextView
+                            android:id="@+id/tv_no_data_humor"
+                            android:layout_width="match_parent"
+                            android:layout_height="200dp"
+                            android:layout_marginTop="8dp"
+                            android:text="Não foram encontrados dados dos últimos 7 dias"
+                            android:textAlignment="center"
+                            android:gravity="center"
+                            android:textColor="?attr/colorOnSurfaceVariant"
+                            android:textSize="14sp"
+                            android:visibility="gone"
+                            tools:visibility="visible" />
 
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>

@@ -11,6 +11,8 @@ import com.ufrj.escalaiv2.R;
 import com.google.android.material.textfield.TextInputLayout;
 import com.ufrj.escalaiv2.model.Usuario;
 
+import java.lang.Math;
+
 public class InfoUsuariosController {
 
     private static InfoUsuariosController infoUsuariosController;
@@ -47,9 +49,9 @@ public class InfoUsuariosController {
                 peso = peso * 0.4535924;
             }
             usuario.setPeso(peso);
-            double altura = Float.parseFloat(alturaEditText.getEditText().toString());
+            int altura = Integer.parseInt(alturaEditText.getEditText().toString());
             if(alturaDropdown.getText().toString().equals(context.getString(R.string.feet))){
-                altura = altura/30.48;
+                altura = (int)Math.round(altura/30.48);
             }
             usuario.setAltura(altura);
 

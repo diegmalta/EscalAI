@@ -4,7 +4,7 @@
 
     <stroke
         android:width="2dp"
-        android:color="@android:color/holo_red_dark" />
+        android:color="@color/md_theme_dark_errorContainer" />
 
     <corners android:radius="30dp" />
     <padding

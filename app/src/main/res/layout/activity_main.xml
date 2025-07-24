@@ -6,6 +6,7 @@
     android:layout_height="match_parent"
     android:gravity="center"
     android:orientation="vertical"
+    android:focusableInTouchMode="true"
     tools:context="com.ufrj.escalaiv2.activity.MainActivity">
 
     <androidx.cardview.widget.CardView
@@ -52,7 +53,10 @@
                 android:hint="@string/email"
                 android:padding="8dp"
                 android:textColor="@color/black"
-                android:autofillHints="emailAddress"/>
+                android:autofillHints="emailAddress"
+                android:imeOptions="actionNext"
+                android:nextFocusDown="@id/editPassword"
+                android:singleLine="true"/>
 
             <EditText
                 android:id="@+id/editPassword"
@@ -66,7 +70,9 @@
                 android:inputType="textPassword"
                 android:padding="8dp"
                 android:textColor="@color/black"
-                android:autofillHints="password"/>
+                android:autofillHints="password"
+                android:imeOptions="actionDone"
+                android:singleLine="true"/>
 
             <Button
                 android:id="@+id/button_login"
@@ -74,10 +80,20 @@
                 android:layout_height="60dp"
                 android:layout_marginTop="10dp"
                 android:backgroundTint="@color/seed"
-                android:onClick="login"
                 android:text="@string/login"
                 android:textSize="20sp"
                 app:cornerRadius="20dp" />
+
+            <ProgressBar
+                android:id="@+id/progressBar"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:visibility="gone"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent" />
 
             <Button
                 android:id="@+id/recuperarSenhaButton"
@@ -96,7 +112,6 @@
                 android:layout_width="match_parent"
                 android:layout_height="50dp"
                 android:backgroundTint="@android:color/transparent"
-                android:onClick="cadastrar"
                 android:text="Criar conta"
                 android:textColor="@color/black"
                 android:textSize="15sp"

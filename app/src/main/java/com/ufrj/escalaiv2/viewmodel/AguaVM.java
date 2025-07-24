@@ -10,30 +10,38 @@ import java.util.Date;
 import java.util.Locale;
 
 import com.ufrj.escalaiv2.enums.Event;
-import com.ufrj.escalaiv2.repository.UserDailyDataRepository;
+import com.ufrj.escalaiv2.repository.AtividadesRepository;
 import com.ufrj.escalaiv2.repository.UsuarioRepository;
+import android.content.Context;
+import androidx.security.crypto.EncryptedSharedPreferences;
+import androidx.security.crypto.MasterKey;
+import com.ufrj.escalaiv2.repository.AuthRepository;
+import android.util.Log;
 
 public class AguaVM extends AndroidViewModel {
-    private final UserDailyDataRepository userDailyDataRepository;
+    private final AtividadesRepository atividadesRepository;
     private final UsuarioRepository usuarioRepository;
-    private final LiveData<Integer> totalWaterConsumption;
+    private final MutableLiveData<Integer> totalWaterConsumption;
     private final MutableLiveData<Integer> valorAtualSlider;
     private final MutableLiveData<Event> uiEvent;
     private final MutableLiveData<String> recommendedWater;
 
     public AguaVM(Application application) {
         super(application);
-        userDailyDataRepository = new UserDailyDataRepository(application);
+        atividadesRepository = new AtividadesRepository(application);
         usuarioRepository = new UsuarioRepository(application);
 
-        int currentUserId = getCurrentUserId();
-        String today = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());
-        totalWaterConsumption = userDailyDataRepository.getTotalWaterConsumptionLiveData(currentUserId, today);
-
-        // Criar MutableLiveData para valores que você precisa modificar
         valorAtualSlider = new MutableLiveData<>(0);
         uiEvent = new MutableLiveData<>();
-        recommendedWater = new MutableLiveData<>("2.0 L"); // Recomendação padrão
+        recommendedWater = new MutableLiveData<>("2.0 L");
+        totalWaterConsumption = new MutableLiveData<>(0); // Inicializa com 0 ou null
+
+        // Buscar valor do banco de dados em background
+        int currentUserId = getCurrentUserId();
+        new Thread(() -> {
+            int total = atividadesRepository.getTotalWaterConsumption(currentUserId);
+            ((MutableLiveData<Integer>) totalWaterConsumption).postValue(total);
+        }).start();
     }
 
     public LiveData<Integer> getTotalWaterConsumption() {
@@ -66,14 +74,46 @@ public class AguaVM extends AndroidViewModel {
         if (sliderValue != null && sliderValue > 0) {
             int currentUserId = getCurrentUserId();
 
-            // Adicionar consumo de água ao repositório
-            userDailyDataRepository.addWaterConsumption(currentUserId, sliderValue);
+            // Buscar token salvo usando AuthRepository
+            AuthRepository authRepository = new AuthRepository(getApplication());
 
-            // Resetar slider
-            valorAtualSlider.setValue(0);
+            // Verificar se o token existe
+            boolean hasToken = authRepository.hasToken();
+            Log.d("TOKEN_DEBUG", "hasToken(): " + hasToken);
 
-            // Acionar evento de UI
-            uiEvent.setValue(Event.SHOW_SUCCESS_MESSAGE);
+            // Tentar obter o token sem verificar autenticação
+            String token = authRepository.getAuthTokenRaw();
+            Log.d("TOKEN_DEBUG", "Token recuperado (raw): " + token);
+
+            // Se não encontrou, tentar com verificação de autenticação
+            if (token == null) {
+                token = authRepository.getAuthToken();
+                Log.d("TOKEN_DEBUG", "Token recuperado (com auth): " + token);
+            }
+
+            if (token != null && !token.startsWith("Bearer ")) {
+                token = "Bearer " + token;
+            }
+            Log.d("TOKEN_DEBUG", "Token enviado: " + token);
+
+            // Registrar água usando o novo repositório
+            atividadesRepository.registrarAgua(currentUserId, sliderValue, token, new AtividadesRepository.OnActivityCallback() {
+                @Override
+                public void onSuccess() {
+                    valorAtualSlider.postValue(0);
+                    new Thread(() -> {
+                        int total = atividadesRepository.getTotalWaterConsumption(currentUserId);
+                        ((MutableLiveData<Integer>) totalWaterConsumption).postValue(total);
+                    }).start();
+                    uiEvent.postValue(Event.SHOW_SUCCESS_MESSAGE);
+                }
+
+                @Override
+                public void onError(String message) {
+                    Log.e("TOKEN_DEBUG", "Erro na requisição: " + message);
+                    uiEvent.postValue(Event.SHOW_ERROR_MESSAGE);
+                }
+            });
         } else {
             uiEvent.setValue(Event.SHOW_ERROR_MESSAGE);
         }
@@ -82,17 +122,21 @@ public class AguaVM extends AndroidViewModel {
     // Resetar consumo total de água
     public void resetarConsumoAgua() {
         int currentUserId = getCurrentUserId();
-        userDailyDataRepository.resetWaterConsumption(currentUserId);
+        atividadesRepository.resetWaterConsumption(currentUserId);
 
         // Resetar outros valores
         valorAtualSlider.setValue(0);
         uiEvent.setValue(Event.RESET_COMPLETED);
+        // Buscar valor do banco de dados em background
+        new Thread(() -> {
+            int total = atividadesRepository.getTotalWaterConsumption(currentUserId);
+            ((MutableLiveData<Integer>) totalWaterConsumption).postValue(total);
+        }).start();
     }
 
     // Método para obter o ID do usuário atual
     private int getCurrentUserId() {
-        // Pegar o ID do usuário logado atual, usando SharedPreferences
-        return 1; // Substituir pela implementação real
+        return atividadesRepository.getCurrentUserId();
     }
 
     // Formatar quantidade de água para exibição

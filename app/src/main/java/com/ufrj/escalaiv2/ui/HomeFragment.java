@@ -16,13 +16,13 @@ import com.ufrj.escalaiv2.activity.HumorActivity;
 import com.ufrj.escalaiv2.activity.DorActivity;
 import com.ufrj.escalaiv2.activity.SonoActivity;
 import com.ufrj.escalaiv2.activity.TreinoActivity;
+import com.ufrj.escalaiv2.activity.LesaoActivity;
 
 public class HomeFragment extends Fragment {
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        // Infla o layout que agora contém o GridLayout
         return inflater.inflate(R.layout.fragment_home, container, false);
     }
 
@@ -30,7 +30,6 @@ public class HomeFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        // Configura os listeners para os botões dentro do fragment
         Button aguaButton = view.findViewById(R.id.aguaButton);
         aguaButton.setOnClickListener(v -> {
             Intent intent = new Intent(getActivity(), AguaActivity.class);
@@ -61,13 +60,16 @@ public class HomeFragment extends Fragment {
             startActivity(intent);
         });
 
-        // Adicione listeners para outros botões se necessário (ex: bloco6Button)
         Button bloco6Button = view.findViewById(R.id.bloco6Button);
         bloco6Button.setOnClickListener(v -> {
-            // Defina a ação para o Bloco 6 aqui (ex: iniciar outra Activity)
-            // Exemplo: Intent intent = new Intent(getActivity(), Bloco6Activity.class);
-            //          startActivity(intent);
+            Intent intent = new Intent(getActivity(), LesaoActivity.class);
+            startActivity(intent);
         });
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
     }
 }
 

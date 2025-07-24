@@ -5,12 +5,13 @@ import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
-import com.ufrj.escalaiv2.enums.Event;
-import com.ufrj.escalaiv2.model.UserDailyData;
-import com.ufrj.escalaiv2.repository.UserDailyDataRepository;
 import com.ufrj.escalaiv2.enums.AreaCorporalN1;
 import com.ufrj.escalaiv2.enums.AreaCorporalN2;
 import com.ufrj.escalaiv2.enums.AreaCorporalN3;
+import com.ufrj.escalaiv2.enums.Event;
+import com.ufrj.escalaiv2.model.UserDailyData;
+import com.ufrj.escalaiv2.repository.AtividadesRepository;
+import com.ufrj.escalaiv2.repository.AuthRepository;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -20,7 +21,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class DorVM extends AndroidViewModel {
-    private final UserDailyDataRepository userDailyDataRepository;
+    private final AtividadesRepository atividadesRepository;
     private final ExecutorService executorService;
 
     // LiveData para os valores selecionados
@@ -47,7 +48,7 @@ public class DorVM extends AndroidViewModel {
 
     public DorVM(Application application) {
         super(application);
-        userDailyDataRepository = new UserDailyDataRepository(application);
+        atividadesRepository = new AtividadesRepository(application);
         executorService = Executors.newSingleThreadExecutor();
 
         // Inicializar os LiveData para os valores selecionados
@@ -96,6 +97,9 @@ public class DorVM extends AndroidViewModel {
             }
             especificacoes.put(subarea.getNome(), especificacoesForSubarea);
         }
+
+        // Carregar dados de dor existentes
+        loadDailyDorData();
     }
 
     private void loadDailyDorData() {
@@ -103,7 +107,7 @@ public class DorVM extends AndroidViewModel {
 
         executorService.execute(() -> {
             // Carregar valores de dor anteriores se existirem para hoje
-            UserDailyData todayDor = userDailyDataRepository.getTodayDorData(currentUserId);
+            UserDailyData todayDor = atividadesRepository.getTodayDorData(currentUserId);
 
             if (todayDor != null) {
                 // Aqui você teria que ajustar de acordo com a estrutura do seu banco de dados
@@ -240,26 +244,31 @@ public class DorVM extends AndroidViewModel {
         }
 
         int currentUserId = getCurrentUserId();
-
-        // Salvar os dados no banco de dados
-        boolean success = userDailyDataRepository.saveDorData(
-                currentUserId,
-                area,
-                subarea,
-                especificacao,
-                intensidade
-        );
-
-        if (success) {
-            uiEvent.setValue(Event.SHOW_SUCCESS_MESSAGE);
-        } else {
-            uiEvent.setValue(Event.SHOW_ERROR_MESSAGE);
+        AuthRepository authRepository = new AuthRepository(getApplication());
+        String token = authRepository.getAuthTokenRaw();
+        if (token == null) {
+            token = authRepository.getAuthToken();
         }
+        if (token != null && !token.startsWith("Bearer ")) {
+            token = "Bearer " + token;
+        }
+        // Registrar dor usando o novo repositório
+        atividadesRepository.registrarDor(currentUserId, area, subarea, especificacao, intensidade, token,
+                new AtividadesRepository.OnActivityCallback() {
+                    @Override
+                    public void onSuccess() {
+                        uiEvent.postValue(Event.SHOW_SUCCESS_MESSAGE);
+                    }
+
+                    @Override
+                    public void onError(String message) {
+                        uiEvent.postValue(Event.SHOW_ERROR_MESSAGE);
+                    }
+                });
     }
 
     // Método para obter o ID do usuário atual
     private int getCurrentUserId() {
-        // Implementação real para obter o ID do usuário logado
-        return 1; // Substituir pela implementação real
+        return atividadesRepository.getCurrentUserId();
     }
 }
