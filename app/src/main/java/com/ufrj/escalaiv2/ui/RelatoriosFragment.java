@@ -24,7 +24,8 @@ import com.github.mikephil.charting.data.LineDataSet;
 import com.github.mikephil.charting.formatter.ValueFormatter;
 import com.github.mikephil.charting.interfaces.datasets.ILineDataSet;
 import com.ufrj.escalaiv2.R;
-import com.ufrj.escalaiv2.utils.PainReportAdapter; // Importar o novo adapter
+import com.ufrj.escalaiv2.utils.PainReportAdapter;
+import com.ufrj.escalaiv2.utils.TreinoReportAdapter;
 import com.ufrj.escalaiv2.databinding.FragmentRelatoriosBinding; // Gerado pelo Data Binding
 import com.ufrj.escalaiv2.viewmodel.RelatoriosVM;
 
@@ -42,6 +43,7 @@ public class RelatoriosFragment extends Fragment {
     private FragmentRelatoriosBinding binding;
     private RelatoriosVM viewModel;
     private PainReportAdapter painReportAdapter; // Adapter para a tabela de dores
+    private TreinoReportAdapter treinoReportAdapter; // Adapter para a tabela de treinos
 
     @Nullable
     @Override
@@ -58,18 +60,15 @@ public class RelatoriosFragment extends Fragment {
 
         setupCharts();
         setupPainTable(); // Configurar a tabela de dores
+        setupTreinoTable(); // Configurar a tabela de treinos
         setupObservers();
     }
 
     private void setupCharts() {
-        // Configurações iniciais comuns para os gráficos de linha (exceto dor)
+        // Configurações iniciais comuns para os gráficos de linha
         configureLineChart(binding.chartAgua, "Consumo de Água (ml)");
-        configureLineChart(binding.chartSono, "Duração do Sono (min)");
-        // configureLineChart(binding.chartDor, "Intensidade da Dor"); // REMOVIDO
+        configureLineChart(binding.chartSono, "Sono - Duração e Qualidade");
         configureLineChart(binding.chartHumor, "Níveis de Humor");
-
-        // Configurações iniciais para o gráfico de barras (Treino)
-        configureBarChart(binding.chartTreino, "Duração do Treino (min)");
     }
 
     private void setupPainTable() {
@@ -77,6 +76,13 @@ public class RelatoriosFragment extends Fragment {
         binding.recyclerViewDores.setLayoutManager(new LinearLayoutManager(getContext()));
         binding.recyclerViewDores.setAdapter(painReportAdapter);
         binding.recyclerViewDores.setNestedScrollingEnabled(false); // Para funcionar bem dentro do NestedScrollView
+    }
+
+    private void setupTreinoTable() {
+        treinoReportAdapter = new TreinoReportAdapter();
+        binding.recyclerViewTreinos.setLayoutManager(new LinearLayoutManager(getContext()));
+        binding.recyclerViewTreinos.setAdapter(treinoReportAdapter);
+        binding.recyclerViewTreinos.setNestedScrollingEnabled(false);
     }
 
     private void configureLineChart(LineChart chart, String description) {
@@ -126,20 +132,20 @@ public class RelatoriosFragment extends Fragment {
                             "Água Consumida", Color.BLUE);
                 });
 
-        viewModel.getSleepDurationLast7Days()
+        viewModel.getSleepDataLast7Days()
                 .observe(getViewLifecycleOwner(), map -> {
                     boolean hasData = map != null && !map.isEmpty();
                     toggleViews(binding.chartSono, binding.tvNoDataSono, hasData);
-                    if (hasData) updateLineChart(binding.chartSono, map,
-                            "Duração do Sono", Color.MAGENTA);
+                    if (hasData) updateSleepChart(binding.chartSono, map);
                 });
 
-        viewModel.getTrainingDurationLast7Days()
-                .observe(getViewLifecycleOwner(), map -> {
-                    boolean hasData = map != null && !map.isEmpty();
-                    toggleViews(binding.chartTreino, binding.tvNoDataTreino, hasData);
-                    if (hasData) updateBarChart(binding.chartTreino, map,
-                            "Duração do Treino", Color.GREEN);
+        viewModel.getTrainingReportData()
+                .observe(getViewLifecycleOwner(), list -> {
+                    boolean hasData = list != null && !list.isEmpty();
+                    treinoReportAdapter.submitList(list);
+                    // tabela e cabeçalho
+                    toggleViews(binding.recyclerViewTreinos, binding.tvNoDataTreino, hasData);
+                    binding.headerTreinos.setVisibility(hasData ? View.VISIBLE : View.GONE);
                 });
 
         viewModel.getMoodLevelsLast7Days()
@@ -250,6 +256,46 @@ public class RelatoriosFragment extends Fragment {
                 dataSet.setValueTextSize(9f);
                 dataSet.setDrawFilled(false);
                 dataSet.setMode(LineDataSet.Mode.LINEAR);
+                dataSets.add(dataSet);
+            }
+        }
+        if (!dataSets.isEmpty()) {
+            LineData lineData = new LineData(dataSets);
+            chart.setData(lineData);
+            chart.invalidate();
+        }
+    }
+
+    private void updateSleepChart(LineChart chart, Map<String, Map<String, Integer>> dataMap) {
+        ArrayList<ILineDataSet> dataSets = new ArrayList<>();
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+        int[] colors = {Color.BLUE, Color.MAGENTA};
+        String[] sleepKeys = {"Duração", "Qualidade"};
+
+        for (int i = 0; i < sleepKeys.length; i++) {
+            String sleepMetric = sleepKeys[i];
+            ArrayList<Entry> entries = new ArrayList<>();
+            for (Map.Entry<String, Map<String, Integer>> dayEntry : dataMap.entrySet()) {
+                try {
+                    Date date = sdf.parse(dayEntry.getKey());
+                    if (date != null && dayEntry.getValue().containsKey(sleepMetric)) {
+                        entries.add(new Entry(date.getTime(), dayEntry.getValue().get(sleepMetric)));
+                    }
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                }
+            }
+            entries.sort(Comparator.comparing(Entry::getX));
+            if (!entries.isEmpty()) {
+                LineDataSet dataSet = new LineDataSet(entries, sleepMetric);
+                dataSet.setColor(colors[i]);
+                dataSet.setCircleColor(colors[i]);
+                dataSet.setLineWidth(2f);
+                dataSet.setCircleRadius(4f);
+                dataSet.setDrawCircleHole(false);
+                dataSet.setValueTextSize(10f);
+                dataSet.setDrawFilled(false);
+                dataSet.setMode(LineDataSet.Mode.CUBIC_BEZIER);
                 dataSets.add(dataSet);
             }
         }

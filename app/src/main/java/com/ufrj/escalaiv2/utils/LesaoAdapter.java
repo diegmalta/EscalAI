@@ -15,9 +15,11 @@ import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.button.MaterialButton;
-import com.google.android.material.progressindicator.LinearProgressIndicator;
 import com.ufrj.escalaiv2.R;
 import com.ufrj.escalaiv2.dto.LesaoResponse;
+import com.ufrj.escalaiv2.enums.AreaCorporalN1;
+import com.ufrj.escalaiv2.enums.AreaCorporalN2;
+import com.ufrj.escalaiv2.enums.AreaCorporalN3;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -66,6 +68,7 @@ public class LesaoAdapter extends RecyclerView.Adapter<LesaoAdapter.LesaoViewHol
     }
 
     public void updateLesoes(List<LesaoResponse.LesaoData> novasLesoes) {
+        android.util.Log.d("LesaoAdapter", "updateLesoes chamado com: " + (novasLesoes != null ? novasLesoes.size() : "null") + " lesões");
         this.lesoes = novasLesoes != null ? novasLesoes : new ArrayList<>();
         notifyDataSetChanged();
     }
@@ -83,8 +86,7 @@ public class LesaoAdapter extends RecyclerView.Adapter<LesaoAdapter.LesaoViewHol
         private TextView tvDiagnostico;
         private TextView tvProfissional;
         private TextView tvReincidencia;
-        private LinearProgressIndicator progressRecuperacao;
-        private TextView tvProgressoPercentual;
+
         private MaterialButton btnEditarLesao;
         private MaterialButton btnConcluirLesao;
         private LinearLayout cardHeader;
@@ -105,8 +107,6 @@ public class LesaoAdapter extends RecyclerView.Adapter<LesaoAdapter.LesaoViewHol
             tvDiagnostico = itemView.findViewById(R.id.tvDiagnostico);
             tvProfissional = itemView.findViewById(R.id.tvProfissional);
             tvReincidencia = itemView.findViewById(R.id.tvReincidencia);
-            progressRecuperacao = itemView.findViewById(R.id.progressRecuperacao);
-            tvProgressoPercentual = itemView.findViewById(R.id.tvProgressoPercentual);
             btnEditarLesao = itemView.findViewById(R.id.btnEditarLesao);
             btnConcluirLesao = itemView.findViewById(R.id.btnConcluirLesao);
             cardHeader = itemView.findViewById(R.id.cardHeader);
@@ -115,15 +115,28 @@ public class LesaoAdapter extends RecyclerView.Adapter<LesaoAdapter.LesaoViewHol
         }
 
         public void bind(LesaoResponse.LesaoData lesao) {
+            android.util.Log.d("LesaoAdapter", "Bind lesão ID: " + lesao.getId() +
+                ", area1: " + lesao.getAreaLesaoN1() +
+                ", area2: " + lesao.getAreaLesaoN2() +
+                ", area3: " + lesao.getAreaLesaoN3() +
+                ", createdAt: " + lesao.getCreatedAt());
+
             // Configurar área da lesão
-            tvAreaLesao.setText(getAreaLesaoString(lesao));
+            String areaString = getAreaLesaoString(lesao);
+            tvAreaLesao.setText(areaString);
 
             // Configurar data
             tvDataLesao.setText(formatCreatedDate(lesao.getCreatedAt()));
 
             // Calcular tempo atual em dias
-            long diasDesdeCreacao = calcularDiasDesdeCreacao(lesao.getCreatedAt());
-            tvTempoAtual.setText(diasDesdeCreacao + " dias");
+            long diasDesdeCriacao = calcularDiasDesdeCriacao(lesao.getCreatedAt());
+            if (diasDesdeCriacao == 0) {
+                tvTempoAtual.setText("Hoje");
+            } else if (diasDesdeCriacao == 1) {
+                tvTempoAtual.setText("1 dia");
+            } else {
+                tvTempoAtual.setText(diasDesdeCriacao + " dias");
+            }
 
             // Tempo previsto baseado no tipo de lesão (exemplo)
             int tempoPrevisto = calcularTempoPrevisto(lesao);
@@ -147,14 +160,6 @@ public class LesaoAdapter extends RecyclerView.Adapter<LesaoAdapter.LesaoViewHol
             tvDiagnostico.setText(getDiagnosticoString(lesao.getDiagnostico()));
             tvProfissional.setText(getProfissionalString(lesao.getProfissionalTratamento()));
             tvReincidencia.setText(lesao.isReincidencia() ? "Sim" : "Não");
-
-            // Calcular progresso
-            int progresso = 0;
-            if (tempoPrevisto > 0) {
-                progresso = Math.min(100, (int) ((diasDesdeCreacao * 100) / tempoPrevisto));
-            }
-            progressRecuperacao.setProgress(progresso);
-            tvProgressoPercentual.setText(progresso + "%");
 
             // Configurar botões
             if (isConcluida) {
@@ -195,48 +200,66 @@ public class LesaoAdapter extends RecyclerView.Adapter<LesaoAdapter.LesaoViewHol
             ivExpandArrow.startAnimation(rotate);
         }
 
-        private String getAreaLesaoString(LesaoResponse.LesaoData lesao) {
-            // Mapeamento das áreas baseado nos códigos
-            String[] areas = {"", "Ombro", "Cotovelo", "Punho/Mão", "Dedos",
-                             "Coluna", "Quadril", "Joelho", "Tornozelo/Pé"};
-
-            StringBuilder resultado = new StringBuilder();
-
-            if (lesao.getAreaLesaoN1() > 0 && lesao.getAreaLesaoN1() < areas.length) {
-                resultado.append(areas[lesao.getAreaLesaoN1()]);
-            }
-
-            if (lesao.getAreaLesaoN2() > 0 && lesao.getAreaLesaoN2() < areas.length) {
-                if (resultado.length() > 0) resultado.append(" + ");
-                resultado.append(areas[lesao.getAreaLesaoN2()]);
-            }
-
-            if (lesao.getAreaLesaoN3() > 0 && lesao.getAreaLesaoN3() < areas.length) {
-                if (resultado.length() > 0) resultado.append(" + ");
-                resultado.append(areas[lesao.getAreaLesaoN3()]);
-            }
-
-            return resultado.length() > 0 ? resultado.toString() : "Área não especificada";
-        }
-
         private String formatCreatedDate(String createdAt) {
+            if (createdAt == null || createdAt.isEmpty()) {
+                return "Data não disponível";
+            }
+
             try {
-                SimpleDateFormat inputFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
-                SimpleDateFormat outputFormat = new SimpleDateFormat("MMM yyyy", Locale.getDefault());
-                Date date = inputFormat.parse(createdAt);
-                return outputFormat.format(date).toUpperCase();
+                // Tentar diferentes formatos de data, incluindo ISO
+                String[] formats = {
+                    "yyyy-MM-dd'T'HH:mm:ss.SSSSSS", // ISO com microssegundos
+                    "yyyy-MM-dd'T'HH:mm:ss.SSS",    // ISO com milissegundos
+                    "yyyy-MM-dd'T'HH:mm:ss",        // ISO sem frações
+                    "yyyy-MM-dd HH:mm:ss",
+                    "yyyy-MM-dd"
+                };
+
+                for (String format : formats) {
+                    try {
+                        SimpleDateFormat inputFormat = new SimpleDateFormat(format, Locale.getDefault());
+                        SimpleDateFormat outputFormat = new SimpleDateFormat("MMM yyyy", Locale.getDefault());
+                        Date date = inputFormat.parse(createdAt);
+                        return outputFormat.format(date).toUpperCase();
+                    } catch (Exception e) {
+                        // Continua para o próximo formato
+                    }
+                }
+
+                return "Data inválida";
             } catch (Exception e) {
-                return "DATA INVÁLIDA";
+                return "Data inválida";
             }
         }
 
-        private long calcularDiasDesdeCreacao(String createdAt) {
+        private long calcularDiasDesdeCriacao(String createdAt) {
+            if (createdAt == null || createdAt.isEmpty()) {
+                return 0;
+            }
+
             try {
-                SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
-                Date dataCreacao = format.parse(createdAt);
-                Date agora = new Date();
-                long diffInMillies = agora.getTime() - dataCreacao.getTime();
-                return TimeUnit.DAYS.convert(diffInMillies, TimeUnit.MILLISECONDS);
+                // Tentar diferentes formatos de data, incluindo ISO
+                String[] formats = {
+                    "yyyy-MM-dd'T'HH:mm:ss.SSSSSS", // ISO com microssegundos
+                    "yyyy-MM-dd'T'HH:mm:ss.SSS",    // ISO com milissegundos
+                    "yyyy-MM-dd'T'HH:mm:ss",        // ISO sem frações
+                    "yyyy-MM-dd HH:mm:ss",
+                    "yyyy-MM-dd"
+                };
+
+                for (String format : formats) {
+                    try {
+                        SimpleDateFormat inputFormat = new SimpleDateFormat(format, Locale.getDefault());
+                        Date dataCriacao = inputFormat.parse(createdAt);
+                        Date agora = new Date();
+                        long diffInMillies = agora.getTime() - dataCriacao.getTime();
+                        return TimeUnit.DAYS.convert(diffInMillies, TimeUnit.MILLISECONDS);
+                    } catch (Exception e) {
+                        // Continua para o próximo formato
+                    }
+                }
+
+                return 0;
             } catch (Exception e) {
                 return 0;
             }
@@ -266,7 +289,7 @@ public class LesaoAdapter extends RecyclerView.Adapter<LesaoAdapter.LesaoViewHol
             // Lógica para determinar se a lesão está concluída
             // Por exemplo, baseado em algum campo de status
             // Como não temos um campo específico, vamos usar uma heurística temporária
-            long dias = calcularDiasDesdeCreacao(lesao.getCreatedAt());
+            long dias = calcularDiasDesdeCriacao(lesao.getCreatedAt());
             int tempoPrevisto = calcularTempoPrevisto(lesao);
             return dias >= tempoPrevisto;
         }
@@ -289,6 +312,31 @@ public class LesaoAdapter extends RecyclerView.Adapter<LesaoAdapter.LesaoViewHol
                 return profissionais[profissional];
             }
             return "Não especificado";
+        }
+
+        private String getAreaLesaoString(LesaoResponse.LesaoData lesao) {
+            // Obter área N1 (área principal)
+            AreaCorporalN1 areaN1 = AreaCorporalN1.getById(lesao.getAreaLesaoN1());
+            if (areaN1 == null) {
+                return "Área não especificada";
+            }
+
+            // Obter área N2 (subárea) - usar índice baseado em area2 dentro das subáreas de area1
+            AreaCorporalN2 areaN2 = null;
+            AreaCorporalN2[] subareas = AreaCorporalN2.getByRegiaoCorporalId(lesao.getAreaLesaoN1());
+            if (lesao.getAreaLesaoN2() >= 0 && lesao.getAreaLesaoN2() < subareas.length) {
+                areaN2 = subareas[lesao.getAreaLesaoN2()];
+            }
+
+            // Obter área N3 (especificação) - usar o id da subárea para buscar as especificações
+            if (areaN2 != null) {
+                AreaCorporalN3[] especificacoes = AreaCorporalN3.getByAreaRegiaoCorporalId(areaN2.getId());
+                if (lesao.getAreaLesaoN3() >= 0 && lesao.getAreaLesaoN3() < especificacoes.length) {
+                    return especificacoes[lesao.getAreaLesaoN3()].getNome();
+                }
+            }
+
+            return "Área não especificada";
         }
     }
 }

@@ -6,11 +6,14 @@ import com.ufrj.escalaiv2.dto.HumorRequest;
 import com.ufrj.escalaiv2.dto.SonoRequest;
 import com.ufrj.escalaiv2.dto.TreinoRequest;
 import com.ufrj.escalaiv2.dto.ApiResponse;
+import com.ufrj.escalaiv2.dto.DadosUsuarioResponse;
 
 import retrofit2.Call;
 import retrofit2.http.Body;
+import retrofit2.http.GET;
 import retrofit2.http.Header;
 import retrofit2.http.POST;
+import retrofit2.http.Path;
 
 public interface AtividadesApiService {
 
@@ -28,4 +31,7 @@ public interface AtividadesApiService {
 
     @POST("api/dor/")
     Call<ApiResponse> registrarDor(@Header("Authorization") String token, @Body DorRequest request);
+
+    @GET("api/dados-usuario/{dias}")
+    Call<DadosUsuarioResponse> getDadosUsuario(@Path("dias") int dias, @Header("Authorization") String token);
 }

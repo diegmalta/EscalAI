@@ -30,27 +30,36 @@ public class LesaoListVM extends AndroidViewModel {
     }
 
     public void loadLesoes() {
-        int currentUserId = getCurrentUserId();
         isLoading.setValue(true);
         errorMessage.setValue(null);
 
-        lesaoRepository.getUserLesoes(currentUserId).observeForever(response -> {
-            isLoading.setValue(false);
+        authRepository.getCurrentUserIdAsync(userId -> {
+            android.util.Log.d("LesaoListVM", "Carregando lesões para userId: " + userId);
 
-            if (response != null && response.isSuccess()) {
-                if (response.getLesoes() != null && !response.getLesoes().isEmpty()) {
-                    lesoes.setValue(response.getLesoes());
-                } else if (response.getData() != null) {
-                    // Fallback para o formato antigo (uma lesão)
-                    lesoes.setValue(List.of(response.getData()));
+            lesaoRepository.getUserLesoes(userId).observeForever(response -> {
+                isLoading.setValue(false);
+
+                android.util.Log.d("LesaoListVM", "Resposta recebida: " + (response != null ? "dados=" + (response.getLesoes() != null ? response.getLesoes().size() : 0) : "null"));
+
+                if (response != null) {
+                    if (response.getLesoes() != null && !response.getLesoes().isEmpty()) {
+                        android.util.Log.d("LesaoListVM", "Lesões encontradas: " + response.getLesoes().size());
+                        lesoes.setValue(response.getLesoes());
+                    } else if (response.getData() != null) {
+                        android.util.Log.d("LesaoListVM", "Dados únicos encontrados");
+                        // Fallback para o formato antigo (uma lesão)
+                        lesoes.setValue(List.of(response.getData()));
+                    } else {
+                        android.util.Log.d("LesaoListVM", "Nenhuma lesão encontrada");
+                        lesoes.setValue(List.of());
+                    }
                 } else {
+                    String error = "Erro ao carregar lesões";
+                    android.util.Log.e("LesaoListVM", "Erro: " + error);
+                    errorMessage.setValue(error);
                     lesoes.setValue(List.of());
                 }
-            } else {
-                String error = response != null ? response.getMessage() : "Erro ao carregar lesões";
-                errorMessage.setValue(error);
-                lesoes.setValue(List.of());
-            }
+            });
         });
     }
 

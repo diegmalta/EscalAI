@@ -27,32 +27,32 @@ public class RegistrarLesaoActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        
+
         // Inicializar o ViewModel
         lesaoVM = new ViewModelProvider(this).get(LesaoVM.class);
-        
+
         // Configurar o DataBinding
         binding = DataBindingUtil.setContentView(this, R.layout.activity_registrar_lesao);
         binding.setViewModel(lesaoVM);
         binding.setLifecycleOwner(this);
-        
+
         // Configurar a Toolbar
         setSupportActionBar(binding.toolbar);
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
             getSupportActionBar().setDisplayShowHomeEnabled(true);
         }
-        
+
         // Configurar os dropdowns
         setupDropdowns();
-        
+
         // Configurar os listeners
         setupListeners();
-        
+
         // Observar eventos da UI
         observeUiEvents();
     }
-    
+
     private void setupDropdowns() {
         // Área da lesão
         ArrayAdapter<String> areaAdapter = new ArrayAdapter<>(
@@ -61,7 +61,7 @@ public class RegistrarLesaoActivity extends AppCompatActivity {
                 lesaoVM.getAreas()
         );
         binding.areaDropdown.setAdapter(areaAdapter);
-        
+
         // Grau de escalada
         ArrayAdapter<String> grauAdapter = new ArrayAdapter<>(
                 this,
@@ -69,7 +69,7 @@ public class RegistrarLesaoActivity extends AppCompatActivity {
                 GrauEscaladaBrasileiro.getAllNames()
         );
         binding.grauEscaladaDropdown.setAdapter(grauAdapter);
-        
+
         // Profissional de atendimento
         ArrayAdapter<String> profAtendAdapter = new ArrayAdapter<>(
                 this,
@@ -77,7 +77,7 @@ public class RegistrarLesaoActivity extends AppCompatActivity {
                 ProfissionalSaude.getAllNames()
         );
         binding.profAtendimentoDropdown.setAdapter(profAtendAdapter);
-        
+
         // Diagnóstico
         ArrayAdapter<String> diagnosticoAdapter = new ArrayAdapter<>(
                 this,
@@ -85,7 +85,7 @@ public class RegistrarLesaoActivity extends AppCompatActivity {
                 DiagnosticoLesao.getAllNames()
         );
         binding.diagnosticoDropdown.setAdapter(diagnosticoAdapter);
-        
+
         // Profissional de tratamento
         ArrayAdapter<String> profTratAdapter = new ArrayAdapter<>(
                 this,
@@ -93,7 +93,7 @@ public class RegistrarLesaoActivity extends AppCompatActivity {
                 ProfissionalSaude.getAllNames()
         );
         binding.profTratamentoDropdown.setAdapter(profTratAdapter);
-        
+
         // Modalidade praticada
         ArrayAdapter<String> modalidadeAdapter = new ArrayAdapter<>(
                 this,
@@ -102,12 +102,12 @@ public class RegistrarLesaoActivity extends AppCompatActivity {
         );
         binding.modalidadeDropdown.setAdapter(modalidadeAdapter);
     }
-    
+
     private void setupListeners() {
         // Área da lesão
         binding.areaDropdown.setOnItemClickListener((parent, view, position, id) -> {
             lesaoVM.updateSelectedArea(position);
-            
+
             // Atualizar o adapter da subárea
             ArrayAdapter<String> subareaAdapter = new ArrayAdapter<>(
                     this,
@@ -117,11 +117,11 @@ public class RegistrarLesaoActivity extends AppCompatActivity {
             binding.subareaDropdown.setAdapter(subareaAdapter);
             binding.subareaDropdown.setText("", false);
         });
-        
+
         // Subárea da lesão
         binding.subareaDropdown.setOnItemClickListener((parent, view, position, id) -> {
             lesaoVM.updateSelectedSubarea(position);
-            
+
             // Atualizar o adapter da especificação
             String subareaText = binding.subareaDropdown.getText().toString();
             ArrayAdapter<String> especificacaoAdapter = new ArrayAdapter<>(
@@ -132,37 +132,37 @@ public class RegistrarLesaoActivity extends AppCompatActivity {
             binding.especificacaoDropdown.setAdapter(especificacaoAdapter);
             binding.especificacaoDropdown.setText("", false);
         });
-        
+
         // Especificação da lesão
         binding.especificacaoDropdown.setOnItemClickListener((parent, view, position, id) -> {
             lesaoVM.updateSelectedEspecificacao(position);
         });
-        
+
         // Grau de escalada
         binding.grauEscaladaDropdown.setOnItemClickListener((parent, view, position, id) -> {
             lesaoVM.updateGrauEscalada(position);
         });
-        
+
         // Profissional de atendimento
         binding.profAtendimentoDropdown.setOnItemClickListener((parent, view, position, id) -> {
             lesaoVM.updateProfissionalAtendimento(position);
         });
-        
+
         // Diagnóstico
         binding.diagnosticoDropdown.setOnItemClickListener((parent, view, position, id) -> {
             lesaoVM.updateDiagnostico(position);
         });
-        
+
         // Profissional de tratamento
         binding.profTratamentoDropdown.setOnItemClickListener((parent, view, position, id) -> {
             lesaoVM.updateProfissionalTratamento(position);
         });
-        
+
         // Modalidade praticada
         binding.modalidadeDropdown.setOnItemClickListener((parent, view, position, id) -> {
             lesaoVM.updateModalidadePraticada(position);
         });
-        
+
         // Botão de salvar
         binding.saveButton.setOnClickListener(v -> {
             // Atualizar os valores dos campos de texto antes de salvar
@@ -172,57 +172,57 @@ public class RegistrarLesaoActivity extends AppCompatActivity {
             } catch (NumberFormatException e) {
                 lesaoVM.updateMassa(0f);
             }
-            
+
             try {
                 int alturaValue = Integer.parseInt(binding.alturaInput.getText().toString());
                 lesaoVM.updateAltura(alturaValue);
             } catch (NumberFormatException e) {
                 lesaoVM.updateAltura(0);
             }
-            
+
             try {
                 int tempoPraticaValue = Integer.parseInt(binding.tempoPraticaInput.getText().toString());
                 lesaoVM.updateTempoPraticaMeses(tempoPraticaValue);
             } catch (NumberFormatException e) {
                 lesaoVM.updateTempoPraticaMeses(0);
             }
-            
+
             try {
                 int frequenciaValue = Integer.parseInt(binding.frequenciaInput.getText().toString());
                 lesaoVM.updateFrequenciaSemanal(frequenciaValue);
             } catch (NumberFormatException e) {
                 lesaoVM.updateFrequenciaSemanal(0);
             }
-            
+
             try {
                 int horasValue = Integer.parseInt(binding.horasInput.getText().toString());
                 lesaoVM.updateHorasSemanais(horasValue);
             } catch (NumberFormatException e) {
                 lesaoVM.updateHorasSemanais(0);
             }
-            
+
             try {
                 int lesoesPreviasValue = Integer.parseInt(binding.lesoesPreviasInput.getText().toString());
                 lesaoVM.updateLesoesPrevias(lesoesPreviasValue);
             } catch (NumberFormatException e) {
                 lesaoVM.updateLesoesPrevias(0);
             }
-            
+
             // Salvar os dados
             lesaoVM.saveLesaoData();
         });
-        
+
         // Switch de buscou atendimento
         binding.buscouAtendimentoSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
             lesaoVM.updateBuscouAtendimento(isChecked);
         });
-        
+
         // Switch de reincidência
         binding.reincidenciaSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
             lesaoVM.updateReincidencia(isChecked);
         });
     }
-    
+
     private void observeUiEvents() {
         lesaoVM.getUiEvent().observe(this, event -> {
             if (event == Event.SHOW_SUCCESS_MESSAGE) {
@@ -231,7 +231,7 @@ public class RegistrarLesaoActivity extends AppCompatActivity {
                         "Dados da lesão salvos com sucesso!",
                         BaseTransientBottomBar.LENGTH_LONG
                 ).show();
-                
+
                 // Fechar a tela após salvar com sucesso
                 finish();
             } else if (event == Event.SHOW_ERROR_MESSAGE) {
@@ -243,7 +243,7 @@ public class RegistrarLesaoActivity extends AppCompatActivity {
             }
         });
     }
-    
+
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         if (item.getItemId() == android.R.id.home) {
@@ -252,4 +252,4 @@ public class RegistrarLesaoActivity extends AppCompatActivity {
         }
         return super.onOptionsItemSelected(item);
     }
-} 
+}

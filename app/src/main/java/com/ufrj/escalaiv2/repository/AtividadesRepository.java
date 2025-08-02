@@ -40,7 +40,7 @@ public class AtividadesRepository {
     public AtividadesRepository(Application application) {
         this.context = application.getApplicationContext();
         this.userDailyDataRepository = new UserDailyDataRepository(application);
-        this.atividadesApiService = RetrofitClient.getAtividadesApiService();
+        this.atividadesApiService = RetrofitClient.getAtividadesApiService(application);
         this.authRepository = new AuthRepository(application);
         this.executorService = Executors.newSingleThreadExecutor();
     }

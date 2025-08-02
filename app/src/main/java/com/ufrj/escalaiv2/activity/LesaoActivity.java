@@ -68,6 +68,7 @@ public class LesaoActivity extends AppCompatActivity implements LesaoAdapter.OnL
 
     private void observeData() {
         lesaoListVM.getLesoes().observe(this, lesoes -> {
+            android.util.Log.d("LesaoActivity", "Dados recebidos na Activity: " + (lesoes != null ? lesoes.size() : "null"));
             if (lesoes != null) {
                 lesaoAdapter.updateLesoes(lesoes);
             }
@@ -75,6 +76,7 @@ public class LesaoActivity extends AppCompatActivity implements LesaoAdapter.OnL
 
         lesaoListVM.getErrorMessage().observe(this, errorMessage -> {
             if (errorMessage != null && !errorMessage.isEmpty()) {
+                android.util.Log.e("LesaoActivity", "Erro: " + errorMessage);
                 Snackbar.make(binding.getRoot(), errorMessage, Snackbar.LENGTH_LONG).show();
             }
         });

@@ -12,6 +12,9 @@ public class LoginResponse {
     @SerializedName("expires_in")
     private long expiresIn;
 
+    @SerializedName("refresh_token")
+    private String refreshToken;
+
     public String getToken() {
         return token;
     }
@@ -34,6 +37,14 @@ public class LoginResponse {
 
     public void setExpiresIn(long expiresIn) {
         this.expiresIn = expiresIn;
+    }
+
+    public String getRefreshToken() {
+        return refreshToken;
+    }
+
+    public void setRefreshToken(String refreshToken) {
+        this.refreshToken = refreshToken;
     }
 
     public static class UserData {

@@ -149,23 +149,24 @@ public class MenuPrincipalActivity extends AppCompatActivity {
 
     /**
      * Realiza o logout do usuário:
-     * 1. Remove o token de autenticação
-     * 2. Limpa dados sensíveis
-     * 3. Redireciona para a tela de login
+     * 1. Chama o endpoint de logout no servidor
+     * 2. Remove o token de autenticação
+     * 3. Limpa dados sensíveis
+     * 4. Redireciona para a tela de login
      */
     private void realizarLogout() {
-        // Executa o logout no AuthRepository
-        authRepository.logout();
+        // Executa o logout no AuthRepository (chama o servidor e limpa dados locais)
+        authRepository.logoutWithServer().observe(this, response -> {
+            // Exibe mensagem de confirmação
+            Toast.makeText(this, "Logout realizado com sucesso", Toast.LENGTH_SHORT).show();
 
-        // Exibe mensagem de confirmação
-        Toast.makeText(this, "Logout realizado com sucesso", Toast.LENGTH_SHORT).show();
-
-        // Redireciona para a tela de login
-        Intent intent = new Intent(this, MainActivity.class);
-        // Limpa o histórico de navegação para evitar voltar com o botão Back
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        startActivity(intent);
-        finish();
+            // Redireciona para a tela de login
+            Intent intent = new Intent(this, MainActivity.class);
+            // Limpa o histórico de navegação para evitar voltar com o botão Back
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(intent);
+            finish();
+        });
     }
 
     @Override

@@ -24,7 +24,7 @@ public class LesaoRepository {
 
     public LesaoRepository(Context context) {
         this.context = context;
-        this.lesaoApiService = RetrofitClient.getLesaoApiService();
+        this.lesaoApiService = RetrofitClient.getLesaoApiService(context);
         this.authRepository = new AuthRepository(context);
     }
 

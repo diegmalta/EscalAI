@@ -1,5 +1,6 @@
 package com.ufrj.escalaiv2.network;
 
+import android.content.Context;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 import okhttp3.OkHttpClient;
@@ -14,6 +15,7 @@ public class RetrofitClient {
     private static final String BASE_URL = "http://192.168.0.18:8000/";
 
     private static Retrofit retrofitInstance = null;
+    private static Retrofit authenticatedRetrofitInstance = null;
     private static AuthApiService authApiServiceInstance = null;
     private static LesaoApiService lesaoApiServiceInstance = null;
     private static AtividadesApiService atividadesApiServiceInstance = null;
@@ -38,6 +40,27 @@ public class RetrofitClient {
                     .build();
         }
         return retrofitInstance;
+    }
+
+    private static Retrofit getAuthenticatedRetrofitInstance(Context context) {
+        if (authenticatedRetrofitInstance == null) {
+            HttpLoggingInterceptor logging = new HttpLoggingInterceptor();
+            logging.setLevel(HttpLoggingInterceptor.Level.BODY); // TODO Mude para NONE em produção
+
+            OkHttpClient.Builder httpClient = new OkHttpClient.Builder();
+            httpClient.addInterceptor(logging);
+            httpClient.addInterceptor(new AuthInterceptor(context));
+            httpClient.connectTimeout(10, TimeUnit.SECONDS);
+            httpClient.readTimeout(10, TimeUnit.SECONDS);
+            httpClient.writeTimeout(10, TimeUnit.SECONDS);
+
+            authenticatedRetrofitInstance = new Retrofit.Builder()
+                    .baseUrl(BASE_URL)
+                    .addConverterFactory(GsonConverterFactory.create())
+                    .client(httpClient.build())
+                    .build();
+        }
+        return authenticatedRetrofitInstance;
     }
 
     /**
@@ -65,6 +88,16 @@ public class RetrofitClient {
     }
 
     /**
+     * Obtém a instância singleton do serviço da API de lesões com autenticação automática.
+     *
+     * @param context Contexto da aplicação
+     * @return Instância de LesaoApiService
+     */
+    public static LesaoApiService getLesaoApiService(Context context) {
+        return getAuthenticatedRetrofitInstance(context).create(LesaoApiService.class);
+    }
+
+    /**
      * Obtém a instância singleton do serviço da API de atividades.
      *
      * @return Instância de AtividadesApiService
@@ -74,5 +107,15 @@ public class RetrofitClient {
             atividadesApiServiceInstance = getRetrofitInstance().create(AtividadesApiService.class);
         }
         return atividadesApiServiceInstance;
+    }
+
+    /**
+     * Obtém a instância singleton do serviço da API de atividades com autenticação automática.
+     *
+     * @param context Contexto da aplicação
+     * @return Instância de AtividadesApiService
+     */
+    public static AtividadesApiService getAtividadesApiService(Context context) {
+        return getAuthenticatedRetrofitInstance(context).create(AtividadesApiService.class);
     }
 }
