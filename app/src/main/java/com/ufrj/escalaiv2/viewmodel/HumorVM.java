@@ -63,22 +63,23 @@ public class HumorVM extends AndroidViewModel {
     }
 
     private void initializeMoodValues() {
-        int currentUserId = getCurrentUserId();
+        AuthRepository authRepository = new AuthRepository(getApplication());
+        authRepository.getCurrentUserIdAsync(currentUserId -> {
+            executorService.execute(() -> {
+                // Carregar valores de humor anteriores se existirem para hoje
+                UserDailyData todayMood = atividadesRepository.getTodayMoodData(currentUserId);
 
-        executorService.execute(() -> {
-            // Carregar valores de humor anteriores se existirem para hoje
-            UserDailyData todayMood = atividadesRepository.getTodayMoodData(currentUserId);
+                if (todayMood != null) {
+                    joyLevel.postValue(todayMood.getJoyLevel());
+                    sadnessLevel.postValue(todayMood.getSadnessLevel());
+                    anxietyLevel.postValue(todayMood.getAnxietyLevel());
+                    stressLevel.postValue(todayMood.getStressLevel());
+                    calmLevel.postValue(todayMood.getCalmLevel());
 
-            if (todayMood != null) {
-                joyLevel.postValue(todayMood.getJoyLevel());
-                sadnessLevel.postValue(todayMood.getSadnessLevel());
-                anxietyLevel.postValue(todayMood.getAnxietyLevel());
-                stressLevel.postValue(todayMood.getStressLevel());
-                calmLevel.postValue(todayMood.getCalmLevel());
-
-                // Atualizar todos os textos de humor na UI thread
-                updateAllMoodTexts();
-            }
+                    // Atualizar todos os textos de humor na UI thread
+                    updateAllMoodTexts();
+                }
+            });
         });
     }
 
@@ -192,44 +193,42 @@ public class HumorVM extends AndroidViewModel {
         Integer calm = calmLevel.getValue();
 
         if (joy != null && sadness != null && anxiety != null && stress != null && calm != null) {
-            int currentUserId = getCurrentUserId();
             AuthRepository authRepository = new AuthRepository(getApplication());
-            String token = authRepository.getAuthTokenRaw();
-            if (token == null) {
-                token = authRepository.getAuthToken();
-            }
-            if (token != null && !token.startsWith("Bearer ")) {
-                token = "Bearer " + token;
-            }
+            authRepository.getCurrentUserIdAsync(currentUserId -> {
+                String token = authRepository.getAuthTokenRaw();
+                if (token == null) {
+                    token = authRepository.getAuthToken();
+                }
+                if (token != null && !token.startsWith("Bearer ")) {
+                    token = "Bearer " + token;
+                }
 
-            // Registrar humor usando o novo repositório
-            atividadesRepository.registrarHumor(
-                    currentUserId,
-                    HumorValues.values()[joy],
-                    HumorValues.values()[sadness],
-                    HumorValues.values()[anxiety],
-                    HumorValues.values()[stress],
-                    HumorValues.values()[calm],
-                    token,
-                    new AtividadesRepository.OnActivityCallback() {
-                        @Override
-                        public void onSuccess() {
-                            uiEvent.postValue(Event.SHOW_SUCCESS_MESSAGE);
-                        }
+                // Registrar humor usando o novo repositório
+                atividadesRepository.registrarHumor(
+                        currentUserId,
+                        HumorValues.values()[joy],
+                        HumorValues.values()[sadness],
+                        HumorValues.values()[anxiety],
+                        HumorValues.values()[stress],
+                        HumorValues.values()[calm],
+                        token,
+                        new AtividadesRepository.OnActivityCallback() {
+                            @Override
+                            public void onSuccess() {
+                                uiEvent.postValue(Event.SHOW_SUCCESS_MESSAGE);
+                            }
 
-                        @Override
-                        public void onError(String message) {
-                            uiEvent.postValue(Event.SHOW_ERROR_MESSAGE);
+                            @Override
+                            public void onError(String message) {
+                                uiEvent.postValue(Event.SHOW_ERROR_MESSAGE);
+                            }
                         }
-                    }
-            );
+                );
+            });
         } else {
             uiEvent.setValue(Event.SHOW_ERROR_MESSAGE);
         }
     }
 
-    // Method to get current user ID
-    private int getCurrentUserId() {
-        return atividadesRepository.getCurrentUserId();
-    }
+
 }

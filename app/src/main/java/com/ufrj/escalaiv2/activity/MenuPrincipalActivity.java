@@ -143,8 +143,8 @@ public class MenuPrincipalActivity extends AppCompatActivity {
         fragmentTransaction.commit();
     }
 
-    private int getCurrentUserId() {
-        return authRepository.getCurrentUserId();
+    private void getCurrentUserIdAsync(java.util.function.Consumer<Integer> callback) {
+        authRepository.getCurrentUserIdAsync(callback);
     }
 
     /**

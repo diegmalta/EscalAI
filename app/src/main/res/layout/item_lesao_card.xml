@@ -223,6 +223,14 @@
                     android:gravity="end">
 
                     <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnPreverTempo"
+                        style="@style/Widget.Material3.Button.TextButton"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Prever"
+                        android:layout_marginEnd="8dp"/>
+
+                    <com.google.android.material.button.MaterialButton
                         android:id="@+id/btnEditarLesao"
                         style="@style/Widget.Material3.Button.TextButton"
                         android:layout_width="wrap_content"

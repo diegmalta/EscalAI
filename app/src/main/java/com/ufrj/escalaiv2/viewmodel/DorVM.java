@@ -103,42 +103,42 @@ public class DorVM extends AndroidViewModel {
     }
 
     private void loadDailyDorData() {
-        int currentUserId = getCurrentUserId();
+        atividadesRepository.getCurrentUserId(currentUserId -> {
+            executorService.execute(() -> {
+                // Carregar valores de dor anteriores se existirem para hoje
+                UserDailyData todayDor = atividadesRepository.getTodayDorData(currentUserId);
 
-        executorService.execute(() -> {
-            // Carregar valores de dor anteriores se existirem para hoje
-            UserDailyData todayDor = atividadesRepository.getTodayDorData(currentUserId);
+                if (todayDor != null) {
+                    // Aqui você teria que ajustar de acordo com a estrutura do seu banco de dados
+                    // Este é um exemplo baseado na sua estrutura atual
+                    int areaId = todayDor.getAreaDorN1();
+                    int subareaId = todayDor.getAreaDorN2();
+                    int especificacaoId = todayDor.getAreaDorN3();
+                    int intensidade = todayDor.getIntensidadeDor();
 
-            if (todayDor != null) {
-                // Aqui você teria que ajustar de acordo com a estrutura do seu banco de dados
-                // Este é um exemplo baseado na sua estrutura atual
-                int areaId = todayDor.getAreaDorN1();
-                int subareaId = todayDor.getAreaDorN2();
-                int especificacaoId = todayDor.getAreaDorN3();
-                int intensidade = todayDor.getIntensidadeDor();
+                    // Atualizar os valores no LiveData na thread principal
+                    selectedArea.postValue(areaId);
+                    intensidadeDor.postValue(intensidade);
 
-                // Atualizar os valores no LiveData na thread principal
-                selectedArea.postValue(areaId);
-                intensidadeDor.postValue(intensidade);
+                    // Configurar textos e habilitar campos
+                    if (areaId >= 0 && areaId < areas.size()) {
+                        selectedAreaText.postValue(areas.get(areaId));
+                        subareaEnabled.postValue(true);
 
-                // Configurar textos e habilitar campos
-                if (areaId >= 0 && areaId < areas.size()) {
-                    selectedAreaText.postValue(areas.get(areaId));
-                    subareaEnabled.postValue(true);
+                        if (subareaId >= 0 && subareaId < subareas.get(areaId).size()) {
+                            String subareaText = subareas.get(areaId).get(subareaId);
+                            selectedSubarea.postValue(subareaId);
+                            selectedSubareaText.postValue(subareaText);
+                            especificacaoEnabled.postValue(true);
 
-                    if (subareaId >= 0 && subareaId < subareas.get(areaId).size()) {
-                        String subareaText = subareas.get(areaId).get(subareaId);
-                        selectedSubarea.postValue(subareaId);
-                        selectedSubareaText.postValue(subareaText);
-                        especificacaoEnabled.postValue(true);
-
-                        if (especificacaoId >= 0 && especificacaoId < especificacoes.get(subareaText).size()) {
-                            selectedEspecificacao.postValue(especificacaoId);
-                            selectedEspecificacaoText.postValue(especificacoes.get(subareaText).get(especificacaoId));
+                            if (especificacaoId >= 0 && especificacaoId < especificacoes.get(subareaText).size()) {
+                                selectedEspecificacao.postValue(especificacaoId);
+                                selectedEspecificacaoText.postValue(especificacoes.get(subareaText).get(especificacaoId));
+                            }
                         }
                     }
                 }
-            }
+            });
         });
     }
 
@@ -243,32 +243,30 @@ public class DorVM extends AndroidViewModel {
             return;
         }
 
-        int currentUserId = getCurrentUserId();
-        AuthRepository authRepository = new AuthRepository(getApplication());
-        String token = authRepository.getAuthTokenRaw();
-        if (token == null) {
-            token = authRepository.getAuthToken();
-        }
-        if (token != null && !token.startsWith("Bearer ")) {
-            token = "Bearer " + token;
-        }
-        // Registrar dor usando o novo repositório
-        atividadesRepository.registrarDor(currentUserId, area, subarea, especificacao, intensidade, token,
-                new AtividadesRepository.OnActivityCallback() {
-                    @Override
-                    public void onSuccess() {
-                        uiEvent.postValue(Event.SHOW_SUCCESS_MESSAGE);
-                    }
+        atividadesRepository.getCurrentUserId(currentUserId -> {
+            AuthRepository authRepository = new AuthRepository(getApplication());
+            String token = authRepository.getAuthTokenRaw();
+            if (token == null) {
+                token = authRepository.getAuthToken();
+            }
+            if (token != null && !token.startsWith("Bearer ")) {
+                token = "Bearer " + token;
+            }
+            // Registrar dor usando o novo repositório
+            atividadesRepository.registrarDor(currentUserId, area, subarea, especificacao, intensidade, token,
+                    new AtividadesRepository.OnActivityCallback() {
+                        @Override
+                        public void onSuccess() {
+                            uiEvent.postValue(Event.SHOW_SUCCESS_MESSAGE);
+                        }
 
-                    @Override
-                    public void onError(String message) {
-                        uiEvent.postValue(Event.SHOW_ERROR_MESSAGE);
-                    }
-                });
+                        @Override
+                        public void onError(String message) {
+                            uiEvent.postValue(Event.SHOW_ERROR_MESSAGE);
+                        }
+                    });
+        });
     }
 
-    // Método para obter o ID do usuário atual
-    private int getCurrentUserId() {
-        return atividadesRepository.getCurrentUserId();
-    }
+
 }

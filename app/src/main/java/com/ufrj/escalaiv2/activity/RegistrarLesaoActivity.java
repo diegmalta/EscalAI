@@ -19,6 +19,7 @@ import com.ufrj.escalaiv2.enums.GrauEscaladaBrasileiro;
 import com.ufrj.escalaiv2.enums.ProfissionalSaude;
 import com.ufrj.escalaiv2.enums.TipoTreino;
 import com.ufrj.escalaiv2.viewmodel.LesaoVM;
+import com.ufrj.escalaiv2.dto.LesaoResponse;
 
 public class RegistrarLesaoActivity extends AppCompatActivity {
     private ActivityRegistrarLesaoBinding binding;
@@ -49,8 +50,97 @@ public class RegistrarLesaoActivity extends AppCompatActivity {
         // Configurar os listeners
         setupListeners();
 
+        // Verificar se há dados de lesão para edição
+        checkForLesaoData();
+
+        // Verificar se deve mostrar previsão automaticamente
+        checkForPredictionRequest();
+
         // Observar eventos da UI
         observeUiEvents();
+    }
+
+    private void checkForLesaoData() {
+        LesaoResponse.LesaoData lesaoData = null;
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
+            lesaoData = getIntent().getParcelableExtra("lesao_data", LesaoResponse.LesaoData.class);
+        } else {
+            lesaoData = getIntent().getParcelableExtra("lesao_data");
+        }
+        if (lesaoData != null) {
+            // Preencher os campos com os dados da lesão
+            populateFieldsWithLesaoData(lesaoData);
+        }
+    }
+
+    private void populateFieldsWithLesaoData(LesaoResponse.LesaoData lesao) {
+        // Armazena o ID da lesão no ViewModel para previsão ML
+        lesaoVM.setLesaoId(lesao.getId());
+        // Área da lesão
+        if (lesao.getAreaLesaoN1() >= 0) {
+            binding.areaDropdown.setText(lesaoVM.getAreas().get(lesao.getAreaLesaoN1()), false);
+            lesaoVM.updateSelectedArea(lesao.getAreaLesaoN1());
+
+            // Configurar subárea
+            if (lesao.getAreaLesaoN2() >= 0) {
+                ArrayAdapter<String> subareaAdapter = new ArrayAdapter<>(
+                        this,
+                        android.R.layout.simple_dropdown_item_1line,
+                        lesaoVM.getSubareas(lesao.getAreaLesaoN1())
+                );
+                binding.subareaDropdown.setAdapter(subareaAdapter);
+                binding.subareaDropdown.setText(subareaAdapter.getItem(lesao.getAreaLesaoN2()), false);
+                lesaoVM.updateSelectedSubarea(lesao.getAreaLesaoN2());
+
+                // Configurar especificação
+                if (lesao.getAreaLesaoN3() >= 0) {
+                    String subareaText = lesaoVM.getSubareas(lesao.getAreaLesaoN1()).get(lesao.getAreaLesaoN2());
+                    ArrayAdapter<String> especificacaoAdapter = new ArrayAdapter<>(
+                            this,
+                            android.R.layout.simple_dropdown_item_1line,
+                            lesaoVM.getEspecificacoes(subareaText)
+                    );
+                    binding.especificacaoDropdown.setAdapter(especificacaoAdapter);
+                    binding.especificacaoDropdown.setText(especificacaoAdapter.getItem(lesao.getAreaLesaoN3()), false);
+                    lesaoVM.updateSelectedEspecificacao(lesao.getAreaLesaoN3());
+                }
+            }
+        }
+
+        // Dados do usuário
+        binding.massaInput.setText(String.valueOf(lesao.getMassa()));
+        binding.alturaInput.setText(String.valueOf(lesao.getAltura()));
+        binding.grauEscaladaDropdown.setText(GrauEscaladaBrasileiro.getAllNames()[lesao.getGrauEscalada()], false);
+        lesaoVM.updateMassa(lesao.getMassa());
+        lesaoVM.updateAltura(lesao.getAltura());
+        lesaoVM.updateGrauEscalada(lesao.getGrauEscalada());
+
+        // Dados de prática
+        binding.tempoPraticaInput.setText(String.valueOf(lesao.getTempoPraticaMeses()));
+        binding.frequenciaInput.setText(String.valueOf(lesao.getFrequenciaSemanal()));
+        binding.horasInput.setText(String.valueOf(lesao.getHorasSemanais()));
+        binding.lesoesPreviasInput.setText(String.valueOf(lesao.getLesoesPrevias()));
+        lesaoVM.updateTempoPraticaMeses(lesao.getTempoPraticaMeses());
+        lesaoVM.updateFrequenciaSemanal(lesao.getFrequenciaSemanal());
+        lesaoVM.updateHorasSemanais(lesao.getHorasSemanais());
+        lesaoVM.updateLesoesPrevias(lesao.getLesoesPrevias());
+
+        // Dados de lesão
+        binding.reincidenciaSwitch.setChecked(lesao.isReincidencia());
+        binding.buscouAtendimentoSwitch.setChecked(lesao.isBuscouAtendimento());
+        lesaoVM.updateReincidencia(lesao.isReincidencia());
+        lesaoVM.updateBuscouAtendimento(lesao.isBuscouAtendimento());
+
+        if (lesao.isBuscouAtendimento()) {
+            binding.profAtendimentoDropdown.setText(ProfissionalSaude.getAllNames()[lesao.getProfissionalAtendimento()], false);
+            binding.diagnosticoDropdown.setText(DiagnosticoLesao.getAllNames()[lesao.getDiagnostico()], false);
+            binding.profTratamentoDropdown.setText(ProfissionalSaude.getAllNames()[lesao.getProfissionalTratamento()], false);
+            binding.modalidadeDropdown.setText(TipoTreino.getAllNames()[lesao.getModalidadePraticada()], false);
+            lesaoVM.updateProfissionalAtendimento(lesao.getProfissionalAtendimento());
+            lesaoVM.updateDiagnostico(lesao.getDiagnostico());
+            lesaoVM.updateProfissionalTratamento(lesao.getProfissionalTratamento());
+            lesaoVM.updateModalidadePraticada(lesao.getModalidadePraticada());
+        }
     }
 
     private void setupDropdowns() {
@@ -221,6 +311,11 @@ public class RegistrarLesaoActivity extends AppCompatActivity {
         binding.reincidenciaSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
             lesaoVM.updateReincidencia(isChecked);
         });
+
+        // Botão de previsão ML
+        binding.predictButton.setOnClickListener(v -> {
+            lesaoVM.preverTempoAfastamento();
+        });
     }
 
     private void observeUiEvents() {
@@ -240,8 +335,24 @@ public class RegistrarLesaoActivity extends AppCompatActivity {
                         "Erro ao salvar dados. Verifique os campos e tente novamente.",
                         BaseTransientBottomBar.LENGTH_LONG
                 ).show();
+            } else if (event == Event.PREDICTION_ERROR) {
+                Snackbar.make(
+                        binding.getRoot(),
+                        "Não foi possível gerar a previsão. Verifique sua conexão e tente novamente.",
+                        BaseTransientBottomBar.LENGTH_LONG
+                ).show();
             }
         });
+    }
+
+    private void checkForPredictionRequest() {
+        boolean showPrediction = getIntent().getBooleanExtra("show_prediction", false);
+        if (showPrediction) {
+            // Aguardar um pouco para os dados carregarem
+            binding.getRoot().postDelayed(() -> {
+                lesaoVM.preverTempoAfastamento();
+            }, 1000);
+        }
     }
 
     @Override

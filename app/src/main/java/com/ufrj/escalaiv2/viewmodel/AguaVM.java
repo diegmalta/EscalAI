@@ -37,11 +37,12 @@ public class AguaVM extends AndroidViewModel {
         totalWaterConsumption = new MutableLiveData<>(0); // Inicializa com 0 ou null
 
         // Buscar valor do banco de dados em background
-        int currentUserId = getCurrentUserId();
-        new Thread(() -> {
-            int total = atividadesRepository.getTotalWaterConsumption(currentUserId);
-            ((MutableLiveData<Integer>) totalWaterConsumption).postValue(total);
-        }).start();
+        atividadesRepository.getCurrentUserId(currentUserId -> {
+            new Thread(() -> {
+                int total = atividadesRepository.getTotalWaterConsumption(currentUserId);
+                ((MutableLiveData<Integer>) totalWaterConsumption).postValue(total);
+            }).start();
+        });
     }
 
     public LiveData<Integer> getTotalWaterConsumption() {
@@ -72,47 +73,47 @@ public class AguaVM extends AndroidViewModel {
         Integer sliderValue = valorAtualSlider.getValue();
 
         if (sliderValue != null && sliderValue > 0) {
-            int currentUserId = getCurrentUserId();
+            atividadesRepository.getCurrentUserId(currentUserId -> {
+                // Buscar token salvo usando AuthRepository
+                AuthRepository authRepository = new AuthRepository(getApplication());
 
-            // Buscar token salvo usando AuthRepository
-            AuthRepository authRepository = new AuthRepository(getApplication());
+                // Verificar se o token existe
+                boolean hasToken = authRepository.hasToken();
+                Log.d("TOKEN_DEBUG", "hasToken(): " + hasToken);
 
-            // Verificar se o token existe
-            boolean hasToken = authRepository.hasToken();
-            Log.d("TOKEN_DEBUG", "hasToken(): " + hasToken);
+                // Tentar obter o token sem verificar autenticação
+                String token = authRepository.getAuthTokenRaw();
+                Log.d("TOKEN_DEBUG", "Token recuperado (raw): " + token);
 
-            // Tentar obter o token sem verificar autenticação
-            String token = authRepository.getAuthTokenRaw();
-            Log.d("TOKEN_DEBUG", "Token recuperado (raw): " + token);
-
-            // Se não encontrou, tentar com verificação de autenticação
-            if (token == null) {
-                token = authRepository.getAuthToken();
-                Log.d("TOKEN_DEBUG", "Token recuperado (com auth): " + token);
-            }
-
-            if (token != null && !token.startsWith("Bearer ")) {
-                token = "Bearer " + token;
-            }
-            Log.d("TOKEN_DEBUG", "Token enviado: " + token);
-
-            // Registrar água usando o novo repositório
-            atividadesRepository.registrarAgua(currentUserId, sliderValue, token, new AtividadesRepository.OnActivityCallback() {
-                @Override
-                public void onSuccess() {
-                    valorAtualSlider.postValue(0);
-                    new Thread(() -> {
-                        int total = atividadesRepository.getTotalWaterConsumption(currentUserId);
-                        ((MutableLiveData<Integer>) totalWaterConsumption).postValue(total);
-                    }).start();
-                    uiEvent.postValue(Event.SHOW_SUCCESS_MESSAGE);
+                // Se não encontrou, tentar com verificação de autenticação
+                if (token == null) {
+                    token = authRepository.getAuthToken();
+                    Log.d("TOKEN_DEBUG", "Token recuperado (com auth): " + token);
                 }
 
-                @Override
-                public void onError(String message) {
-                    Log.e("TOKEN_DEBUG", "Erro na requisição: " + message);
-                    uiEvent.postValue(Event.SHOW_ERROR_MESSAGE);
+                if (token != null && !token.startsWith("Bearer ")) {
+                    token = "Bearer " + token;
                 }
+                Log.d("TOKEN_DEBUG", "Token enviado: " + token);
+
+                // Registrar água usando o novo repositório
+                atividadesRepository.registrarAgua(currentUserId, sliderValue, token, new AtividadesRepository.OnActivityCallback() {
+                    @Override
+                    public void onSuccess() {
+                        valorAtualSlider.postValue(0);
+                        new Thread(() -> {
+                            int total = atividadesRepository.getTotalWaterConsumption(currentUserId);
+                            ((MutableLiveData<Integer>) totalWaterConsumption).postValue(total);
+                        }).start();
+                        uiEvent.postValue(Event.SHOW_SUCCESS_MESSAGE);
+                    }
+
+                    @Override
+                    public void onError(String message) {
+                        Log.e("TOKEN_DEBUG", "Erro na requisição: " + message);
+                        uiEvent.postValue(Event.SHOW_ERROR_MESSAGE);
+                    }
+                });
             });
         } else {
             uiEvent.setValue(Event.SHOW_ERROR_MESSAGE);
@@ -121,23 +122,21 @@ public class AguaVM extends AndroidViewModel {
 
     // Resetar consumo total de água
     public void resetarConsumoAgua() {
-        int currentUserId = getCurrentUserId();
-        atividadesRepository.resetWaterConsumption(currentUserId);
+        atividadesRepository.getCurrentUserId(currentUserId -> {
+            atividadesRepository.resetWaterConsumption(currentUserId);
 
-        // Resetar outros valores
-        valorAtualSlider.setValue(0);
-        uiEvent.setValue(Event.RESET_COMPLETED);
-        // Buscar valor do banco de dados em background
-        new Thread(() -> {
-            int total = atividadesRepository.getTotalWaterConsumption(currentUserId);
-            ((MutableLiveData<Integer>) totalWaterConsumption).postValue(total);
-        }).start();
+            // Resetar outros valores
+            valorAtualSlider.setValue(0);
+            uiEvent.setValue(Event.RESET_COMPLETED);
+            // Buscar valor do banco de dados em background
+            new Thread(() -> {
+                int total = atividadesRepository.getTotalWaterConsumption(currentUserId);
+                ((MutableLiveData<Integer>) totalWaterConsumption).postValue(total);
+            }).start();
+        });
     }
 
-    // Método para obter o ID do usuário atual
-    private int getCurrentUserId() {
-        return atividadesRepository.getCurrentUserId();
-    }
+
 
     // Formatar quantidade de água para exibição
     public String formatarQuantidadeAgua(int quantidadeML) {

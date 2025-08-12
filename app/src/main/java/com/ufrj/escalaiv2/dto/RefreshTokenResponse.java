@@ -9,6 +9,9 @@ public class RefreshTokenResponse {
     @SerializedName("expires_in")
     private long expiresIn;
 
+    @SerializedName("refresh_token")
+    private String refreshToken;
+
     public String getAccessToken() {
         return accessToken;
     }
@@ -23,5 +26,13 @@ public class RefreshTokenResponse {
 
     public void setExpiresIn(long expiresIn) {
         this.expiresIn = expiresIn;
+    }
+
+    public String getRefreshToken() {
+        return refreshToken;
+    }
+
+    public void setRefreshToken(String refreshToken) {
+        this.refreshToken = refreshToken;
     }
 }

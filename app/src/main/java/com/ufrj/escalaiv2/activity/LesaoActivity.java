@@ -86,7 +86,7 @@ public class LesaoActivity extends AppCompatActivity implements LesaoAdapter.OnL
     public void onEditarClick(LesaoResponse.LesaoData lesao) {
         // Implementar edição da lesão
         Intent intent = new Intent(this, RegistrarLesaoActivity.class);
-        intent.putExtra("lesao_id", lesao.getId());
+        intent.putExtra("lesao_data", lesao);
         startActivity(intent);
     }
 
@@ -100,6 +100,15 @@ public class LesaoActivity extends AppCompatActivity implements LesaoAdapter.OnL
     public void onReabrirClick(LesaoResponse.LesaoData lesao) {
         // Implementar reabertura da lesão
         Snackbar.make(binding.getRoot(), "Funcionalidade de reabertura será implementada", Snackbar.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void onPreverTempoClick(LesaoResponse.LesaoData lesao) {
+        // Abrir tela de registro com dados da lesão para prever
+        Intent intent = new Intent(this, RegistrarLesaoActivity.class);
+        intent.putExtra("lesao_data", lesao);
+        intent.putExtra("show_prediction", true);
+        startActivity(intent);
     }
 
     @Override

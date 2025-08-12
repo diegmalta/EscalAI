@@ -38,6 +38,7 @@ public class LesaoAdapter extends RecyclerView.Adapter<LesaoAdapter.LesaoViewHol
         void onEditarClick(LesaoResponse.LesaoData lesao);
         void onConcluirClick(LesaoResponse.LesaoData lesao);
         void onReabrirClick(LesaoResponse.LesaoData lesao);
+        void onPreverTempoClick(LesaoResponse.LesaoData lesao);
     }
 
     public LesaoAdapter(Context context, List<LesaoResponse.LesaoData> lesoes) {
@@ -89,6 +90,7 @@ public class LesaoAdapter extends RecyclerView.Adapter<LesaoAdapter.LesaoViewHol
 
         private MaterialButton btnEditarLesao;
         private MaterialButton btnConcluirLesao;
+        private MaterialButton btnPreverTempo;
         private LinearLayout cardHeader;
 
         private boolean isExpanded = false;
@@ -109,6 +111,7 @@ public class LesaoAdapter extends RecyclerView.Adapter<LesaoAdapter.LesaoViewHol
             tvReincidencia = itemView.findViewById(R.id.tvReincidencia);
             btnEditarLesao = itemView.findViewById(R.id.btnEditarLesao);
             btnConcluirLesao = itemView.findViewById(R.id.btnConcluirLesao);
+            btnPreverTempo = itemView.findViewById(R.id.btnPreverTempo);
             cardHeader = itemView.findViewById(R.id.cardHeader);
 
             cardHeader.setOnClickListener(v -> toggleExpansion());
@@ -176,6 +179,10 @@ public class LesaoAdapter extends RecyclerView.Adapter<LesaoAdapter.LesaoViewHol
 
             btnEditarLesao.setOnClickListener(v -> {
                 if (listener != null) listener.onEditarClick(lesao);
+            });
+
+            btnPreverTempo.setOnClickListener(v -> {
+                if (listener != null) listener.onPreverTempoClick(lesao);
             });
         }
 

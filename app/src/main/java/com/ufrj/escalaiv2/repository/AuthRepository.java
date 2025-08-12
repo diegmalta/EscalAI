@@ -276,6 +276,7 @@ public class AuthRepository {
         });
     }
 
+
     /**
      * Obtém os dados do usuário do banco de dados local.
      *
@@ -475,8 +476,9 @@ public class AuthRepository {
 
                     if (context != null) {
                         Log.d(TAG, "Contexto disponível, salvando novo token...");
-                        // Salva apenas o novo access token, mantendo o refresh token existente
-                        saveAuthToken(refreshResponse.getAccessToken(), expiresIn, getRefreshToken());
+                        // Salva novo access token e substitui refresh token pelo novo retornado (single use)
+                        String newRefresh = refreshResponse.getRefreshToken() != null ? refreshResponse.getRefreshToken() : getRefreshToken();
+                        saveAuthToken(refreshResponse.getAccessToken(), expiresIn, newRefresh);
                     } else {
                         Log.e(TAG, "Contexto é null, não foi possível salvar o token");
                     }
@@ -600,7 +602,8 @@ public class AuthRepository {
                 }
 
                 if (context != null) {
-                    saveAuthToken(refreshResponse.getAccessToken(), expiresIn, getRefreshToken());
+                    String newRefresh = refreshResponse.getRefreshToken() != null ? refreshResponse.getRefreshToken() : getRefreshToken();
+                    saveAuthToken(refreshResponse.getAccessToken(), expiresIn, newRefresh);
                     Log.d(TAG, "Token renovado automaticamente");
                 }
             }

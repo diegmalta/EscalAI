@@ -255,8 +255,8 @@ public class AtividadesRepository {
         userDailyDataRepository.resetWaterConsumption(userId);
     }
 
-    public int getCurrentUserId() {
-        return authRepository.getCurrentUserId();
+    public void getCurrentUserId(java.util.function.Consumer<Integer> callback) {
+        authRepository.getCurrentUserIdAsync(callback);
     }
 
     // Interface de callback

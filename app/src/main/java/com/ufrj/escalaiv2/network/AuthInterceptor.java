@@ -112,7 +112,8 @@ public class AuthInterceptor implements Interceptor {
                 }
 
                 // Salva o novo token
-                authRepository.saveAuthToken(refreshResponse.getAccessToken(), expiresIn, refreshToken);
+                String newRefresh = refreshResponse.getRefreshToken() != null ? refreshResponse.getRefreshToken() : refreshToken;
+                authRepository.saveAuthToken(refreshResponse.getAccessToken(), expiresIn, newRefresh);
                 Log.d(TAG, "Token renovado com sucesso");
                 return true;
             } else {
