@@ -21,6 +21,14 @@ import com.ufrj.escalaiv2.enums.TipoTreino;
 import com.ufrj.escalaiv2.viewmodel.LesaoVM;
 import com.ufrj.escalaiv2.dto.LesaoResponse;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.Locale;
+
+import android.app.DatePickerDialog;
+
 public class RegistrarLesaoActivity extends AppCompatActivity {
     private ActivityRegistrarLesaoBinding binding;
     private LesaoVM lesaoVM;
@@ -58,6 +66,12 @@ public class RegistrarLesaoActivity extends AppCompatActivity {
 
         // Observar eventos da UI
         observeUiEvents();
+
+        // Carregar dados básicos do usuário
+        lesaoVM.loadUserBasicData();
+
+        // Carregar dados do usuário se necessário
+        loadUserDataIfNeeded();
     }
 
     private void checkForLesaoData() {
@@ -107,13 +121,28 @@ public class RegistrarLesaoActivity extends AppCompatActivity {
             }
         }
 
-        // Dados do usuário
-        binding.massaInput.setText(String.valueOf(lesao.getMassa()));
-        binding.alturaInput.setText(String.valueOf(lesao.getAltura()));
-        binding.grauEscaladaDropdown.setText(GrauEscaladaBrasileiro.getAllNames()[lesao.getGrauEscalada()], false);
+        // Dados do usuário - priorizar dados da lesão
+        if (lesao.getMassa() > 0) {
+            binding.massaInput.setText(String.valueOf(lesao.getMassa()));
+            lesaoVM.updateMassa(lesao.getMassa());
+        }
+
+        if (lesao.getAltura() > 0) {
+            binding.alturaInput.setText(String.valueOf(lesao.getAltura()));
+            lesaoVM.updateAltura(lesao.getAltura());
+        }
+
+        // Grau de escalada - tratar valores inválidos
+        int grauId = lesao.getGrauEscalada();
+        if (grauId >= 0 && grauId < GrauEscaladaBrasileiro.getAllNames().length) {
+            binding.grauEscaladaDropdown.setText(GrauEscaladaBrasileiro.getAllNames()[grauId], false);
+            lesaoVM.updateGrauEscalada(grauId);
+        } else {
+            binding.grauEscaladaDropdown.setText("", false);
+            lesaoVM.updateGrauEscalada(0);
+        }
         lesaoVM.updateMassa(lesao.getMassa());
         lesaoVM.updateAltura(lesao.getAltura());
-        lesaoVM.updateGrauEscalada(lesao.getGrauEscalada());
 
         // Dados de prática
         binding.tempoPraticaInput.setText(String.valueOf(lesao.getTempoPraticaMeses()));
@@ -140,6 +169,23 @@ public class RegistrarLesaoActivity extends AppCompatActivity {
             lesaoVM.updateDiagnostico(lesao.getDiagnostico());
             lesaoVM.updateProfissionalTratamento(lesao.getProfissionalTratamento());
             lesaoVM.updateModalidadePraticada(lesao.getModalidadePraticada());
+        }
+
+        // Dados de data da lesão
+        String dataInicioDisplay = lesaoVM.convertServerDateToDisplay(lesao.getDataInicio());
+        String dataConclusaoDisplay = lesaoVM.convertServerDateToDisplay(lesao.getDataConclusao());
+
+        binding.dataInicioInput.setText(dataInicioDisplay);
+        binding.dataConclusaoInput.setText(dataConclusaoDisplay);
+        lesaoVM.updateDataInicio(dataInicioDisplay);
+        lesaoVM.updateDataConclusao(dataConclusaoDisplay);
+    }
+
+    private void loadUserDataIfNeeded() {
+        // Se não há dados de massa ou altura, carregar do perfil do usuário
+        if (binding.massaInput.getText().toString().isEmpty() ||
+            binding.alturaInput.getText().toString().isEmpty()) {
+            lesaoVM.loadUserBasicData();
         }
     }
 
@@ -312,9 +358,23 @@ public class RegistrarLesaoActivity extends AppCompatActivity {
             lesaoVM.updateReincidencia(isChecked);
         });
 
+        // Campos de data
+        binding.dataInicioInput.setOnClickListener(v -> {
+            showDatePickerDialog(binding.dataInicioInput, lesaoVM.getDataInicio().getValue());
+        });
+
+        binding.dataConclusaoInput.setOnClickListener(v -> {
+            showDatePickerDialog(binding.dataConclusaoInput, lesaoVM.getDataConclusao().getValue());
+        });
+
         // Botão de previsão ML
         binding.predictButton.setOnClickListener(v -> {
             lesaoVM.preverTempoAfastamento();
+        });
+
+        // Botão de concluir lesão
+        binding.concluirButton.setOnClickListener(v -> {
+            lesaoVM.concludeLesao();
         });
     }
 
@@ -353,6 +413,48 @@ public class RegistrarLesaoActivity extends AppCompatActivity {
                 lesaoVM.preverTempoAfastamento();
             }, 1000);
         }
+    }
+
+    private void showDatePickerDialog(com.google.android.material.textfield.TextInputEditText editText, String currentDate) {
+        Calendar calendar = Calendar.getInstance();
+
+        // Se há uma data atual, parse ela
+        if (currentDate != null && !currentDate.isEmpty()) {
+            try {
+                SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
+                Date date = sdf.parse(currentDate);
+                if (date != null) {
+                    calendar.setTime(date);
+                }
+            } catch (ParseException e) {
+                // Se não conseguir fazer parse, usar data atual
+            }
+        }
+
+        DatePickerDialog datePickerDialog = new DatePickerDialog(
+            this,
+            (view, year, month, dayOfMonth) -> {
+                Calendar selectedCalendar = Calendar.getInstance();
+                selectedCalendar.set(year, month, dayOfMonth);
+
+                SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
+                String formattedDate = sdf.format(selectedCalendar.getTime());
+
+                editText.setText(formattedDate);
+
+                // Atualizar o ViewModel
+                if (editText == binding.dataInicioInput) {
+                    lesaoVM.updateDataInicio(formattedDate);
+                } else if (editText == binding.dataConclusaoInput) {
+                    lesaoVM.updateDataConclusao(formattedDate);
+                }
+            },
+            calendar.get(Calendar.YEAR),
+            calendar.get(Calendar.MONTH),
+            calendar.get(Calendar.DAY_OF_MONTH)
+        );
+
+        datePickerDialog.show();
     }
 
     @Override

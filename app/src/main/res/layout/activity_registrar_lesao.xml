@@ -53,9 +53,9 @@
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_marginTop="8dp"
-            android:layout_marginBottom="16dp"
+            android:layout_marginBottom="8dp"
             app:layout_constraintTop_toBottomOf="@id/titleText"
-            app:layout_constraintBottom_toTopOf="@id/saveButton">
+            app:layout_constraintBottom_toTopOf="@id/buttonsLayout">
 
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="match_parent"
@@ -537,6 +537,88 @@
                         android:text="@{viewModel.modalidadePraticadaText}"/>
                 </com.google.android.material.textfield.TextInputLayout>
 
+                <!-- Seção: Datas da Lesão -->
+                <TextView
+                    android:id="@+id/secaoDatasLesao"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Datas da Lesão"
+                    android:textSize="20sp"
+                    android:textStyle="bold"
+                    android:textColor="?attr/colorPrimary"
+                    android:layout_marginTop="24dp"
+                    app:layout_constraintTop_toBottomOf="@id/modalidadeDropdownLayout"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"/>
+
+                <!-- Data de Início -->
+                <TextView
+                    android:id="@+id/dataInicioLabel"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Data de início da lesão"
+                    android:textSize="18sp"
+                    android:textColor="?attr/colorOnSurface"
+                    android:layout_marginTop="16dp"
+                    app:layout_constraintTop_toBottomOf="@id/secaoDatasLesao"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"/>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/dataInicioLayout"
+                    style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:hint="DD/MM/AAAA"
+                    app:layout_constraintTop_toBottomOf="@id/dataInicioLabel"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/dataInicioInput"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="date"
+                        android:text="@{viewModel.dataInicio}"
+                        android:focusable="false"
+                        android:clickable="true"/>
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <!-- Data de Conclusão -->
+                <TextView
+                    android:id="@+id/dataConclusaoLabel"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Data de conclusão/recuperação (opcional)"
+                    android:textSize="18sp"
+                    android:textColor="?attr/colorOnSurface"
+                    android:layout_marginTop="16dp"
+                    app:layout_constraintTop_toBottomOf="@id/dataInicioLayout"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"/>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/dataConclusaoLayout"
+                    style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:hint="DD/MM/AAAA"
+                    app:layout_constraintTop_toBottomOf="@id/dataConclusaoLabel"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/dataConclusaoInput"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="date"
+                        android:text="@{viewModel.dataConclusao}"
+                        android:focusable="false"
+                        android:clickable="true"/>
+                </com.google.android.material.textfield.TextInputLayout>
+
                 <!-- Seção: Previsão ML -->
                 <TextView
                     android:id="@+id/secaoPrevisaoML"
@@ -547,7 +629,7 @@
                     android:textStyle="bold"
                     android:textColor="?attr/colorPrimary"
                     android:layout_marginTop="24dp"
-                    app:layout_constraintTop_toBottomOf="@id/modalidadeDropdownLayout"
+                    app:layout_constraintTop_toBottomOf="@id/dataConclusaoLayout"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"/>
 
@@ -665,6 +747,30 @@
                                 android:textColor="?attr/colorPrimary"/>
                         </LinearLayout>
 
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            android:layout_marginBottom="8dp"
+                            android:visibility="@{viewModel.previsaoAfastamento != null ? android.view.View.VISIBLE : android.view.View.GONE}">
+
+                            <TextView
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:text="Intervalo de confiança:"
+                                android:textSize="16sp"
+                                android:textColor="?attr/colorOnSurface"/>
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@{viewModel.intervaloConfiancaTexto}"
+                                android:textSize="16sp"
+                                android:textStyle="bold"
+                                android:textColor="?attr/colorPrimary"/>
+                        </LinearLayout>
+
                         <TextView
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
@@ -679,17 +785,38 @@
             </androidx.constraintlayout.widget.ConstraintLayout>
         </ScrollView>
 
-        <!-- Botão para salvar -->
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/saveButton"
+        <!-- Botões -->
+        <LinearLayout
+            android:id="@+id/buttonsLayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Salvar"
+            android:orientation="vertical"
             android:layout_marginHorizontal="16dp"
-            android:layout_marginBottom="16dp"
-            android:padding="12dp"
-            app:cornerRadius="8dp"
-            app:layout_constraintBottom_toBottomOf="parent"/>
+            android:layout_marginBottom="8dp"
+            app:layout_constraintBottom_toBottomOf="parent">
+
+            <!-- Botão para salvar -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/saveButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Salvar"
+                android:layout_marginBottom="8dp"
+                android:padding="12dp"
+                app:cornerRadius="8dp"/>
+
+            <!-- Botão para concluir lesão -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/concluirButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Concluir Lesão"
+                android:padding="12dp"
+                android:enabled="@{viewModel.canConcludeLesao}"
+                app:cornerRadius="8dp"
+                style="@style/Widget.Material3.Button.OutlinedButton"/>
+
+        </LinearLayout>
 
         <!-- Loading Indicator -->
         <ProgressBar

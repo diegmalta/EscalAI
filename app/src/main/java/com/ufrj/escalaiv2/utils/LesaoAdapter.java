@@ -74,6 +74,15 @@ public class LesaoAdapter extends RecyclerView.Adapter<LesaoAdapter.LesaoViewHol
         notifyDataSetChanged();
     }
 
+    public void updateIntervaloConfianca(int lesaoId, double min, double max) {
+        for (int i = 0; i < lesoes.size(); i++) {
+            if (lesoes.get(i).getId() == lesaoId) {
+                notifyItemChanged(i);
+                break;
+            }
+        }
+    }
+
     class LesaoViewHolder extends RecyclerView.ViewHolder {
 
         private View statusIndicator;
@@ -87,6 +96,8 @@ public class LesaoAdapter extends RecyclerView.Adapter<LesaoAdapter.LesaoViewHol
         private TextView tvDiagnostico;
         private TextView tvProfissional;
         private TextView tvReincidencia;
+        private TextView tvIntervaloConfianca;
+        private LinearLayout intervaloConfiancaContainer;
 
         private MaterialButton btnEditarLesao;
         private MaterialButton btnConcluirLesao;
@@ -109,6 +120,8 @@ public class LesaoAdapter extends RecyclerView.Adapter<LesaoAdapter.LesaoViewHol
             tvDiagnostico = itemView.findViewById(R.id.tvDiagnostico);
             tvProfissional = itemView.findViewById(R.id.tvProfissional);
             tvReincidencia = itemView.findViewById(R.id.tvReincidencia);
+            tvIntervaloConfianca = itemView.findViewById(R.id.tvIntervaloConfianca);
+            intervaloConfiancaContainer = itemView.findViewById(R.id.intervaloConfiancaContainer);
             btnEditarLesao = itemView.findViewById(R.id.btnEditarLesao);
             btnConcluirLesao = itemView.findViewById(R.id.btnConcluirLesao);
             btnPreverTempo = itemView.findViewById(R.id.btnPreverTempo);
@@ -164,6 +177,9 @@ public class LesaoAdapter extends RecyclerView.Adapter<LesaoAdapter.LesaoViewHol
             tvProfissional.setText(getProfissionalString(lesao.getProfissionalTratamento()));
             tvReincidencia.setText(lesao.isReincidencia() ? "Sim" : "Não");
 
+            // Configurar intervalo de confiança (se disponível)
+            configurarIntervaloConfianca(lesao);
+
             // Configurar botões
             if (isConcluida) {
                 btnConcluirLesao.setText("Reabrir");
@@ -184,6 +200,20 @@ public class LesaoAdapter extends RecyclerView.Adapter<LesaoAdapter.LesaoViewHol
             btnPreverTempo.setOnClickListener(v -> {
                 if (listener != null) listener.onPreverTempoClick(lesao);
             });
+        }
+
+        private void configurarIntervaloConfianca(LesaoResponse.LesaoData lesao) {
+            // Por enquanto, vamos esconder o container
+            // Quando a previsão for feita, este método será chamado com os dados reais
+            intervaloConfiancaContainer.setVisibility(View.GONE);
+
+            // TODO: Implementar quando a previsão for feita
+            // if (lesao.getPrevisaoAfastamento() != null) {
+            //     double min = lesao.getPrevisaoAfastamento().getIntervaloConfiancaMin();
+            //     double max = lesao.getPrevisaoAfastamento().getIntervaloConfiancaMax();
+            //     tvIntervaloConfianca.setText(String.format("Intervalo: %.1f - %.1f dias", min, max));
+            //     intervaloConfiancaContainer.setVisibility(View.VISIBLE);
+            // }
         }
 
         private void toggleExpansion() {

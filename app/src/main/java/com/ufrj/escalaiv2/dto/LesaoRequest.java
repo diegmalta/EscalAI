@@ -3,6 +3,10 @@ package com.ufrj.escalaiv2.dto;
 import com.google.gson.annotations.SerializedName;
 
 public class LesaoRequest {
+
+    @SerializedName("id")
+    private Integer id;
+
     @SerializedName("user_id")
     private int userId;
 
@@ -73,11 +77,26 @@ public class LesaoRequest {
     @SerializedName("tempo_escalada_meses")
     private Integer tempoEscaladaMeses;
 
+    // Campos de data da lesão
+    @SerializedName("data_inicio")
+    private String dataInicio;
+
+    @SerializedName("data_conclusao")
+    private String dataConclusao;
+
     // Construtor
     public LesaoRequest() {
     }
 
     // Getters e Setters
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
     public int getUserId() {
         return userId;
     }
@@ -237,4 +256,10 @@ public class LesaoRequest {
 
     public Integer getTempoEscaladaMeses() { return tempoEscaladaMeses; }
     public void setTempoEscaladaMeses(Integer value) { this.tempoEscaladaMeses = value; }
+
+    public String getDataInicio() { return dataInicio; }
+    public void setDataInicio(String value) { this.dataInicio = value; }
+
+    public String getDataConclusao() { return dataConclusao; }
+    public void setDataConclusao(String value) { this.dataConclusao = value; }
 }

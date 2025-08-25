@@ -79,6 +79,13 @@ public class LesaoResponse {
         @SerializedName("updated_at")
         private String updatedAt;
 
+        // Campos de data da lesão
+        @SerializedName("data_inicio")
+        private String dataInicio;
+
+        @SerializedName("data_conclusao")
+        private String dataConclusao;
+
         // Construtor padrão
         public LesaoData() {}
 
@@ -104,6 +111,8 @@ public class LesaoResponse {
             modalidadePraticada = in.readInt();
             createdAt = in.readString();
             updatedAt = in.readString();
+            dataInicio = in.readString();
+            dataConclusao = in.readString();
         }
 
         public static final Creator<LesaoData> CREATOR = new Creator<LesaoData>() {
@@ -140,6 +149,8 @@ public class LesaoResponse {
             dest.writeInt(modalidadePraticada);
             dest.writeString(createdAt);
             dest.writeString(updatedAt);
+            dest.writeString(dataInicio);
+            dest.writeString(dataConclusao);
         }
 
         @Override
@@ -306,6 +317,22 @@ public class LesaoResponse {
 
         public void setUpdatedAt(String updatedAt) {
             this.updatedAt = updatedAt;
+        }
+
+        public String getDataInicio() {
+            return dataInicio;
+        }
+
+        public void setDataInicio(String dataInicio) {
+            this.dataInicio = dataInicio;
+        }
+
+        public String getDataConclusao() {
+            return dataConclusao;
+        }
+
+        public void setDataConclusao(String dataConclusao) {
+            this.dataConclusao = dataConclusao;
         }
     }
 

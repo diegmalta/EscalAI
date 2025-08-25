@@ -22,10 +22,12 @@ import com.ufrj.escalaiv2.model.Usuario;
 import com.ufrj.escalaiv2.repository.AuthRepository;
 import com.ufrj.escalaiv2.repository.LesaoRepository;
 import com.ufrj.escalaiv2.repository.UsuarioRepository;
+import com.ufrj.escalaiv2.EscalAIApplication;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -84,9 +86,15 @@ public class LesaoVM extends AndroidViewModel {
     // LiveData para previsão ML
     private final MutableLiveData<PrevisaoAfastamentoResponse> previsaoAfastamento;
     private final MutableLiveData<Boolean> isPredicting;
+    private final MutableLiveData<String> intervaloConfiancaTexto;
 
     // ID da lesão atual (para previsão ML)
     private final MutableLiveData<Integer> lesaoId;
+
+    // LiveData para datas da lesão
+    private final MutableLiveData<String> dataInicio;
+    private final MutableLiveData<String> dataConclusao;
+    private final MutableLiveData<Boolean> canConcludeLesao;
 
     // Dados para os dropdowns de área da lesão
     private final List<String> areas;
@@ -146,9 +154,15 @@ public class LesaoVM extends AndroidViewModel {
         // Inicializar os LiveData para previsão ML
         previsaoAfastamento = new MutableLiveData<>();
         isPredicting = new MutableLiveData<>(false);
+        intervaloConfiancaTexto = new MutableLiveData<>("");
 
         // Inicializar lesaoId
         lesaoId = new MutableLiveData<>(-1);
+
+        // Inicializar os LiveData para datas da lesão
+        dataInicio = new MutableLiveData<>("");
+        dataConclusao = new MutableLiveData<>("");
+        canConcludeLesao = new MutableLiveData<>(false);
 
         // Inicializar os dados para os dropdowns de área da lesão
         areas = new ArrayList<>();
@@ -180,8 +194,45 @@ public class LesaoVM extends AndroidViewModel {
             especificacoes.put(subarea.getNome(), especificacoesForSubarea);
         }
 
-        // Carregar dados do usuário
-        loadUserData();
+        // Carregar dados do usuário apenas quando necessário
+        // loadUserData();
+    }
+
+    // Método para carregar dados básicos do usuário
+    public void loadUserBasicData() {
+        android.util.Log.d("LesaoVM", "Carregando dados básicos do usuário via API");
+
+        AuthRepository authRepository = new AuthRepository(EscalAIApplication.getAppContext());
+        authRepository.getUserProfile().observeForever(userProfile -> {
+            if (userProfile != null) {
+                android.util.Log.d("LesaoVM", "Dados do usuário carregados com sucesso");
+
+                // Atualizar massa e altura
+                if (userProfile.getPeso() != null) {
+                    massa.postValue(userProfile.getPeso());
+                }
+
+                if (userProfile.getAltura() != null) {
+                    altura.postValue(userProfile.getAltura());
+                }
+
+                // Grau de escalada - só preencher se houver dados válidos
+                Integer grauId = userProfile.getGrauEscaladaRedpoint();
+                if (grauId != null && grauId > 0) {
+                    grauEscalada.postValue(grauId);
+                    GrauEscaladaBrasileiro grau = GrauEscaladaBrasileiro.getById(grauId);
+                    if (grau != null) {
+                        grauEscaladaText.postValue(grau.getNome());
+                    }
+                } else {
+                    // Deixar vazio se não houver dados válidos
+                    grauEscalada.postValue(0);
+                    grauEscaladaText.postValue("");
+                }
+            } else {
+                android.util.Log.e("LesaoVM", "Erro ao carregar dados do usuário");
+            }
+        });
     }
 
     private void loadUserData() {
@@ -437,6 +488,35 @@ public class LesaoVM extends AndroidViewModel {
         return previsaoAfastamento;
     }
 
+    public LiveData<String> getIntervaloConfiancaTexto() {
+        return intervaloConfiancaTexto;
+    }
+
+    private String formatarIntervaloMeses(double min, double max) {
+        // Converter meses para meses e dias
+        String minFormatado = converterMesesParaMesesEDias(min);
+        String maxFormatado = converterMesesParaMesesEDias(max);
+        return minFormatado + " - " + maxFormatado;
+    }
+
+    private String converterMesesParaMesesEDias(double meses) {
+        int mesesInteiros = (int) meses;
+        double parteDecimal = meses - mesesInteiros;
+
+        // Calcular dias: parte decimal * 30 dias
+        int dias = (int) Math.round(parteDecimal * 30);
+
+        if (mesesInteiros == 0) {
+            return dias + " dias";
+        } else if (dias == 0) {
+            return mesesInteiros + " meses";
+        } else {
+            return mesesInteiros + " meses e " + dias + " dias";
+        }
+    }
+
+
+
     public LiveData<Boolean> getIsPredicting() {
         return isPredicting;
     }
@@ -531,6 +611,23 @@ public class LesaoVM extends AndroidViewModel {
         modalidadePraticadaText.setValue(TipoTreino.getAllNames()[position]);
     }
 
+    // Métodos para atualizar datas
+    public void updateDataInicio(String data) {
+        dataInicio.setValue(data);
+        validateConcludeButton();
+    }
+
+    public void updateDataConclusao(String data) {
+        dataConclusao.setValue(data);
+        validateConcludeButton();
+    }
+
+    // Método para validar se pode concluir a lesão
+    private void validateConcludeButton() {
+        boolean canConclude = validateRequiredFieldsForConclusion();
+        canConcludeLesao.setValue(canConclude);
+    }
+
     // Atualiza o ID da lesão corrente
     public void setLesaoId(int id) {
         lesaoId.setValue(id);
@@ -540,8 +637,29 @@ public class LesaoVM extends AndroidViewModel {
         return lesaoId;
     }
 
+    // Getters para datas da lesão
+    public LiveData<String> getDataInicio() {
+        return dataInicio;
+    }
+
+    public LiveData<String> getDataConclusao() {
+        return dataConclusao;
+    }
+
+    public LiveData<Boolean> getCanConcludeLesao() {
+        return canConcludeLesao;
+    }
+
     // Método para salvar os dados
     public void saveLesaoData() {
+        // Validar apenas campos essenciais para salvar
+        if (!validateRequiredFields()) {
+            android.util.Log.d("LesaoVM", "Validação falhou ao salvar lesão");
+            uiEvent.setValue(Event.SHOW_ERROR_MESSAGE);
+            return;
+        }
+
+        android.util.Log.d("LesaoVM", "Iniciando salvamento da lesão");
         isLoading.setValue(true);
 
         authRepository.getCurrentUserIdAsync(userId -> {
@@ -558,22 +676,11 @@ public class LesaoVM extends AndroidViewModel {
             request.setAltura(altura.getValue());
             request.setGrauEscalada(grauEscalada.getValue());
 
-            // Dados de prática (legado)
+            // Dados de prática
             request.setTempoPraticaMeses(tempoPraticaMeses.getValue());
             request.setFrequenciaSemanal(frequenciaSemanal.getValue());
             request.setHorasSemanais(horasSemanais.getValue());
             request.setLesoesPrevias(lesoesPrevias.getValue());
-
-            // Novos dados de engajamento (apenas brasileira)
-            Integer freq = frequenciaSemanal.getValue();
-            Integer horas = horasSemanais.getValue();
-            Integer grau = grauEscalada.getValue();
-            Integer tempo = tempoPraticaMeses.getValue();
-            request.setFreqEscaladaTradicionalBrasileira(freq != null ? freq : 0);
-            request.setHorasEscaladaTradicionalBrasileira(horas != null ? horas : 0);
-            request.setGrauEscaladaBrasileiraOnSight(grau != null ? grau : 0);
-            request.setGrauEscaladaBrasileiraRedpoint(grau != null ? grau : 0);
-            request.setTempoEscaladaMeses(tempo != null ? tempo : 0);
 
             // Dados de lesão
             request.setReincidencia(reincidencia.getValue());
@@ -586,23 +693,54 @@ public class LesaoVM extends AndroidViewModel {
                 request.setModalidadePraticada(modalidadePraticada.getValue());
             }
 
+            // Dados de data da lesão
+            String dataInicioFormatted = null;
+            String dataConclusaoFormatted = null;
+
+            if (dataInicio.getValue() != null && !dataInicio.getValue().trim().isEmpty()) {
+                dataInicioFormatted = convertDateFormat(dataInicio.getValue());
+            }
+
+            if (dataConclusao.getValue() != null && !dataConclusao.getValue().trim().isEmpty()) {
+                dataConclusaoFormatted = convertDateFormat(dataConclusao.getValue());
+            }
+
+            request.setDataInicio(dataInicioFormatted);
+            request.setDataConclusao(dataConclusaoFormatted);
+
+            // Log para debug
+            android.util.Log.d("LesaoVM", "Dados de data sendo enviados:");
+            android.util.Log.d("LesaoVM", "dataInicio: " + dataInicioFormatted);
+            android.util.Log.d("LesaoVM", "dataConclusao: " + dataConclusaoFormatted);
+
+            // Log para campos obrigatórios
+            android.util.Log.d("LesaoVM", "Campos obrigatórios:");
+            android.util.Log.d("LesaoVM", "areaLesaoN1: " + selectedArea.getValue());
+            android.util.Log.d("LesaoVM", "areaLesaoN2: " + selectedSubarea.getValue());
+            android.util.Log.d("LesaoVM", "areaLesaoN3: " + selectedEspecificacao.getValue());
+            android.util.Log.d("LesaoVM", "massa: " + massa.getValue());
+            android.util.Log.d("LesaoVM", "altura: " + altura.getValue());
+            android.util.Log.d("LesaoVM", "grauEscalada: " + grauEscalada.getValue());
+
             Integer currentId = lesaoId.getValue();
             if (currentId != null && currentId > 0) {
-                // Atualiza lesão existente via PUT
+                // Garantir que o ID da lesão está sendo enviado na requisição
+                request.setId(currentId);
                 lesaoRepository.updateLesao(currentId, request).observeForever(response -> {
                     isLoading.postValue(false);
                     if (response != null && response.isSuccess()) {
                         uiEvent.postValue(Event.SHOW_SUCCESS_MESSAGE);
+                        validateConcludeButton(); // Revalidar botão após salvar
                     } else {
                         uiEvent.postValue(Event.SHOW_ERROR_MESSAGE);
                     }
                 });
             } else {
-                // Cria nova lesão via POST
                 lesaoRepository.saveLesao(request).observeForever(response -> {
                     isLoading.postValue(false);
                     if (response != null && response.isSuccess()) {
                         uiEvent.postValue(Event.SHOW_SUCCESS_MESSAGE);
+                        validateConcludeButton(); // Revalidar botão após salvar
                     } else {
                         uiEvent.postValue(Event.SHOW_ERROR_MESSAGE);
                     }
@@ -611,8 +749,33 @@ public class LesaoVM extends AndroidViewModel {
         });
     }
 
+    // Método para concluir a lesão
+    public void concludeLesao() {
+        // Verificar se pode concluir
+        if (!canConcludeLesao.getValue()) {
+            return;
+        }
+
+        // Validar campos obrigatórios para conclusão
+        if (!validateRequiredFieldsForConclusion()) {
+            uiEvent.setValue(Event.SHOW_ERROR_MESSAGE);
+            return;
+        }
+
+        // Salvar a lesão com a data de conclusão
+        saveLesaoData();
+    }
+
     // Método para prever tempo de afastamento
     public void preverTempoAfastamento() {
+        // Validar campos obrigatórios para previsão
+        if (!validateFieldsForPrediction()) {
+            android.util.Log.d("LesaoVM", "Validação falhou ao prever tempo de afastamento");
+            uiEvent.setValue(Event.SHOW_ERROR_MESSAGE);
+            return;
+        }
+
+        android.util.Log.d("LesaoVM", "Iniciando previsão de tempo de afastamento");
         isPredicting.setValue(true);
         previsaoAfastamento.setValue(null);
 
@@ -631,6 +794,11 @@ public class LesaoVM extends AndroidViewModel {
 
                 if (response != null) {
                     previsaoAfastamento.postValue(response);
+                    // Atualizar o texto do intervalo de confiança
+                    double min = response.getIntervaloConfiancaMin();
+                    double max = response.getIntervaloConfiancaMax();
+                    String intervaloTexto = formatarIntervaloMeses(min, max);
+                    intervaloConfiancaTexto.postValue(intervaloTexto);
                 } else {
                     // Em caso de erro, não gerar previsão; sinalizar erro para UI
                     uiEvent.postValue(Event.PREDICTION_ERROR);
@@ -695,11 +863,30 @@ public class LesaoVM extends AndroidViewModel {
             especificacaoEnabled.postValue(true);
         }
 
-        // Dados do usuário
-        massa.postValue((double) lesao.getMassa());
-        altura.postValue(lesao.getAltura());
-        grauEscalada.postValue(lesao.getGrauEscalada());
-        grauEscaladaText.postValue(GrauEscaladaBrasileiro.getAllNames()[lesao.getGrauEscalada()]);
+        // Dados do usuário - priorizar dados da lesão, usar dados do usuário como fallback
+        if (lesao.getMassa() > 0) {
+            massa.postValue((double) lesao.getMassa());
+        } else {
+            // Se não há massa na lesão, carregar do perfil do usuário
+            loadUserBasicData();
+        }
+
+        if (lesao.getAltura() > 0) {
+            altura.postValue(lesao.getAltura());
+        } else {
+            // Se não há altura na lesão, carregar do perfil do usuário
+            loadUserBasicData();
+        }
+
+        // Grau de escalada - tratar valores inválidos
+        int grauId = lesao.getGrauEscalada();
+        if (grauId >= 0 && grauId < GrauEscaladaBrasileiro.getAllNames().length) {
+            grauEscalada.postValue(grauId);
+            grauEscaladaText.postValue(GrauEscaladaBrasileiro.getAllNames()[grauId]);
+        } else {
+            grauEscalada.postValue(0);
+            grauEscaladaText.postValue("");
+        }
 
         // Dados de prática
         tempoPraticaMeses.postValue(lesao.getTempoPraticaMeses());
@@ -724,6 +911,156 @@ public class LesaoVM extends AndroidViewModel {
 
             modalidadePraticada.postValue(lesao.getModalidadePraticada());
             modalidadePraticadaText.postValue(TipoTreino.getAllNames()[lesao.getModalidadePraticada()]);
+        }
+
+        // Dados de data da lesão
+        dataInicio.postValue(convertServerDateToDisplay(lesao.getDataInicio()));
+        dataConclusao.postValue(convertServerDateToDisplay(lesao.getDataConclusao()));
+        validateConcludeButton();
+    }
+
+    // Método para validar campos obrigatórios
+    private boolean validateRequiredFields() {
+        boolean isValid = true;
+
+        // Validar apenas campos essenciais para salvar
+        if (selectedArea.getValue() == null || selectedArea.getValue() == -1) {
+            android.util.Log.d("LesaoVM", "Validação falhou: área não selecionada");
+            isValid = false;
+        }
+        if (selectedSubarea.getValue() == null || selectedSubarea.getValue() == -1) {
+            android.util.Log.d("LesaoVM", "Validação falhou: subárea não selecionada");
+            isValid = false;
+        }
+        if (selectedEspecificacao.getValue() == null || selectedEspecificacao.getValue() == -1) {
+            android.util.Log.d("LesaoVM", "Validação falhou: especificação não selecionada");
+            isValid = false;
+        }
+        if (massa.getValue() == null) {
+            android.util.Log.d("LesaoVM", "Validação falhou: massa é null");
+            isValid = false;
+        }
+        if (altura.getValue() == null) {
+            android.util.Log.d("LesaoVM", "Validação falhou: altura é null");
+            isValid = false;
+        }
+        if (grauEscalada.getValue() == null) {
+            android.util.Log.d("LesaoVM", "Validação falhou: grau de escalada é null");
+            isValid = false;
+        }
+        if (tempoPraticaMeses.getValue() == null) {
+            android.util.Log.d("LesaoVM", "Validação falhou: tempo de prática é null");
+            isValid = false;
+        }
+        if (frequenciaSemanal.getValue() == null) {
+            android.util.Log.d("LesaoVM", "Validação falhou: frequência semanal é null");
+            isValid = false;
+        }
+        if (horasSemanais.getValue() == null) {
+            android.util.Log.d("LesaoVM", "Validação falhou: horas semanais é null");
+            isValid = false;
+        }
+        if (lesoesPrevias.getValue() == null) {
+            android.util.Log.d("LesaoVM", "Validação falhou: lesões prévias é null");
+            isValid = false;
+        }
+
+        // Data de início é opcional para salvar, obrigatória apenas para concluir
+        // Data de conclusão é opcional para salvar, obrigatória apenas para concluir
+
+        android.util.Log.d("LesaoVM", "Validação concluída: " + (isValid ? "SUCESSO" : "FALHA"));
+        return isValid;
+    }
+
+    // Método para validar campos obrigatórios para conclusão
+    private boolean validateRequiredFieldsForConclusion() {
+        boolean isValid = validateRequiredFields();
+
+        // Para concluir, a data de início é obrigatória
+        if (dataInicio.getValue() == null || dataInicio.getValue().trim().isEmpty()) {
+            isValid = false;
+        }
+
+        // Para concluir, a data de conclusão é obrigatória
+        if (dataConclusao.getValue() == null || dataConclusao.getValue().trim().isEmpty()) {
+            isValid = false;
+        }
+
+        return isValid;
+    }
+
+    // Método para validar campos para previsão (sem exigir data de conclusão)
+    private boolean validateFieldsForPrediction() {
+        boolean isValid = true;
+
+        if (selectedArea.getValue() == null || selectedArea.getValue() == -1) {
+            isValid = false;
+        }
+        if (selectedSubarea.getValue() == null || selectedSubarea.getValue() == -1) {
+            isValid = false;
+        }
+        if (selectedEspecificacao.getValue() == null || selectedEspecificacao.getValue() == -1) {
+            isValid = false;
+        }
+        if (massa.getValue() == null) {
+            isValid = false;
+        }
+        if (altura.getValue() == null) {
+            isValid = false;
+        }
+        if (grauEscalada.getValue() == null) {
+            isValid = false;
+        }
+        if (tempoPraticaMeses.getValue() == null) {
+            isValid = false;
+        }
+        if (frequenciaSemanal.getValue() == null) {
+            isValid = false;
+        }
+        if (horasSemanais.getValue() == null) {
+            isValid = false;
+        }
+        if (lesoesPrevias.getValue() == null) {
+            isValid = false;
+        }
+        // Data de início não é obrigatória para previsão
+
+        return isValid;
+    }
+
+    // Método para converter formato de data de DD/MM/YYYY para YYYY-MM-DD
+    private String convertDateFormat(String dateString) {
+        if (dateString == null || dateString.trim().isEmpty()) {
+            return "";
+        }
+
+        try {
+            java.text.SimpleDateFormat inputFormat = new java.text.SimpleDateFormat("dd/MM/yyyy", java.util.Locale.getDefault());
+            java.text.SimpleDateFormat outputFormat = new java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.getDefault());
+
+            java.util.Date date = inputFormat.parse(dateString);
+            return outputFormat.format(date);
+        } catch (java.text.ParseException e) {
+            android.util.Log.e("LesaoVM", "Erro ao converter data: " + dateString, e);
+            return "";
+        }
+    }
+
+    // Método para converter formato de data do servidor (YYYY-MM-DD) para exibição (DD/MM/YYYY)
+    public String convertServerDateToDisplay(String serverDate) {
+        if (serverDate == null || serverDate.trim().isEmpty()) {
+            return "";
+        }
+
+        try {
+            java.text.SimpleDateFormat serverFormat = new java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.getDefault());
+            java.text.SimpleDateFormat displayFormat = new java.text.SimpleDateFormat("dd/MM/yyyy", java.util.Locale.getDefault());
+
+            java.util.Date date = serverFormat.parse(serverDate);
+            return displayFormat.format(date);
+        } catch (java.text.ParseException e) {
+            android.util.Log.e("LesaoVM", "Erro ao converter data do servidor: " + serverDate, e);
+            return serverDate; // Retorna o valor original se não conseguir converter
         }
     }
 }

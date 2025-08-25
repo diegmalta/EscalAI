@@ -13,6 +13,7 @@ import com.ufrj.escalaiv2.dto.LoginResponse;
 import com.ufrj.escalaiv2.dto.RegisterRequest;
 import com.ufrj.escalaiv2.dto.RefreshTokenRequest;
 import com.ufrj.escalaiv2.dto.RefreshTokenResponse;
+import com.ufrj.escalaiv2.dto.UserProfileResponse;
 import com.ufrj.escalaiv2.model.AppDatabase;
 import com.ufrj.escalaiv2.model.Usuario;
 import com.ufrj.escalaiv2.network.AuthApiService;
@@ -747,6 +748,54 @@ public class AuthRepository {
                 successResponse.setMessage("Logout realizado com sucesso");
                 result.setValue(successResponse);
                 Log.w(TAG, "Falha na comunicação durante logout, mas logout local realizado", t);
+            }
+        });
+
+        return result;
+    }
+
+    public LiveData<RefreshTokenResponse> refreshToken(RefreshTokenRequest request) {
+        MutableLiveData<RefreshTokenResponse> result = new MutableLiveData<>();
+
+        authApiService.refreshToken(request).enqueue(new Callback<RefreshTokenResponse>() {
+            @Override
+            public void onResponse(Call<RefreshTokenResponse> call, Response<RefreshTokenResponse> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    result.postValue(response.body());
+                } else {
+                    Log.e(TAG, "Erro ao renovar token: " + response.code());
+                    result.postValue(null);
+                }
+            }
+
+            @Override
+            public void onFailure(Call<RefreshTokenResponse> call, Throwable t) {
+                Log.e(TAG, "Erro de rede ao renovar token", t);
+                result.postValue(null);
+            }
+        });
+
+        return result;
+    }
+
+    public LiveData<UserProfileResponse> getUserProfile() {
+        MutableLiveData<UserProfileResponse> result = new MutableLiveData<>();
+
+        authApiService.getUserProfile().enqueue(new Callback<UserProfileResponse>() {
+            @Override
+            public void onResponse(Call<UserProfileResponse> call, Response<UserProfileResponse> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    result.postValue(response.body());
+                } else {
+                    Log.e(TAG, "Erro ao buscar perfil do usuário: " + response.code());
+                    result.postValue(null);
+                }
+            }
+
+            @Override
+            public void onFailure(Call<UserProfileResponse> call, Throwable t) {
+                Log.e(TAG, "Erro de rede ao buscar perfil do usuário", t);
+                result.postValue(null);
             }
         });
 

@@ -16,11 +16,14 @@ public class PrevisaoAfastamentoResponse {
     @SerializedName("confianca")
     private double confianca;
 
+    @SerializedName("intervalo_confianca_min")
+    private double intervaloConfiancaMin;
+
+    @SerializedName("intervalo_confianca_max")
+    private double intervaloConfiancaMax;
+
     @SerializedName("fatores_principais")
     private List<String> fatoresPrincipais;
-
-    @SerializedName("recomendacoes")
-    private List<String> recomendacoes;
 
     @SerializedName("message")
     private String message;
@@ -60,20 +63,28 @@ public class PrevisaoAfastamentoResponse {
         this.confianca = confianca;
     }
 
+    public double getIntervaloConfiancaMin() {
+        return intervaloConfiancaMin;
+    }
+
+    public void setIntervaloConfiancaMin(double intervaloConfiancaMin) {
+        this.intervaloConfiancaMin = intervaloConfiancaMin;
+    }
+
+    public double getIntervaloConfiancaMax() {
+        return intervaloConfiancaMax;
+    }
+
+    public void setIntervaloConfiancaMax(double intervaloConfiancaMax) {
+        this.intervaloConfiancaMax = intervaloConfiancaMax;
+    }
+
     public List<String> getFatoresPrincipais() {
         return fatoresPrincipais;
     }
 
     public void setFatoresPrincipais(List<String> fatoresPrincipais) {
         this.fatoresPrincipais = fatoresPrincipais;
-    }
-
-    public List<String> getRecomendacoes() {
-        return recomendacoes;
-    }
-
-    public void setRecomendacoes(List<String> recomendacoes) {
-        this.recomendacoes = recomendacoes;
     }
 
     public String getMessage() {
