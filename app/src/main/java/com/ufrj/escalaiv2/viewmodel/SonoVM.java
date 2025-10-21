@@ -188,7 +188,7 @@ public class SonoVM extends AndroidViewModel {
                 }
 
                 // Registrar sono usando o novo repositório
-                atividadesRepository.registrarSono(currentUserId, currentDate, sleepTime.getValue(),
+                atividadesRepository.registrarSono(currentDate, sleepTime.getValue(),
                         wakeTime.getValue(), totalSleepTimeInMinutes.getValue(), quality, token,
                         new AtividadesRepository.OnActivityCallback() {
                             @Override

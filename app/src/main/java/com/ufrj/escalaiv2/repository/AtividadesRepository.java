@@ -53,7 +53,7 @@ public class AtividadesRepository {
     }
 
     // Método para registrar água
-    public void registrarAgua(int userId, int quantidade, String token, OnActivityCallback callback) {
+    public void registrarAgua(int quantidade, String token, OnActivityCallback callback) {
         executorService.execute(() -> {
             int localUserId = getLocalUserId(context);
             if (localUserId == -1) {
@@ -62,7 +62,7 @@ public class AtividadesRepository {
             }
             String todayDate = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());
             userDailyDataRepository.addWaterConsumption(localUserId, quantidade);
-            AguaRequest request = new AguaRequest(localUserId, todayDate, quantidade);
+            AguaRequest request = new AguaRequest(todayDate, quantidade);
             atividadesApiService.registrarAgua(token, request).enqueue(new Callback<ApiResponse>() {
                 @Override
                 public void onResponse(Call<ApiResponse> call, Response<ApiResponse> response) {
@@ -84,7 +84,7 @@ public class AtividadesRepository {
     }
 
     // Método para registrar humor
-    public void registrarHumor(int userId, HumorValues joyLevel, HumorValues sadnessLevel,
+    public void registrarHumor(HumorValues joyLevel, HumorValues sadnessLevel,
                               HumorValues anxietyLevel, HumorValues stressLevel, HumorValues calmLevel, String token,
                               OnActivityCallback callback) {
         executorService.execute(() -> {
@@ -100,7 +100,7 @@ public class AtividadesRepository {
                 callback.onError("Erro ao salvar dados localmente");
                 return;
             }
-            HumorRequest request = new HumorRequest(localUserId, todayDate, joyLevel.ordinal(),
+            HumorRequest request = new HumorRequest(todayDate, joyLevel.ordinal(),
                     sadnessLevel.ordinal(), anxietyLevel.ordinal(), stressLevel.ordinal(), calmLevel.ordinal());
             atividadesApiService.registrarHumor(token, request).enqueue(new Callback<ApiResponse>() {
                 @Override
@@ -123,7 +123,7 @@ public class AtividadesRepository {
     }
 
     // Método para registrar sono
-    public void registrarSono(int userId, String date, String sleepTime, String wakeTime,
+    public void registrarSono(String date, String sleepTime, String wakeTime,
                              Integer totalSleepMinutes, Integer quality, String token, OnActivityCallback callback) {
         executorService.execute(() -> {
             int localUserId = getLocalUserId(context);
@@ -137,7 +137,7 @@ public class AtividadesRepository {
                 callback.onError("Erro ao salvar dados localmente");
                 return;
             }
-            SonoRequest request = new SonoRequest(localUserId, date, sleepTime, wakeTime,
+            SonoRequest request = new SonoRequest(date, sleepTime, wakeTime,
                     totalSleepMinutes != null ? totalSleepMinutes : 0,
                     quality != null ? quality : 3);
             atividadesApiService.registrarSono(token, request).enqueue(new Callback<ApiResponse>() {
@@ -161,7 +161,7 @@ public class AtividadesRepository {
     }
 
     // Método para registrar treino
-    public void registrarTreino(int userId, int tipoTreinoIndex, int duracaoMinutos, String token, OnActivityCallback callback) {
+    public void registrarTreino(int tipoTreinoIndex, int duracaoMinutos, String token, OnActivityCallback callback) {
         executorService.execute(() -> {
             int localUserId = getLocalUserId(context);
             if (localUserId == -1) {
@@ -175,7 +175,7 @@ public class AtividadesRepository {
                 return;
             }
             TipoTreino tipoTreino = TipoTreino.getById(tipoTreinoIndex);
-            TreinoRequest request = new TreinoRequest(localUserId, todayDate, tipoTreino.name(), duracaoMinutos);
+            TreinoRequest request = new TreinoRequest(todayDate, tipoTreino.name(), duracaoMinutos);
             atividadesApiService.registrarTreino(token, request).enqueue(new Callback<ApiResponse>() {
                 @Override
                 public void onResponse(Call<ApiResponse> call, Response<ApiResponse> response) {
@@ -197,7 +197,7 @@ public class AtividadesRepository {
     }
 
     // Método para registrar dor
-    public void registrarDor(int userId, int areaDor, int subareaDor, int especificacaoDor,
+    public void registrarDor(int areaDor, int subareaDor, int especificacaoDor,
                            int intensidadeDor, String token, OnActivityCallback callback) {
         executorService.execute(() -> {
             int localUserId = getLocalUserId(context);
@@ -212,7 +212,7 @@ public class AtividadesRepository {
                 callback.onError("Erro ao salvar dados localmente");
                 return;
             }
-            DorRequest request = new DorRequest(localUserId, todayDate, areaDor, subareaDor,
+            DorRequest request = new DorRequest(todayDate, areaDor, subareaDor,
                     especificacaoDor, intensidadeDor);
             atividadesApiService.registrarDor(token, request).enqueue(new Callback<ApiResponse>() {
                 @Override
@@ -235,24 +235,35 @@ public class AtividadesRepository {
     }
 
     // Métodos para obter dados (apenas localmente)
-    public int getTotalWaterConsumption(int userId) {
-        return userDailyDataRepository.getTotalWaterConsumption(userId);
+    public int getTotalWaterConsumption() {
+        int localUserId = getLocalUserId(context);
+        if (localUserId == -1) return 0;
+        return userDailyDataRepository.getTotalWaterConsumption(localUserId);
     }
 
-    public UserDailyData getTodayMoodData(int userId) {
-        return userDailyDataRepository.getTodayMoodData(userId);
+    public UserDailyData getTodayMoodData() {
+        int localUserId = getLocalUserId(context);
+        if (localUserId == -1) return null;
+        return userDailyDataRepository.getTodayMoodData(localUserId);
     }
 
-    public UserDailyData getTodayDorData(int userId) {
-        return userDailyDataRepository.getTodayDorData(userId);
+    public UserDailyData getTodayDorData() {
+        int localUserId = getLocalUserId(context);
+        if (localUserId == -1) return null;
+        return userDailyDataRepository.getTodayDorData(localUserId);
     }
 
-    public Map<String, Float> getTodayTrainingData(int userId) {
-        return userDailyDataRepository.getTodayTrainingData(userId);
+    public Map<String, Float> getTodayTrainingData() {
+        int localUserId = getLocalUserId(context);
+        if (localUserId == -1) return new HashMap<>();
+        return userDailyDataRepository.getTodayTrainingData(localUserId);
     }
 
-    public void resetWaterConsumption(int userId) {
-        userDailyDataRepository.resetWaterConsumption(userId);
+    public void resetWaterConsumption() {
+        int localUserId = getLocalUserId(context);
+        if (localUserId != -1) {
+            userDailyDataRepository.resetWaterConsumption(localUserId);
+        }
     }
 
     public void getCurrentUserId(java.util.function.Consumer<Integer> callback) {

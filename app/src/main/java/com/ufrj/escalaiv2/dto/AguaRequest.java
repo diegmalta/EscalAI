@@ -3,27 +3,15 @@ package com.ufrj.escalaiv2.dto;
 import com.google.gson.annotations.SerializedName;
 
 public class AguaRequest {
-    @SerializedName("user_id")
-    private int userId;
-
     @SerializedName("date")
     private String date;
 
     @SerializedName("water_consumed")
     private int waterConsumed;
 
-    public AguaRequest(int userId, String date, int waterConsumed) {
-        this.userId = userId;
+    public AguaRequest(String date, int waterConsumed) {
         this.date = date;
         this.waterConsumed = waterConsumed;
-    }
-
-    public int getUserId() {
-        return userId;
-    }
-
-    public void setUserId(int userId) {
-        this.userId = userId;
     }
 
     public String getDate() {

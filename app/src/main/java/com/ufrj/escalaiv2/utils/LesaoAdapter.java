@@ -324,11 +324,9 @@ public class LesaoAdapter extends RecyclerView.Adapter<LesaoAdapter.LesaoViewHol
 
         private boolean isConcluida(LesaoResponse.LesaoData lesao) {
             // Lógica para determinar se a lesão está concluída
-            // Por exemplo, baseado em algum campo de status
-            // Como não temos um campo específico, vamos usar uma heurística temporária
-            long dias = calcularDiasDesdeCriacao(lesao.getCreatedAt());
-            int tempoPrevisto = calcularTempoPrevisto(lesao);
-            return dias >= tempoPrevisto;
+            // Baseado no campo dataConclusao - se não for null/vazio, está concluída
+            String dataConclusao = lesao.getDataConclusao();
+            return dataConclusao != null && !dataConclusao.trim().isEmpty() && !dataConclusao.equals("null");
         }
 
         private String getDiagnosticoString(int diagnostico) {

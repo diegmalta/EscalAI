@@ -3,9 +3,6 @@ package com.ufrj.escalaiv2.dto;
 import com.google.gson.annotations.SerializedName;
 
 public class PrevisaoAfastamentoRequest {
-    @SerializedName("user_id")
-    private int userId;
-
     @SerializedName("buscou_atendimento")
     private boolean buscouAtendimento;
 
@@ -21,20 +18,11 @@ public class PrevisaoAfastamentoRequest {
     public PrevisaoAfastamentoRequest() {
     }
 
-    public PrevisaoAfastamentoRequest(int userId, int lesaoId, boolean buscouAtendimento, boolean reincidencia, int lesoesPrevias) {
-        this.userId = userId;
+    public PrevisaoAfastamentoRequest(int lesaoId, boolean buscouAtendimento, boolean reincidencia, int lesoesPrevias) {
         this.lesaoId = lesaoId;
         this.buscouAtendimento = buscouAtendimento;
         this.reincidencia = reincidencia;
         this.lesoesPrevias = lesoesPrevias;
-    }
-
-    public int getUserId() {
-        return userId;
-    }
-
-    public void setUserId(int userId) {
-        this.userId = userId;
     }
 
     public boolean isBuscouAtendimento() {

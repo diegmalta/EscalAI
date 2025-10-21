@@ -19,10 +19,12 @@ import retrofit2.Response;
 
 public class LesaoRepository {
     private final LesaoApiService lesaoApiService;
+    private final AuthRepository authRepository;
     private static final String TAG = "LesaoRepository";
 
     public LesaoRepository(Context context) {
         this.lesaoApiService = RetrofitClient.getLesaoApiService(context);
+        this.authRepository = new AuthRepository(context);
     }
 
     public LiveData<LesaoResponse> saveLesao(LesaoRequest request) {
@@ -73,10 +75,10 @@ public class LesaoRepository {
         return result;
     }
 
-    public LiveData<LesaoResponse> getUserLesoes(int userId) {
+    public LiveData<LesaoResponse> getUserLesoes() {
         MutableLiveData<LesaoResponse> result = new MutableLiveData<>();
 
-        lesaoApiService.getUserLesoes(userId).enqueue(new Callback<LesaoResponse>() {
+        lesaoApiService.getUserLesoes().enqueue(new Callback<LesaoResponse>() {
             @Override
             public void onResponse(Call<LesaoResponse> call, Response<LesaoResponse> response) {
                 if (response.isSuccessful() && response.body() != null) {
@@ -124,6 +126,7 @@ public class LesaoRepository {
     public LiveData<PrevisaoAfastamentoResponse> preverAfastamento(PrevisaoAfastamentoRequest request) {
         MutableLiveData<PrevisaoAfastamentoResponse> result = new MutableLiveData<>();
 
+        Log.d(TAG, "Usando API remota para previsão");
         lesaoApiService.preverAfastamento(request).enqueue(new Callback<PrevisaoAfastamentoResponse>() {
             @Override
             public void onResponse(Call<PrevisaoAfastamentoResponse> call, Response<PrevisaoAfastamentoResponse> response) {

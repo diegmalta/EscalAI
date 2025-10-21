@@ -37,12 +37,10 @@ public class AguaVM extends AndroidViewModel {
         totalWaterConsumption = new MutableLiveData<>(0); // Inicializa com 0 ou null
 
         // Buscar valor do banco de dados em background
-        atividadesRepository.getCurrentUserId(currentUserId -> {
-            new Thread(() -> {
-                int total = atividadesRepository.getTotalWaterConsumption(currentUserId);
-                ((MutableLiveData<Integer>) totalWaterConsumption).postValue(total);
-            }).start();
-        });
+        new Thread(() -> {
+            int total = atividadesRepository.getTotalWaterConsumption();
+            ((MutableLiveData<Integer>) totalWaterConsumption).postValue(total);
+        }).start();
     }
 
     public LiveData<Integer> getTotalWaterConsumption() {
@@ -97,12 +95,12 @@ public class AguaVM extends AndroidViewModel {
                 Log.d("TOKEN_DEBUG", "Token enviado: " + token);
 
                 // Registrar água usando o novo repositório
-                atividadesRepository.registrarAgua(currentUserId, sliderValue, token, new AtividadesRepository.OnActivityCallback() {
+                atividadesRepository.registrarAgua(sliderValue, token, new AtividadesRepository.OnActivityCallback() {
                     @Override
                     public void onSuccess() {
                         valorAtualSlider.postValue(0);
                         new Thread(() -> {
-                            int total = atividadesRepository.getTotalWaterConsumption(currentUserId);
+                            int total = atividadesRepository.getTotalWaterConsumption();
                             ((MutableLiveData<Integer>) totalWaterConsumption).postValue(total);
                         }).start();
                         uiEvent.postValue(Event.SHOW_SUCCESS_MESSAGE);
@@ -122,18 +120,16 @@ public class AguaVM extends AndroidViewModel {
 
     // Resetar consumo total de água
     public void resetarConsumoAgua() {
-        atividadesRepository.getCurrentUserId(currentUserId -> {
-            atividadesRepository.resetWaterConsumption(currentUserId);
+        atividadesRepository.resetWaterConsumption();
 
-            // Resetar outros valores
-            valorAtualSlider.setValue(0);
-            uiEvent.setValue(Event.RESET_COMPLETED);
-            // Buscar valor do banco de dados em background
-            new Thread(() -> {
-                int total = atividadesRepository.getTotalWaterConsumption(currentUserId);
-                ((MutableLiveData<Integer>) totalWaterConsumption).postValue(total);
-            }).start();
-        });
+        // Resetar outros valores
+        valorAtualSlider.setValue(0);
+        uiEvent.setValue(Event.RESET_COMPLETED);
+        // Buscar valor do banco de dados em background
+        new Thread(() -> {
+            int total = atividadesRepository.getTotalWaterConsumption();
+            ((MutableLiveData<Integer>) totalWaterConsumption).postValue(total);
+        }).start();
     }
 
 

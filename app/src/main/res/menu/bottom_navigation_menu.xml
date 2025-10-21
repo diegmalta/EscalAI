@@ -5,6 +5,7 @@
         android:enabled="true"
         android:icon="@drawable/icon_house"
         android:title="Home"/>
+
     <item
         android:id="@+id/relatorios"
         android:enabled="true"
@@ -14,12 +15,12 @@
     <item
         android:id="@+id/exercises"
         android:enabled="true"
-        android:icon="@drawable/ic_arrow_back"
+        android:icon="@drawable/baseline_smart_display_24"
         android:title="Exercícios"/>
 
     <item
         android:id="@+id/profile"
         android:enabled="true"
-        android:icon="@drawable/ic_arrow_back"
+        android:icon="@drawable/baseline_person_24"
         android:title="Perfil"/>
 </menu>

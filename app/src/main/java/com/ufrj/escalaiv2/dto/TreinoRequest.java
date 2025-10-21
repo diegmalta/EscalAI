@@ -3,9 +3,6 @@ package com.ufrj.escalaiv2.dto;
 import com.google.gson.annotations.SerializedName;
 
 public class TreinoRequest {
-    @SerializedName("user_id")
-    private int userId;
-    
     @SerializedName("date")
     private String date;
     
@@ -15,19 +12,10 @@ public class TreinoRequest {
     @SerializedName("duracao_minutos")
     private int duracaoMinutos;
 
-    public TreinoRequest(int userId, String date, String tipoTreino, int duracaoMinutos) {
-        this.userId = userId;
+    public TreinoRequest(String date, String tipoTreino, int duracaoMinutos) {
         this.date = date;
         this.tipoTreino = tipoTreino;
         this.duracaoMinutos = duracaoMinutos;
-    }
-
-    public int getUserId() {
-        return userId;
-    }
-
-    public void setUserId(int userId) {
-        this.userId = userId;
     }
 
     public String getDate() {

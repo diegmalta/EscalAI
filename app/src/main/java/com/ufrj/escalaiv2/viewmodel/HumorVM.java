@@ -63,23 +63,20 @@ public class HumorVM extends AndroidViewModel {
     }
 
     private void initializeMoodValues() {
-        AuthRepository authRepository = new AuthRepository(getApplication());
-        authRepository.getCurrentUserIdAsync(currentUserId -> {
-            executorService.execute(() -> {
-                // Carregar valores de humor anteriores se existirem para hoje
-                UserDailyData todayMood = atividadesRepository.getTodayMoodData(currentUserId);
+        executorService.execute(() -> {
+            // Carregar valores de humor anteriores se existirem para hoje
+            UserDailyData todayMood = atividadesRepository.getTodayMoodData();
 
-                if (todayMood != null) {
-                    joyLevel.postValue(todayMood.getJoyLevel());
-                    sadnessLevel.postValue(todayMood.getSadnessLevel());
-                    anxietyLevel.postValue(todayMood.getAnxietyLevel());
-                    stressLevel.postValue(todayMood.getStressLevel());
-                    calmLevel.postValue(todayMood.getCalmLevel());
+            if (todayMood != null) {
+                joyLevel.postValue(todayMood.getJoyLevel());
+                sadnessLevel.postValue(todayMood.getSadnessLevel());
+                anxietyLevel.postValue(todayMood.getAnxietyLevel());
+                stressLevel.postValue(todayMood.getStressLevel());
+                calmLevel.postValue(todayMood.getCalmLevel());
 
-                    // Atualizar todos os textos de humor na UI thread
-                    updateAllMoodTexts();
-                }
-            });
+                // Atualizar todos os textos de humor na UI thread
+                updateAllMoodTexts();
+            }
         });
     }
 
@@ -205,7 +202,6 @@ public class HumorVM extends AndroidViewModel {
 
                 // Registrar humor usando o novo repositório
                 atividadesRepository.registrarHumor(
-                        currentUserId,
                         HumorValues.values()[joy],
                         HumorValues.values()[sadness],
                         HumorValues.values()[anxiety],

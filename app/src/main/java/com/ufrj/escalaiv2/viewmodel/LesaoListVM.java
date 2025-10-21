@@ -37,13 +37,12 @@ public class LesaoListVM extends AndroidViewModel {
         isLoading.setValue(true);
         errorMessage.setValue(null);
 
-        authRepository.getCurrentUserIdAsync(userId -> {
-            android.util.Log.d("LesaoListVM", "Carregando lesões para userId: " + userId);
+        android.util.Log.d("LesaoListVM", "Carregando lesões");
 
-            lesaoRepository.getUserLesoes(userId).observeForever(response -> {
-                isLoading.postValue(false);
+        lesaoRepository.getUserLesoes().observeForever(response -> {
+            isLoading.postValue(false);
 
-                android.util.Log.d("LesaoListVM", "Resposta recebida: " + (response != null ? "dados=" + (response.getLesoes() != null ? response.getLesoes().size() : 0) : "null"));
+            android.util.Log.d("LesaoListVM", "Resposta recebida: " + (response != null ? "dados=" + (response.getLesoes() != null ? response.getLesoes().size() : 0) : "null"));
 
                 if (response != null) {
                     if (response.getLesoes() != null && !response.getLesoes().isEmpty()) {
@@ -63,7 +62,6 @@ public class LesaoListVM extends AndroidViewModel {
                     errorMessage.postValue(error);
                     lesoes.postValue(List.of());
                 }
-            });
         });
     }
 

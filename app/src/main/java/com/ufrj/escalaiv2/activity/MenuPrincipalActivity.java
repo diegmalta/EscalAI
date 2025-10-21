@@ -5,25 +5,21 @@ import android.os.Bundle;
 import android.view.MenuItem;
 import android.widget.TextView;
 import android.widget.Toast;
+
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
-import androidx.lifecycle.ViewModelProvider;
 
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.navigation.NavigationBarView;
 import com.ufrj.escalaiv2.R;
-import com.ufrj.escalaiv2.model.AppDatabase;
-import com.ufrj.escalaiv2.model.Usuario;
 import com.ufrj.escalaiv2.repository.AuthRepository;
+import com.ufrj.escalaiv2.ui.ExerciciosFragment;
 import com.ufrj.escalaiv2.ui.HomeFragment;
 import com.ufrj.escalaiv2.ui.RelatoriosFragment;
-
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 public class MenuPrincipalActivity extends AppCompatActivity {
 
@@ -31,7 +27,6 @@ public class MenuPrincipalActivity extends AppCompatActivity {
     private BottomNavigationView bottomNavigationView;
     private MaterialToolbar toolbar;
     private AuthRepository authRepository;
-    private final ExecutorService executorService = Executors.newSingleThreadExecutor();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -80,7 +75,7 @@ public class MenuPrincipalActivity extends AppCompatActivity {
                 } else if (itemId == R.id.relatorios) {
                     selectedFragment = new RelatoriosFragment();
                 } else if (itemId == R.id.exercises) {
-                    // selectedFragment = new ExerciciosFragment();
+                    selectedFragment = new ExerciciosFragment();
                 } else if (itemId == R.id.profile) {
                     // selectedFragment = new PerfilFragment();
                 }
@@ -107,30 +102,13 @@ public class MenuPrincipalActivity extends AppCompatActivity {
     }
 
     private void loadUserName() {
-        AppDatabase db = AppDatabase.getInstance(this);
-
-        executorService.execute(() -> {
-            try {
-                // Busca o primeiro usuário da tabela
-                String userName = null;
-                Usuario usuario = db.usuarioDao().getFirstUser();
-                if (usuario != null) {
-                    userName = usuario.getNome();
-                }
-                final String finalUserName = userName;
-                runOnUiThread(() -> {
-                    if (!isFinishing()) {
-                        txtNomeUsuario.setText(finalUserName != null ? finalUserName : "Usuário");
-                    }
-                });
-            } catch (Exception e) {
-                // Log do erro mas não crasha a aplicação
-                e.printStackTrace();
-                runOnUiThread(() -> {
-                    if (!isFinishing()) {
-                        txtNomeUsuario.setText("Usuário");
-                    }
-                });
+        // Busca o perfil do usuário logado via API
+        authRepository.getUserProfile().observe(this, userProfile -> {
+            if (userProfile != null && !isFinishing()) {
+                String userName = userProfile.getName();
+                txtNomeUsuario.setText(userName != null && !userName.isEmpty() ? userName : "Usuário");
+            } else if (!isFinishing()) {
+                txtNomeUsuario.setText("Usuário");
             }
         });
     }
@@ -167,14 +145,5 @@ public class MenuPrincipalActivity extends AppCompatActivity {
             startActivity(intent);
             finish();
         });
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        // Shutdown do executor para evitar memory leaks
-        if (!executorService.isShutdown()) {
-            executorService.shutdown();
-        }
     }
 }

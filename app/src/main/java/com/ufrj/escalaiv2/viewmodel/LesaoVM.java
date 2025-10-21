@@ -261,7 +261,7 @@ public class LesaoVM extends AndroidViewModel {
                     }
 
                     // Buscar dados de lesão na API
-                    lesaoRepository.getUserLesoes(currentUserId).observeForever(response -> {
+                    lesaoRepository.getUserLesoes().observeForever(response -> {
                         isLoading.postValue(false);
 
                         if (response != null && response.isSuccess() && response.getData() != null) {
@@ -492,18 +492,48 @@ public class LesaoVM extends AndroidViewModel {
         return intervaloConfiancaTexto;
     }
 
+    private final MutableLiveData<String> tempoRecuperacaoFormatado = new MutableLiveData<>("");
+
+    public LiveData<String> getTempoRecuperacaoFormatado() {
+        return tempoRecuperacaoFormatado;
+    }
+
+    private final MutableLiveData<String> mensagemComConfianca = new MutableLiveData<>("");
+
+    public LiveData<String> getMensagemComConfianca() {
+        return mensagemComConfianca;
+    }
+
     private String formatarIntervaloMeses(double min, double max) {
-        // Converter meses para meses e dias
-        String minFormatado = converterMesesParaMesesEDias(min);
-        String maxFormatado = converterMesesParaMesesEDias(max);
-        return minFormatado + " - " + maxFormatado;
+        double minMeses = arredondarParaMeioMes(min);
+        double maxMeses = arredondarParaMeioMes(max);
+
+        String minStr = formatarMeses(minMeses);
+        String maxStr = formatarMeses(maxMeses);
+
+        if (minMeses == maxMeses) {
+            return minStr + " meses";
+        } else {
+            return minStr + " - " + maxStr + " meses";
+        }
+    }
+
+    private double arredondarParaMeioMes(double valor) {
+        return Math.round(valor * 2.0) / 2.0;
+    }
+
+    private String formatarMeses(double meses) {
+        if (meses == Math.floor(meses)) {
+            return String.valueOf((int) meses);
+        } else {
+            return String.format(Locale.US, "%.1f", meses);
+        }
     }
 
     private String converterMesesParaMesesEDias(double meses) {
         int mesesInteiros = (int) meses;
         double parteDecimal = meses - mesesInteiros;
 
-        // Calcular dias: parte decimal * 30 dias
         int dias = (int) Math.round(parteDecimal * 30);
 
         if (mesesInteiros == 0) {
@@ -521,7 +551,6 @@ public class LesaoVM extends AndroidViewModel {
         return isPredicting;
     }
 
-    // Métodos para atualizar os valores
     public void updateSelectedArea(int position) {
         selectedArea.setValue(position);
         selectedAreaText.setValue(areas.get(position));
@@ -662,91 +691,88 @@ public class LesaoVM extends AndroidViewModel {
         android.util.Log.d("LesaoVM", "Iniciando salvamento da lesão");
         isLoading.setValue(true);
 
-        authRepository.getCurrentUserIdAsync(userId -> {
-            LesaoRequest request = new LesaoRequest();
-            request.setUserId(userId);
+        LesaoRequest request = new LesaoRequest();
 
-            // Área da lesão
-            request.setAreaLesaoN1(selectedArea.getValue());
-            request.setAreaLesaoN2(selectedSubarea.getValue());
-            request.setAreaLesaoN3(selectedEspecificacao.getValue());
+        // Área da lesão
+        request.setAreaLesaoN1(selectedArea.getValue());
+        request.setAreaLesaoN2(selectedSubarea.getValue());
+        request.setAreaLesaoN3(selectedEspecificacao.getValue());
 
-            // Dados do usuário
-            request.setMassa(massa.getValue());
-            request.setAltura(altura.getValue());
-            request.setGrauEscalada(grauEscalada.getValue());
+        // Dados do usuário
+        request.setMassa(massa.getValue());
+        request.setAltura(altura.getValue());
+        request.setGrauEscalada(grauEscalada.getValue());
 
-            // Dados de prática
-            request.setTempoPraticaMeses(tempoPraticaMeses.getValue());
-            request.setFrequenciaSemanal(frequenciaSemanal.getValue());
-            request.setHorasSemanais(horasSemanais.getValue());
-            request.setLesoesPrevias(lesoesPrevias.getValue());
+        // Dados de prática
+        request.setTempoPraticaMeses(tempoPraticaMeses.getValue());
+        request.setFrequenciaSemanal(frequenciaSemanal.getValue());
+        request.setHorasSemanais(horasSemanais.getValue());
+        request.setLesoesPrevias(lesoesPrevias.getValue());
 
-            // Dados de lesão
-            request.setReincidencia(reincidencia.getValue());
-            request.setBuscouAtendimento(buscouAtendimento.getValue());
+        // Dados de lesão
+        request.setReincidencia(reincidencia.getValue());
+        request.setBuscouAtendimento(buscouAtendimento.getValue());
 
-            if (buscouAtendimento.getValue()) {
-                request.setProfissionalAtendimento(profissionalAtendimento.getValue());
-                request.setDiagnostico(diagnostico.getValue());
-                request.setProfissionalTratamento(profissionalTratamento.getValue());
-                request.setModalidadePraticada(modalidadePraticada.getValue());
-            }
+        if (buscouAtendimento.getValue()) {
+            request.setProfissionalAtendimento(profissionalAtendimento.getValue());
+            request.setDiagnostico(diagnostico.getValue());
+            request.setProfissionalTratamento(profissionalTratamento.getValue());
+            request.setModalidadePraticada(modalidadePraticada.getValue());
+        }
 
-            // Dados de data da lesão
-            String dataInicioFormatted = null;
-            String dataConclusaoFormatted = null;
+        // Dados de data da lesão
+        String dataInicioFormatted = null;
+        String dataConclusaoFormatted = null;
 
-            if (dataInicio.getValue() != null && !dataInicio.getValue().trim().isEmpty()) {
-                dataInicioFormatted = convertDateFormat(dataInicio.getValue());
-            }
+        if (dataInicio.getValue() != null && !dataInicio.getValue().trim().isEmpty()) {
+            dataInicioFormatted = convertDateFormat(dataInicio.getValue());
+        }
 
-            if (dataConclusao.getValue() != null && !dataConclusao.getValue().trim().isEmpty()) {
-                dataConclusaoFormatted = convertDateFormat(dataConclusao.getValue());
-            }
+        if (dataConclusao.getValue() != null && !dataConclusao.getValue().trim().isEmpty()) {
+            dataConclusaoFormatted = convertDateFormat(dataConclusao.getValue());
+        }
 
-            request.setDataInicio(dataInicioFormatted);
-            request.setDataConclusao(dataConclusaoFormatted);
+        request.setDataInicio(dataInicioFormatted);
+        request.setDataConclusao(dataConclusaoFormatted);
 
-            // Log para debug
-            android.util.Log.d("LesaoVM", "Dados de data sendo enviados:");
-            android.util.Log.d("LesaoVM", "dataInicio: " + dataInicioFormatted);
-            android.util.Log.d("LesaoVM", "dataConclusao: " + dataConclusaoFormatted);
+        // Log para debug
+        android.util.Log.d("LesaoVM", "Dados de data sendo enviados:");
+        android.util.Log.d("LesaoVM", "dataInicio: " + dataInicioFormatted);
+        android.util.Log.d("LesaoVM", "dataConclusao: " + dataConclusaoFormatted);
 
-            // Log para campos obrigatórios
-            android.util.Log.d("LesaoVM", "Campos obrigatórios:");
-            android.util.Log.d("LesaoVM", "areaLesaoN1: " + selectedArea.getValue());
-            android.util.Log.d("LesaoVM", "areaLesaoN2: " + selectedSubarea.getValue());
-            android.util.Log.d("LesaoVM", "areaLesaoN3: " + selectedEspecificacao.getValue());
-            android.util.Log.d("LesaoVM", "massa: " + massa.getValue());
-            android.util.Log.d("LesaoVM", "altura: " + altura.getValue());
-            android.util.Log.d("LesaoVM", "grauEscalada: " + grauEscalada.getValue());
+        // Log para campos obrigatórios
+        android.util.Log.d("LesaoVM", "Campos obrigatórios:");
+        android.util.Log.d("LesaoVM", "areaLesaoN1: " + selectedArea.getValue());
+        android.util.Log.d("LesaoVM", "areaLesaoN2: " + selectedSubarea.getValue());
+        android.util.Log.d("LesaoVM", "areaLesaoN3: " + selectedEspecificacao.getValue());
+        android.util.Log.d("LesaoVM", "massa: " + massa.getValue());
+        android.util.Log.d("LesaoVM", "altura: " + altura.getValue());
+        android.util.Log.d("LesaoVM", "grauEscalada: " + grauEscalada.getValue());
 
-            Integer currentId = lesaoId.getValue();
-            if (currentId != null && currentId > 0) {
-                // Garantir que o ID da lesão está sendo enviado na requisição
-                request.setId(currentId);
-                lesaoRepository.updateLesao(currentId, request).observeForever(response -> {
-                    isLoading.postValue(false);
-                    if (response != null && response.isSuccess()) {
-                        uiEvent.postValue(Event.SHOW_SUCCESS_MESSAGE);
-                        validateConcludeButton(); // Revalidar botão após salvar
-                    } else {
-                        uiEvent.postValue(Event.SHOW_ERROR_MESSAGE);
-                    }
-                });
-            } else {
-                lesaoRepository.saveLesao(request).observeForever(response -> {
-                    isLoading.postValue(false);
-                    if (response != null && response.isSuccess()) {
-                        uiEvent.postValue(Event.SHOW_SUCCESS_MESSAGE);
-                        validateConcludeButton(); // Revalidar botão após salvar
-                    } else {
-                        uiEvent.postValue(Event.SHOW_ERROR_MESSAGE);
-                    }
-                });
-            }
-        });
+        Integer currentId = lesaoId.getValue();
+        if (currentId != null && currentId > 0) {
+            // Garantir que o ID da lesão está sendo enviado na requisição
+            request.setId(currentId);
+            lesaoRepository.updateLesao(currentId, request).observeForever(response -> {
+                isLoading.postValue(false);
+                if (response != null && response.isSuccess()) {
+                    uiEvent.postValue(Event.SHOW_SUCCESS_MESSAGE);
+                    validateConcludeButton(); // Revalidar botão após salvar
+                } else {
+                    uiEvent.postValue(Event.SHOW_ERROR_MESSAGE);
+                }
+            });
+        } else {
+            lesaoRepository.saveLesao(request).observeForever(response -> {
+                isLoading.postValue(false);
+                if (response != null && response.isSuccess()) {
+                    uiEvent.postValue(Event.SHOW_SUCCESS_MESSAGE);
+                    validateConcludeButton(); // Revalidar botão após salvar
+                } else {
+                    uiEvent.postValue(Event.SHOW_ERROR_MESSAGE);
+                }
+            });
+        }
     }
 
     // Método para concluir a lesão
@@ -779,41 +805,47 @@ public class LesaoVM extends AndroidViewModel {
         isPredicting.setValue(true);
         previsaoAfastamento.setValue(null);
 
-        authRepository.getCurrentUserIdAsync(userId -> {
-            int currentLesaoId = lesaoId.getValue() != null ? lesaoId.getValue() : 0;
-            PrevisaoAfastamentoRequest request = new PrevisaoAfastamentoRequest(
-                userId,
-                currentLesaoId,
-                buscouAtendimento.getValue() != null ? buscouAtendimento.getValue() : false,
-                reincidencia.getValue() != null ? reincidencia.getValue() : false,
-                lesoesPrevias.getValue() != null ? lesoesPrevias.getValue() : 0
-            );
+        int currentLesaoId = lesaoId.getValue() != null ? lesaoId.getValue() : 0;
+        PrevisaoAfastamentoRequest request = new PrevisaoAfastamentoRequest(
+            currentLesaoId,
+            buscouAtendimento.getValue() != null ? buscouAtendimento.getValue() : false,
+            reincidencia.getValue() != null ? reincidencia.getValue() : false,
+            lesoesPrevias.getValue() != null ? lesoesPrevias.getValue() : 0
+        );
 
-            lesaoRepository.preverAfastamento(request).observeForever(response -> {
-                isPredicting.postValue(false);
+        lesaoRepository.preverAfastamento(request).observeForever(response -> {
+            isPredicting.postValue(false);
 
-                if (response != null) {
-                    previsaoAfastamento.postValue(response);
-                    // Atualizar o texto do intervalo de confiança
-                    double min = response.getIntervaloConfiancaMin();
-                    double max = response.getIntervaloConfiancaMax();
-                    String intervaloTexto = formatarIntervaloMeses(min, max);
-                    intervaloConfiancaTexto.postValue(intervaloTexto);
-                } else {
-                    // Em caso de erro, não gerar previsão; sinalizar erro para UI
-                    uiEvent.postValue(Event.PREDICTION_ERROR);
-                }
-            });
+            if (response != null) {
+                previsaoAfastamento.postValue(response);
 
-            // Timeout de 30 segundos
-            executorService.schedule(() -> {
-                if (isPredicting.getValue()) {
-                    isPredicting.postValue(false);
-                    // Não gerar previsão em timeout; sinalizar erro para UI
-                    uiEvent.postValue(Event.PREDICTION_ERROR);
-                }
-            }, 30, TimeUnit.SECONDS);
+                // Os valores vêm em meses do servidor
+                double min = response.getIntervaloConfiancaMin();
+                double max = response.getIntervaloConfiancaMax();
+
+                // Formatar o intervalo em meses com valores decimais (1, 1.5, 2.0, etc.)
+                String intervaloMeses = formatarIntervaloMeses(min, max);
+                tempoRecuperacaoFormatado.postValue(intervaloMeses);
+                intervaloConfiancaTexto.postValue(intervaloMeses);
+
+                // Combinar a mensagem original com a confiança
+                int confiancaPercent = (int) (response.getConfianca() * 100);
+                String mensagem = response.getMessage() + " (Confiança: " + confiancaPercent + "%)";
+                mensagemComConfianca.postValue(mensagem);
+            } else {
+                // Em caso de erro, não gerar previsão; sinalizar erro para UI
+                uiEvent.postValue(Event.PREDICTION_ERROR);
+            }
         });
+
+        // Timeout de 30 segundos
+        executorService.schedule(() -> {
+            if (isPredicting.getValue()) {
+                isPredicting.postValue(false);
+                // Não gerar previsão em timeout; sinalizar erro para UI
+                uiEvent.postValue(Event.PREDICTION_ERROR);
+            }
+        }, 30, TimeUnit.SECONDS);
     }
 
     // Método para obter o ID do usuário atual

@@ -14,6 +14,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
 
+import com.google.android.material.card.MaterialCardView;
 import com.ufrj.escalaiv2.R;
 import com.ufrj.escalaiv2.dto.ApiResponse;
 import com.ufrj.escalaiv2.dto.LoginResponse;
@@ -23,7 +24,8 @@ public class MainActivity extends AppCompatActivity {
 
     private EditText editEmail, editPassword;
     private Button button_login, button_cadastro, recuperarSenhaButton;
-    private TextView Resultado;
+    private TextView Resultado, ResultadoSucesso;
+    private MaterialCardView errorContainer, successContainer;
     private ProgressBar progressBar;
     private LoginVM viewModel;
 
@@ -57,6 +59,9 @@ public class MainActivity extends AppCompatActivity {
         button_cadastro = findViewById(R.id.button_cadastro);
         recuperarSenhaButton = findViewById(R.id.recuperarSenhaButton);
         Resultado = findViewById(R.id.Resultado);
+        ResultadoSucesso = findViewById(R.id.ResultadoSucesso);
+        errorContainer = findViewById(R.id.errorContainer);
+        successContainer = findViewById(R.id.successContainer);
         progressBar = findViewById(R.id.progressBar);
 
         // Configurações adicionais para os EditText
@@ -98,9 +103,9 @@ public class MainActivity extends AppCompatActivity {
         viewModel.getErrorMessage().observe(this, errorMsg -> {
             if (errorMsg != null && !errorMsg.isEmpty()) {
                 Resultado.setText(errorMsg);
-                Resultado.setVisibility(View.VISIBLE);
+                errorContainer.setVisibility(View.VISIBLE);
             } else {
-                Resultado.setVisibility(View.GONE);
+                errorContainer.setVisibility(View.GONE);
             }
         });
     }
@@ -139,7 +144,9 @@ public class MainActivity extends AppCompatActivity {
 
         // Limpa mensagens anteriores
         Resultado.setText("");
-        Resultado.setVisibility(View.GONE);
+        ResultadoSucesso.setText("");
+        errorContainer.setVisibility(View.GONE);
+        successContainer.setVisibility(View.GONE);
 
         // Define estado de carregamento
         viewModel.setLoading(true);
@@ -153,15 +160,24 @@ public class MainActivity extends AppCompatActivity {
 
     private void handleLoginResponse(ApiResponse<LoginResponse> response) {
         if (response != null && response.isSuccess()) {
-            Resultado.setText("Login efetuado com sucesso");
-            Resultado.setVisibility(View.VISIBLE);
+            ResultadoSucesso.setText("Login efetuado com sucesso");
+            successContainer.setVisibility(View.VISIBLE);
+            errorContainer.setVisibility(View.GONE);
             // Pequeno delay para mostrar a mensagem antes de navegar
             editEmail.postDelayed(this::navigateToMainScreen, 500);
         } else {
+            // Verificar se é erro 403 (email não verificado)
+            if (response != null && response.getHttpStatusCode() == 403) {
+                String email = editEmail.getText().toString().trim();
+                navigateToVerifyEmail(email);
+                return;
+            }
+            
             String errorMsg = response != null && response.getMessage() != null ?
                     response.getMessage() : "Erro ao fazer login";
             Resultado.setText(errorMsg);
-            Resultado.setVisibility(View.VISIBLE);
+            errorContainer.setVisibility(View.VISIBLE);
+            successContainer.setVisibility(View.GONE);
             viewModel.setErrorMessage(errorMsg);
             limpar();
         }
@@ -171,6 +187,12 @@ public class MainActivity extends AppCompatActivity {
         Intent intent = new Intent(MainActivity.this, getMenuPrincipal());
         startActivity(intent);
         finish();
+    }
+
+    private void navigateToVerifyEmail(String email) {
+        Intent intent = new Intent(MainActivity.this, VerifyEmailActivity.class);
+        intent.putExtra(VerifyEmailActivity.EXTRA_EMAIL, email);
+        startActivity(intent);
     }
 
     @NonNull

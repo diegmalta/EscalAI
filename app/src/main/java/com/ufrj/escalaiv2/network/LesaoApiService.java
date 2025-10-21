@@ -16,8 +16,8 @@ public interface LesaoApiService {
     @POST("api/lesoes")
     Call<LesaoResponse> saveLesao(@Body LesaoRequest request);
 
-    @GET("api/lesoes/user/{user_id}")
-    Call<LesaoResponse> getUserLesoes(@Path("user_id") int userId);
+    @GET("api/lesoes/user")
+    Call<LesaoResponse> getUserLesoes();
 
     @GET("api/lesoes/{id}")
     Call<LesaoResponse> getLesaoById(@Path("id") int lesaoId);

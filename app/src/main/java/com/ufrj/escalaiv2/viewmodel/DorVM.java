@@ -103,12 +103,11 @@ public class DorVM extends AndroidViewModel {
     }
 
     private void loadDailyDorData() {
-        atividadesRepository.getCurrentUserId(currentUserId -> {
-            executorService.execute(() -> {
-                // Carregar valores de dor anteriores se existirem para hoje
-                UserDailyData todayDor = atividadesRepository.getTodayDorData(currentUserId);
+        executorService.execute(() -> {
+            // Carregar valores de dor anteriores se existirem para hoje
+            UserDailyData todayDor = atividadesRepository.getTodayDorData();
 
-                if (todayDor != null) {
+            if (todayDor != null) {
                     // Aqui você teria que ajustar de acordo com a estrutura do seu banco de dados
                     // Este é um exemplo baseado na sua estrutura atual
                     int areaId = todayDor.getAreaDorN1();
@@ -138,7 +137,6 @@ public class DorVM extends AndroidViewModel {
                         }
                     }
                 }
-            });
         });
     }
 
@@ -253,7 +251,7 @@ public class DorVM extends AndroidViewModel {
                 token = "Bearer " + token;
             }
             // Registrar dor usando o novo repositório
-            atividadesRepository.registrarDor(currentUserId, area, subarea, especificacao, intensidade, token,
+            atividadesRepository.registrarDor(area, subarea, especificacao, intensidade, token,
                     new AtividadesRepository.OnActivityCallback() {
                         @Override
                         public void onSuccess() {

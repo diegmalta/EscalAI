@@ -192,23 +192,28 @@ public class AuthRepository {
                     Log.i(TAG, "Login bem-sucedido");
                 } else {
                     // Erro na resposta da API
+                    int statusCode = response.code();
                     String errorMessage = "Erro desconhecido no login";
-                    if (response.errorBody() != null) {
+
+                    if (statusCode == 403) {
+                        errorMessage = "Email não verificado. Por favor, verifique seu email.";
+                    } else if (response.errorBody() != null) {
                         try {
-                            errorMessage = "Erro " + response.code() + ": " + response.errorBody().string();
+                            errorMessage = "Erro " + statusCode + ": " + response.errorBody().string();
                         } catch (Exception e) {
                             Log.e(TAG, "Erro ao parsear errorBody", e);
-                            errorMessage = "Erro " + response.code() + " ao fazer login";
+                            errorMessage = "Erro " + statusCode + " ao fazer login";
                         }
                     } else if (response.message() != null && !response.message().isEmpty()){
-                        errorMessage = "Erro " + response.code() + ": " + response.message();
+                        errorMessage = "Erro " + statusCode + ": " + response.message();
                     }
 
                     ApiResponse<LoginResponse> errorResponse = new ApiResponse<>();
                     errorResponse.setSuccess(false);
                     errorResponse.setMessage(errorMessage);
+                    errorResponse.setHttpStatusCode(statusCode);
                     result.setValue(errorResponse);
-                    Log.w(TAG, "Erro no login: " + errorMessage);
+                    Log.w(TAG, "Erro no login (" + statusCode + "): " + errorMessage);
                 }
             }
 
@@ -781,11 +786,16 @@ public class AuthRepository {
     public LiveData<UserProfileResponse> getUserProfile() {
         MutableLiveData<UserProfileResponse> result = new MutableLiveData<>();
 
-        authApiService.getUserProfile().enqueue(new Callback<UserProfileResponse>() {
+        // Usar AuthApiService autenticado para incluir o token no header
+        AuthApiService authenticatedAuthService = RetrofitClient.getAuthApiService(context);
+
+        authenticatedAuthService.getUserProfile().enqueue(new Callback<UserProfileResponse>() {
             @Override
             public void onResponse(Call<UserProfileResponse> call, Response<UserProfileResponse> response) {
                 if (response.isSuccessful() && response.body() != null) {
-                    result.postValue(response.body());
+                    UserProfileResponse profile = response.body();
+                    Log.d(TAG, "Perfil do usuário carregado: " + profile.getName());
+                    result.postValue(profile);
                 } else {
                     Log.e(TAG, "Erro ao buscar perfil do usuário: " + response.code());
                     result.postValue(null);

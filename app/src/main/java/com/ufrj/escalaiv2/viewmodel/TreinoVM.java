@@ -50,12 +50,10 @@ public class TreinoVM extends AndroidViewModel {
     }
 
     private void loadTodayTrainingData() {
-        atividadesRepository.getCurrentUserId(currentUserId -> {
-            executorService.execute(() -> {
-                // Buscar os dados de treino já registrados hoje
-                Map<String, Float> resumoMap = atividadesRepository.getTodayTrainingData(currentUserId);
-                resumoTreinosHoje.postValue(resumoMap);
-            });
+        executorService.execute(() -> {
+            // Buscar os dados de treino já registrados hoje
+            Map<String, Float> resumoMap = atividadesRepository.getTodayTrainingData();
+            resumoTreinosHoje.postValue(resumoMap);
         });
     }
 
@@ -124,13 +122,13 @@ public class TreinoVM extends AndroidViewModel {
             }
 
             // Registrar treino usando o novo repositório
-            atividadesRepository.registrarTreino(currentUserId, treinoTipo, duracaoMinutos,
+            atividadesRepository.registrarTreino(treinoTipo, duracaoMinutos,
                     token,
                     new AtividadesRepository.OnActivityCallback() {
                         @Override
                         public void onSuccess() {
                             // Após salvar, recarregar o resumo de treinos
-                            Map<String, Float> resumoMap = atividadesRepository.getTodayTrainingData(currentUserId);
+                            Map<String, Float> resumoMap = atividadesRepository.getTodayTrainingData();
                             resumoTreinosHoje.postValue(resumoMap);
                             uiEvent.postValue(Event.SHOW_SUCCESS_MESSAGE);
                         }

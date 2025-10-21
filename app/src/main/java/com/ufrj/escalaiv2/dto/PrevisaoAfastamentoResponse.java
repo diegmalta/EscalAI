@@ -11,7 +11,7 @@ public class PrevisaoAfastamentoResponse {
     private int tempoAfastamentoDias;
 
     @SerializedName("tempo_afastamento_semanas")
-    private int tempoAfastamentoSemanas;
+    private double tempoAfastamentoSemanas;
 
     @SerializedName("confianca")
     private double confianca;
@@ -47,11 +47,11 @@ public class PrevisaoAfastamentoResponse {
         this.tempoAfastamentoDias = tempoAfastamentoDias;
     }
 
-    public int getTempoAfastamentoSemanas() {
+    public double getTempoAfastamentoSemanas() {
         return tempoAfastamentoSemanas;
     }
 
-    public void setTempoAfastamentoSemanas(int tempoAfastamentoSemanas) {
+    public void setTempoAfastamentoSemanas(double tempoAfastamentoSemanas) {
         this.tempoAfastamentoSemanas = tempoAfastamentoSemanas;
     }
 

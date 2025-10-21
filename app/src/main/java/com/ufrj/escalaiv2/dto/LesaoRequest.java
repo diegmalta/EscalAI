@@ -7,9 +7,6 @@ public class LesaoRequest {
     @SerializedName("id")
     private Integer id;
 
-    @SerializedName("user_id")
-    private int userId;
-
     @SerializedName("area_lesao_n1")
     private int areaLesaoN1;
 
@@ -95,14 +92,6 @@ public class LesaoRequest {
 
     public void setId(Integer id) {
         this.id = id;
-    }
-
-    public int getUserId() {
-        return userId;
-    }
-
-    public void setUserId(int userId) {
-        this.userId = userId;
     }
 
     public int getAreaLesaoN1() {
