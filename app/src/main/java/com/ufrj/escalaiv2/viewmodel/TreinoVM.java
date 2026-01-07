@@ -50,19 +50,14 @@ public class TreinoVM extends AndroidViewModel {
     }
 
     private void loadTodayTrainingData() {
-        int currentUserId = getCurrentUserId();
-
         executorService.execute(() -> {
             // Buscar os dados de treino já registrados hoje
-            Map<String, Float> resumoMap = atividadesRepository.getTodayTrainingData(currentUserId);
+            Map<String, Float> resumoMap = atividadesRepository.getTodayTrainingData();
             resumoTreinosHoje.postValue(resumoMap);
         });
     }
 
-    // Método para obter o ID do usuário atual
-    private int getCurrentUserId() {
-        return atividadesRepository.getCurrentUserId();
-    }
+
 
     // Getters para LiveData
     public LiveData<Integer> getSelectedTreinoTipo() {
@@ -116,33 +111,34 @@ public class TreinoVM extends AndroidViewModel {
             return;
         }
 
-        int currentUserId = getCurrentUserId();
-        AuthRepository authRepository = new AuthRepository(getApplication());
-        String token = authRepository.getAuthTokenRaw();
-        if (token == null) {
-            token = authRepository.getAuthToken();
-        }
-        if (token != null && !token.startsWith("Bearer ")) {
-            token = "Bearer " + token;
-        }
+        atividadesRepository.getCurrentUserId(currentUserId -> {
+            AuthRepository authRepository = new AuthRepository(getApplication());
+            String token = authRepository.getAuthTokenRaw();
+            if (token == null) {
+                token = authRepository.getAuthToken();
+            }
+            if (token != null && !token.startsWith("Bearer ")) {
+                token = "Bearer " + token;
+            }
 
-        // Registrar treino usando o novo repositório
-        atividadesRepository.registrarTreino(currentUserId, treinoTipo, duracaoMinutos,
-                token,
-                new AtividadesRepository.OnActivityCallback() {
-                    @Override
-                    public void onSuccess() {
-                        // Após salvar, recarregar o resumo de treinos
-                        Map<String, Float> resumoMap = atividadesRepository.getTodayTrainingData(currentUserId);
-                        resumoTreinosHoje.postValue(resumoMap);
-                        uiEvent.postValue(Event.SHOW_SUCCESS_MESSAGE);
-                    }
+            // Registrar treino usando o novo repositório
+            atividadesRepository.registrarTreino(treinoTipo, duracaoMinutos,
+                    token,
+                    new AtividadesRepository.OnActivityCallback() {
+                        @Override
+                        public void onSuccess() {
+                            // Após salvar, recarregar o resumo de treinos
+                            Map<String, Float> resumoMap = atividadesRepository.getTodayTrainingData();
+                            resumoTreinosHoje.postValue(resumoMap);
+                            uiEvent.postValue(Event.SHOW_SUCCESS_MESSAGE);
+                        }
 
-                    @Override
-                    public void onError(String message) {
-                        uiEvent.postValue(Event.SHOW_ERROR_MESSAGE);
-                    }
-                });
+                        @Override
+                        public void onError(String message) {
+                            uiEvent.postValue(Event.SHOW_ERROR_MESSAGE);
+                        }
+                    });
+        });
     }
 
 

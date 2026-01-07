@@ -97,7 +97,7 @@
                             style="@style/TextAppearance.Material3.TitleMedium"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Duração do Sono (Últimos 7 dias)" />
+                            android:text="Sono - Duração e Qualidade (Últimos 7 dias)" />
 
                         <com.github.mikephil.charting.charts.LineChart
                             android:id="@+id/chart_sono"
@@ -223,7 +223,7 @@
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
 
-                <!-- Gráfico de Treinos -->
+                <!-- Tabela de Treinos -->
                 <com.google.android.material.card.MaterialCardView
                     android:id="@+id/card_treino"
                     style="@style/Widget.Material3.CardView.Elevated"
@@ -241,18 +241,60 @@
                             style="@style/TextAppearance.Material3.TitleMedium"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Duração dos Treinos (Últimos 7 dias)" />
+                            android:text="Relatório de Treinos (Últimos 7 dias)" />
 
-                        <com.github.mikephil.charting.charts.BarChart
-                            android:id="@+id/chart_treino"
+                        <!-- Cabeçalho da Tabela -->
+                        <LinearLayout
+                            android:id="@+id/header_treinos"
                             android:layout_width="match_parent"
-                            android:layout_height="200dp"
-                            android:layout_marginTop="8dp" />
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            android:paddingTop="8dp"
+                            android:paddingBottom="4dp"
+                            android:paddingStart="8dp"
+                            android:paddingEnd="8dp"
+                            android:background="?attr/colorSurfaceVariant">
+
+                            <TextView
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="2"
+                                android:text="Tipo"
+                                android:textStyle="bold"
+                                android:textSize="12sp" />
+
+                            <TextView
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:text="Data"
+                                android:gravity="center"
+                                android:textStyle="bold"
+                                android:textSize="12sp" />
+
+                            <TextView
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:text="Duração"
+                                android:gravity="center"
+                                android:textStyle="bold"
+                                android:textSize="12sp" />
+                        </LinearLayout>
+
+                        <androidx.recyclerview.widget.RecyclerView
+                            android:id="@+id/recyclerViewTreinos"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="4dp"
+                            android:nestedScrollingEnabled="false"
+                            tools:listitem="@layout/item_treino_report"
+                            tools:itemCount="3" />
 
                         <TextView
                             android:id="@+id/tv_no_data_treino"
                             android:layout_width="match_parent"
-                            android:layout_height="200dp"
+                            android:layout_height="120dp"
                             android:layout_marginTop="8dp"
                             android:text="Não foram encontrados dados dos últimos 7 dias"
                             android:textAlignment="center"

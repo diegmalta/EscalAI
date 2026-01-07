@@ -4,6 +4,7 @@ public class ApiResponse<T> {
     private boolean success;
     private String message;
     private T data;
+    private int httpStatusCode;
 
     public boolean isSuccess() {
         return success;
@@ -17,6 +18,10 @@ public class ApiResponse<T> {
         return data;
     }
 
+    public int getHttpStatusCode() {
+        return httpStatusCode;
+    }
+
     public void setSuccess(boolean success) {
         this.success = success;
     }
@@ -27,5 +32,9 @@ public class ApiResponse<T> {
 
     public void setData(T data) {
         this.data = data;
+    }
+
+    public void setHttpStatusCode(int httpStatusCode) {
+        this.httpStatusCode = httpStatusCode;
     }
 }

@@ -3,9 +3,6 @@ package com.ufrj.escalaiv2.dto;
 import com.google.gson.annotations.SerializedName;
 
 public class SonoRequest {
-    @SerializedName("user_id")
-    private int userId;
-    
     @SerializedName("date")
     private String date;
     
@@ -21,22 +18,13 @@ public class SonoRequest {
     @SerializedName("sleep_quality")
     private int sleepQuality;
 
-    public SonoRequest(int userId, String date, String sleepTime, String wakeTime, 
+    public SonoRequest(String date, String sleepTime, String wakeTime, 
                       int totalSleepTimeMinutes, int sleepQuality) {
-        this.userId = userId;
         this.date = date;
         this.sleepTime = sleepTime;
         this.wakeTime = wakeTime;
         this.totalSleepTimeMinutes = totalSleepTimeMinutes;
         this.sleepQuality = sleepQuality;
-    }
-
-    public int getUserId() {
-        return userId;
-    }
-
-    public void setUserId(int userId) {
-        this.userId = userId;
     }
 
     public String getDate() {

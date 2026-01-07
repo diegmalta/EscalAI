@@ -3,9 +3,6 @@ package com.ufrj.escalaiv2.dto;
 import com.google.gson.annotations.SerializedName;
 
 public class DorRequest {
-    @SerializedName("user_id")
-    private int userId;
-    
     @SerializedName("date")
     private String date;
     
@@ -21,22 +18,13 @@ public class DorRequest {
     @SerializedName("intensidade_dor")
     private int intensidadeDor;
 
-    public DorRequest(int userId, String date, int areaDorN1, int areaDorN2, 
+    public DorRequest(String date, int areaDorN1, int areaDorN2, 
                      int areaDorN3, int intensidadeDor) {
-        this.userId = userId;
         this.date = date;
         this.areaDorN1 = areaDorN1;
         this.areaDorN2 = areaDorN2;
         this.areaDorN3 = areaDorN3;
         this.intensidadeDor = intensidadeDor;
-    }
-
-    public int getUserId() {
-        return userId;
-    }
-
-    public void setUserId(int userId) {
-        this.userId = userId;
     }
 
     public String getDate() {

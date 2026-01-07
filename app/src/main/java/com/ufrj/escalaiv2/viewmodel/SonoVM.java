@@ -174,33 +174,34 @@ public class SonoVM extends AndroidViewModel {
         Integer quality = sleepQuality.getValue();
 
         if (quality != null) {
-            int currentUserId = getCurrentUserId();
-            String currentDate = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());
-            AuthRepository authRepository = new AuthRepository(getApplication());
-            String token = authRepository.getAuthTokenRaw();
+            atividadesRepository.getCurrentUserId(currentUserId -> {
+                String currentDate = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());
+                AuthRepository authRepository = new AuthRepository(getApplication());
+                String token = authRepository.getAuthTokenRaw();
 
-            if (token == null) {
-                token = authRepository.getAuthToken();
-            }
+                if (token == null) {
+                    token = authRepository.getAuthToken();
+                }
 
-            if (token != null && !token.startsWith("Bearer ")) {
-                token = "Bearer " + token;
-            }
+                if (token != null && !token.startsWith("Bearer ")) {
+                    token = "Bearer " + token;
+                }
 
-            // Registrar sono usando o novo repositório
-            atividadesRepository.registrarSono(currentUserId, currentDate, sleepTime.getValue(),
-                    wakeTime.getValue(), totalSleepTimeInMinutes.getValue(), quality, token,
-                    new AtividadesRepository.OnActivityCallback() {
-                        @Override
-                        public void onSuccess() {
-                            uiEvent.postValue(Event.SHOW_SUCCESS_MESSAGE);
-                        }
+                // Registrar sono usando o novo repositório
+                atividadesRepository.registrarSono(currentDate, sleepTime.getValue(),
+                        wakeTime.getValue(), totalSleepTimeInMinutes.getValue(), quality, token,
+                        new AtividadesRepository.OnActivityCallback() {
+                            @Override
+                            public void onSuccess() {
+                                uiEvent.postValue(Event.SHOW_SUCCESS_MESSAGE);
+                            }
 
-                        @Override
-                        public void onError(String message) {
-                            uiEvent.postValue(Event.SHOW_ERROR_MESSAGE);
-                        }
-                    });
+                            @Override
+                            public void onError(String message) {
+                                uiEvent.postValue(Event.SHOW_ERROR_MESSAGE);
+                            }
+                        });
+            });
         } else {
             uiEvent.setValue(Event.SHOW_ERROR_MESSAGE);
         }
@@ -216,8 +217,5 @@ public class SonoVM extends AndroidViewModel {
         uiEvent.setValue(Event.RESET_COMPLETED);
     }
 
-    // Método para obter o ID do usuário atual
-    private int getCurrentUserId() {
-        return atividadesRepository.getCurrentUserId();
-    }
+
 }

@@ -98,7 +98,7 @@
                     android:layout_marginTop="2dp"
                     android:textColor="@color/md_theme_light_onSurfaceVariant"
                     android:textSize="12sp"
-                    tools:text="Prev: 30 dias" />
+                    tools:text="Prev: sem previsão" />
 
                 <!-- Seta de expansão -->
                 <ImageView
@@ -214,42 +214,31 @@
 
                 </LinearLayout>
 
-                <!-- Barra de progresso -->
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Progresso da Recuperação"
-                    android:textSize="14sp"
-                    android:textStyle="bold"
-                    android:textColor="@color/md_theme_light_primary"
-                    android:layout_marginTop="16dp"
-                    android:layout_marginBottom="8dp"/>
-
+                <!-- Intervalo de Confiança -->
                 <LinearLayout
+                    android:id="@+id/intervaloConfiancaContainer"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical"
-                    android:layout_marginBottom="8dp">
-
-                    <com.google.android.material.progressindicator.LinearProgressIndicator
-                        android:id="@+id/progressRecuperacao"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:layout_marginEnd="8dp"
-                        app:indicatorColor="@color/md_theme_light_primary"
-                        app:trackThickness="6dp"
-                        tools:progress="50"/>
+                    android:orientation="vertical"
+                    android:layout_marginTop="8dp"
+                    android:visibility="gone">
 
                     <TextView
-                        android:id="@+id/tvProgressoPercentual"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:text="Previsão de Afastamento"
                         android:textSize="12sp"
                         android:textStyle="bold"
                         android:textColor="@color/md_theme_light_primary"
-                        tools:text="50%"/>
+                        android:layout_marginBottom="4dp"/>
+
+                    <TextView
+                        android:id="@+id/tvIntervaloConfianca"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textSize="12sp"
+                        android:textColor="@color/md_theme_light_onSurface"
+                        tools:text="Intervalo: 5.2 - 8.7 dias"/>
 
                 </LinearLayout>
 
@@ -260,6 +249,14 @@
                     android:orientation="horizontal"
                     android:layout_marginTop="16dp"
                     android:gravity="end">
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnPreverTempo"
+                        style="@style/Widget.Material3.Button.TextButton"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Prever"
+                        android:layout_marginEnd="8dp"/>
 
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/btnEditarLesao"

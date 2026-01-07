@@ -1,81 +1,162 @@
 package com.ufrj.escalaiv2.dto;
 
+import android.os.Parcel;
+import android.os.Parcelable;
 import com.google.gson.annotations.SerializedName;
 import java.util.List;
 
 public class LesaoResponse {
     @SerializedName("success")
     private boolean success;
-    
+
     @SerializedName("message")
     private String message;
-    
+
     @SerializedName("data")
     private LesaoData data;
-    
+
     @SerializedName("lesoes")
     private List<LesaoData> lesoes;
-    
-    public static class LesaoData {
+
+    public static class LesaoData implements Parcelable {
         @SerializedName("id")
         private int id;
-        
+
         @SerializedName("user_id")
         private int userId;
-        
+
         @SerializedName("area_lesao_n1")
         private int areaLesaoN1;
-        
+
         @SerializedName("area_lesao_n2")
         private int areaLesaoN2;
-        
+
         @SerializedName("area_lesao_n3")
         private int areaLesaoN3;
-        
+
         @SerializedName("massa")
         private float massa;
-        
+
         @SerializedName("altura")
         private int altura;
-        
+
         @SerializedName("grau_escalada")
         private int grauEscalada;
-        
+
         @SerializedName("tempo_pratica_meses")
         private int tempoPraticaMeses;
-        
+
         @SerializedName("frequencia_semanal")
         private int frequenciaSemanal;
-        
+
         @SerializedName("horas_semanais")
         private int horasSemanais;
-        
+
         @SerializedName("lesoes_previas")
         private int lesoesPrevias;
-        
+
         @SerializedName("reincidencia")
         private boolean reincidencia;
-        
+
         @SerializedName("buscou_atendimento")
         private boolean buscouAtendimento;
-        
+
         @SerializedName("profissional_atendimento")
         private int profissionalAtendimento;
-        
+
         @SerializedName("diagnostico")
         private int diagnostico;
-        
+
         @SerializedName("profissional_tratamento")
         private int profissionalTratamento;
-        
+
         @SerializedName("modalidade_praticada")
         private int modalidadePraticada;
-        
+
         @SerializedName("created_at")
         private String createdAt;
-        
+
         @SerializedName("updated_at")
         private String updatedAt;
+
+        // Campos de data da lesão
+        @SerializedName("data_inicio")
+        private String dataInicio;
+
+        @SerializedName("data_conclusao")
+        private String dataConclusao;
+
+        // Construtor padrão
+        public LesaoData() {}
+
+        // Construtor Parcelable
+        protected LesaoData(Parcel in) {
+            id = in.readInt();
+            userId = in.readInt();
+            areaLesaoN1 = in.readInt();
+            areaLesaoN2 = in.readInt();
+            areaLesaoN3 = in.readInt();
+            massa = in.readFloat();
+            altura = in.readInt();
+            grauEscalada = in.readInt();
+            tempoPraticaMeses = in.readInt();
+            frequenciaSemanal = in.readInt();
+            horasSemanais = in.readInt();
+            lesoesPrevias = in.readInt();
+            reincidencia = in.readByte() != 0;
+            buscouAtendimento = in.readByte() != 0;
+            profissionalAtendimento = in.readInt();
+            diagnostico = in.readInt();
+            profissionalTratamento = in.readInt();
+            modalidadePraticada = in.readInt();
+            createdAt = in.readString();
+            updatedAt = in.readString();
+            dataInicio = in.readString();
+            dataConclusao = in.readString();
+        }
+
+        public static final Creator<LesaoData> CREATOR = new Creator<LesaoData>() {
+            @Override
+            public LesaoData createFromParcel(Parcel in) {
+                return new LesaoData(in);
+            }
+
+            @Override
+            public LesaoData[] newArray(int size) {
+                return new LesaoData[size];
+            }
+        };
+
+        @Override
+        public void writeToParcel(Parcel dest, int flags) {
+            dest.writeInt(id);
+            dest.writeInt(userId);
+            dest.writeInt(areaLesaoN1);
+            dest.writeInt(areaLesaoN2);
+            dest.writeInt(areaLesaoN3);
+            dest.writeFloat(massa);
+            dest.writeInt(altura);
+            dest.writeInt(grauEscalada);
+            dest.writeInt(tempoPraticaMeses);
+            dest.writeInt(frequenciaSemanal);
+            dest.writeInt(horasSemanais);
+            dest.writeInt(lesoesPrevias);
+            dest.writeByte((byte) (reincidencia ? 1 : 0));
+            dest.writeByte((byte) (buscouAtendimento ? 1 : 0));
+            dest.writeInt(profissionalAtendimento);
+            dest.writeInt(diagnostico);
+            dest.writeInt(profissionalTratamento);
+            dest.writeInt(modalidadePraticada);
+            dest.writeString(createdAt);
+            dest.writeString(updatedAt);
+            dest.writeString(dataInicio);
+            dest.writeString(dataConclusao);
+        }
+
+        @Override
+        public int describeContents() {
+            return 0;
+        }
 
         // Getters e Setters
         public int getId() {
@@ -236,6 +317,22 @@ public class LesaoResponse {
 
         public void setUpdatedAt(String updatedAt) {
             this.updatedAt = updatedAt;
+        }
+
+        public String getDataInicio() {
+            return dataInicio;
+        }
+
+        public void setDataInicio(String dataInicio) {
+            this.dataInicio = dataInicio;
+        }
+
+        public String getDataConclusao() {
+            return dataConclusao;
+        }
+
+        public void setDataConclusao(String dataConclusao) {
+            this.dataConclusao = dataConclusao;
         }
     }
 

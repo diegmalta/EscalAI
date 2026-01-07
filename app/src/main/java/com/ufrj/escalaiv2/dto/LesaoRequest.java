@@ -3,71 +3,95 @@ package com.ufrj.escalaiv2.dto;
 import com.google.gson.annotations.SerializedName;
 
 public class LesaoRequest {
-    @SerializedName("user_id")
-    private int userId;
-    
+
+    @SerializedName("id")
+    private Integer id;
+
     @SerializedName("area_lesao_n1")
     private int areaLesaoN1;
-    
+
     @SerializedName("area_lesao_n2")
     private int areaLesaoN2;
-    
+
     @SerializedName("area_lesao_n3")
     private int areaLesaoN3;
-    
+
     @SerializedName("massa")
     private double massa;
-    
+
     @SerializedName("altura")
     private int altura;
-    
+
     @SerializedName("grau_escalada")
     private int grauEscalada;
-    
+
     @SerializedName("tempo_pratica_meses")
     private int tempoPraticaMeses;
-    
+
     @SerializedName("frequencia_semanal")
     private int frequenciaSemanal;
-    
+
     @SerializedName("horas_semanais")
     private int horasSemanais;
-    
+
     @SerializedName("lesoes_previas")
     private int lesoesPrevias;
-    
+
     @SerializedName("reincidencia")
     private boolean reincidencia;
-    
+
     @SerializedName("buscou_atendimento")
     private boolean buscouAtendimento;
-    
+
     @SerializedName("profissional_atendimento")
     private int profissionalAtendimento;
-    
+
     @SerializedName("diagnostico")
     private int diagnostico;
-    
+
     @SerializedName("profissional_tratamento")
     private int profissionalTratamento;
-    
+
     @SerializedName("modalidade_praticada")
     private int modalidadePraticada;
-    
+
     @SerializedName("token")
     private String token;
+
+    // Novos campos de engajamento (apenas brasileira)
+    @SerializedName("freq_escalada_tradicional_brasileira")
+    private Integer freqEscaladaTradicionalBrasileira;
+
+    @SerializedName("horas_escalada_tradicional_brasileira")
+    private Integer horasEscaladaTradicionalBrasileira;
+
+    @SerializedName("grau_escalada_brasileira_on_sight")
+    private Integer grauEscaladaBrasileiraOnSight;
+
+    @SerializedName("grau_escalada_brasileira_redpoint")
+    private Integer grauEscaladaBrasileiraRedpoint;
+
+    @SerializedName("tempo_escalada_meses")
+    private Integer tempoEscaladaMeses;
+
+    // Campos de data da lesão
+    @SerializedName("data_inicio")
+    private String dataInicio;
+
+    @SerializedName("data_conclusao")
+    private String dataConclusao;
 
     // Construtor
     public LesaoRequest() {
     }
 
     // Getters e Setters
-    public int getUserId() {
-        return userId;
+    public Integer getId() {
+        return id;
     }
 
-    public void setUserId(int userId) {
-        this.userId = userId;
+    public void setId(Integer id) {
+        this.id = id;
     }
 
     public int getAreaLesaoN1() {
@@ -205,4 +229,26 @@ public class LesaoRequest {
     public void setToken(String token) {
         this.token = token;
     }
+
+    // Getters/Setters novos campos
+    public Integer getFreqEscaladaTradicionalBrasileira() { return freqEscaladaTradicionalBrasileira; }
+    public void setFreqEscaladaTradicionalBrasileira(Integer value) { this.freqEscaladaTradicionalBrasileira = value; }
+
+    public Integer getHorasEscaladaTradicionalBrasileira() { return horasEscaladaTradicionalBrasileira; }
+    public void setHorasEscaladaTradicionalBrasileira(Integer value) { this.horasEscaladaTradicionalBrasileira = value; }
+
+    public Integer getGrauEscaladaBrasileiraOnSight() { return grauEscaladaBrasileiraOnSight; }
+    public void setGrauEscaladaBrasileiraOnSight(Integer value) { this.grauEscaladaBrasileiraOnSight = value; }
+
+    public Integer getGrauEscaladaBrasileiraRedpoint() { return grauEscaladaBrasileiraRedpoint; }
+    public void setGrauEscaladaBrasileiraRedpoint(Integer value) { this.grauEscaladaBrasileiraRedpoint = value; }
+
+    public Integer getTempoEscaladaMeses() { return tempoEscaladaMeses; }
+    public void setTempoEscaladaMeses(Integer value) { this.tempoEscaladaMeses = value; }
+
+    public String getDataInicio() { return dataInicio; }
+    public void setDataInicio(String value) { this.dataInicio = value; }
+
+    public String getDataConclusao() { return dataConclusao; }
+    public void setDataConclusao(String value) { this.dataConclusao = value; }
 }

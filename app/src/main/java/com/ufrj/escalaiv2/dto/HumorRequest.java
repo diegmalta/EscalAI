@@ -3,9 +3,6 @@ package com.ufrj.escalaiv2.dto;
 import com.google.gson.annotations.SerializedName;
 
 public class HumorRequest {
-    @SerializedName("user_id")
-    private int userId;
-    
     @SerializedName("date")
     private String date;
     
@@ -24,23 +21,14 @@ public class HumorRequest {
     @SerializedName("calm_level")
     private int calmLevel;
 
-    public HumorRequest(int userId, String date, int joyLevel, int sadnessLevel, 
+    public HumorRequest(String date, int joyLevel, int sadnessLevel, 
                        int anxietyLevel, int stressLevel, int calmLevel) {
-        this.userId = userId;
         this.date = date;
         this.joyLevel = joyLevel;
         this.sadnessLevel = sadnessLevel;
         this.anxietyLevel = anxietyLevel;
         this.stressLevel = stressLevel;
         this.calmLevel = calmLevel;
-    }
-
-    public int getUserId() {
-        return userId;
-    }
-
-    public void setUserId(int userId) {
-        this.userId = userId;
     }
 
     public String getDate() {

@@ -49,11 +49,11 @@
             android:exported="true" />
         <activity android:name="com.ufrj.escalaiv2.activity.LesaoActivity"
             android:exported="true" />
-        <activity android:name="com.ufrj.escalaiv2.activity.LesaoListActivity"
-            android:exported="true" />
         <activity android:name="com.ufrj.escalaiv2.activity.RegistrarLesaoActivity"
             android:exported="true" />
         <activity android:name="com.ufrj.escalaiv2.activity.TermsOfUseActivity"
+            android:exported="true" />
+        <activity android:name="com.ufrj.escalaiv2.activity.VerifyEmailActivity"
             android:exported="true" />
     </application>
 

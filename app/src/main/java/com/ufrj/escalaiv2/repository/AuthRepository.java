@@ -11,6 +11,9 @@ import com.ufrj.escalaiv2.dto.ApiResponse;
 import com.ufrj.escalaiv2.dto.LoginRequest;
 import com.ufrj.escalaiv2.dto.LoginResponse;
 import com.ufrj.escalaiv2.dto.RegisterRequest;
+import com.ufrj.escalaiv2.dto.RefreshTokenRequest;
+import com.ufrj.escalaiv2.dto.RefreshTokenResponse;
+import com.ufrj.escalaiv2.dto.UserProfileResponse;
 import com.ufrj.escalaiv2.model.AppDatabase;
 import com.ufrj.escalaiv2.model.Usuario;
 import com.ufrj.escalaiv2.network.AuthApiService;
@@ -35,10 +38,13 @@ public class AuthRepository {
     private static final String TAG = "AuthRepository";
     private static final String PREF_FILE_NAME = "auth_secure_prefs";
     private static final String KEY_TOKEN = "auth_token";
+    private static final String KEY_REFRESH_TOKEN = "refresh_token";
     private static final String KEY_LAST_USED = "last_used_timestamp";
     private static final String KEY_EXPIRY = "token_expiry";
+    private static final String KEY_REFRESH_EXPIRY = "refresh_token_expiry";
     private static final String KEY_USER_ID = "user_id";
     private static final long THREE_DAYS_MS = 3 * 24 * 60 * 60 * 1000L; // 3 dias em milissegundos
+    private static final long SEVEN_DAYS_MS = 7 * 24 * 60 * 60 * 1000L; // 7 dias em milissegundos
 
     private final AuthApiService authApiService;
     private Context context;
@@ -170,7 +176,7 @@ public class AuthRepository {
 
                     if (context != null) {
                         Log.d(TAG, "Contexto disponível, salvando token...");
-                        saveAuthToken(loginResponse.getToken(), expiresIn);
+                        saveAuthToken(loginResponse.getToken(), expiresIn, loginResponse.getRefreshToken());
                         saveUserDataToRoom(loginResponse.getUser());
                     } else {
                         Log.e(TAG, "Contexto é null, não foi possível salvar o token");
@@ -186,23 +192,28 @@ public class AuthRepository {
                     Log.i(TAG, "Login bem-sucedido");
                 } else {
                     // Erro na resposta da API
+                    int statusCode = response.code();
                     String errorMessage = "Erro desconhecido no login";
-                    if (response.errorBody() != null) {
+
+                    if (statusCode == 403) {
+                        errorMessage = "Email não verificado. Por favor, verifique seu email.";
+                    } else if (response.errorBody() != null) {
                         try {
-                            errorMessage = "Erro " + response.code() + ": " + response.errorBody().string();
+                            errorMessage = "Erro " + statusCode + ": " + response.errorBody().string();
                         } catch (Exception e) {
                             Log.e(TAG, "Erro ao parsear errorBody", e);
-                            errorMessage = "Erro " + response.code() + " ao fazer login";
+                            errorMessage = "Erro " + statusCode + " ao fazer login";
                         }
                     } else if (response.message() != null && !response.message().isEmpty()){
-                        errorMessage = "Erro " + response.code() + ": " + response.message();
+                        errorMessage = "Erro " + statusCode + ": " + response.message();
                     }
 
                     ApiResponse<LoginResponse> errorResponse = new ApiResponse<>();
                     errorResponse.setSuccess(false);
                     errorResponse.setMessage(errorMessage);
+                    errorResponse.setHttpStatusCode(statusCode);
                     result.setValue(errorResponse);
-                    Log.w(TAG, "Erro no login: " + errorMessage);
+                    Log.w(TAG, "Erro no login (" + statusCode + "): " + errorMessage);
                 }
             }
 
@@ -271,6 +282,7 @@ public class AuthRepository {
         });
     }
 
+
     /**
      * Obtém os dados do usuário do banco de dados local.
      *
@@ -287,12 +299,13 @@ public class AuthRepository {
     }
 
     /**
-     * Salva o token de autenticação de forma segura.
+     * Salva o token de autenticação e refresh token de forma segura.
      *
      * @param token Token JWT recebido da API
      * @param expiresIn Tempo de expiração do token em segundos
+     * @param refreshToken Refresh token recebido da API
      */
-    private void saveAuthToken(String token, long expiresIn) {
+    public void saveAuthToken(String token, long expiresIn, String refreshToken) {
         if (encryptedPrefs == null) {
             Log.e(TAG, "EncryptedSharedPreferences não inicializado");
             return;
@@ -300,23 +313,37 @@ public class AuthRepository {
 
         long currentTime = System.currentTimeMillis();
         long expiryTime = currentTime + (expiresIn * 1000); // Converte segundos para milissegundos
+        long refreshExpiryTime = currentTime + SEVEN_DAYS_MS; // 7 dias para refresh token
 
         Log.d(TAG, "Salvando token. expiresIn: " + expiresIn + " (segundos), expiryTime: " + expiryTime + " (ms), currentTime: " + currentTime);
 
         encryptedPrefs.edit()
                 .putString(KEY_TOKEN, token)
+                .putString(KEY_REFRESH_TOKEN, refreshToken)
                 .putLong(KEY_LAST_USED, currentTime)
                 .putLong(KEY_EXPIRY, expiryTime)
+                .putLong(KEY_REFRESH_EXPIRY, refreshExpiryTime)
                 .apply();
 
-        Log.d(TAG, "Token salvo com sucesso. Expira em: " + new Date(expiryTime));
+        Log.d(TAG, "Token e refresh token salvos com sucesso. Expira em: " + new Date(expiryTime));
         Log.d(TAG, "Token salvo: " + token);
+        Log.d(TAG, "Refresh token salvo: " + refreshToken);
         Log.d(TAG, "Expira em: " + new Date(expiryTime));
+        Log.d(TAG, "Refresh token expira em: " + new Date(refreshExpiryTime));
 
         // Verificar se foi salvo corretamente
         String savedToken = encryptedPrefs.getString(KEY_TOKEN, null);
+        String savedRefreshToken = encryptedPrefs.getString(KEY_REFRESH_TOKEN, null);
         Log.d(TAG, "Token verificado após salvar: " + savedToken);
+        Log.d(TAG, "Refresh token verificado após salvar: " + savedRefreshToken);
         Log.d(TAG, "=== FIM SAVE AUTH TOKEN DEBUG ===");
+    }
+
+    /**
+     * Salva apenas o access token (para compatibilidade com código existente).
+     */
+    private void saveAuthToken(String token, long expiresIn) {
+        saveAuthToken(token, expiresIn, null);
     }
 
     /**
@@ -338,6 +365,33 @@ public class AuthRepository {
     public String getAuthTokenRaw() {
         if (encryptedPrefs == null) return null;
         return encryptedPrefs.getString(KEY_TOKEN, null);
+    }
+
+    /**
+     * Obtém o refresh token armazenado.
+     *
+     * @return O refresh token ou null se não existir
+     */
+    public String getRefreshToken() {
+        if (encryptedPrefs == null) return null;
+        return encryptedPrefs.getString(KEY_REFRESH_TOKEN, null);
+    }
+
+    /**
+     * Verifica se o refresh token existe e não expirou.
+     *
+     * @return true se o refresh token for válido
+     */
+    public boolean hasValidRefreshToken() {
+        if (encryptedPrefs == null) return false;
+
+        String refreshToken = encryptedPrefs.getString(KEY_REFRESH_TOKEN, null);
+        if (refreshToken == null) return false;
+
+        long refreshExpiryTime = encryptedPrefs.getLong(KEY_REFRESH_EXPIRY, 0);
+        long currentTime = System.currentTimeMillis();
+
+        return currentTime < refreshExpiryTime;
     }
 
     /**
@@ -383,7 +437,105 @@ public class AuthRepository {
     }
 
     /**
+     * Tenta renovar o access token usando o refresh token.
+     *
+     * @return LiveData contendo a resposta da API
+     */
+    public LiveData<ApiResponse<RefreshTokenResponse>> refreshToken() {
+        MutableLiveData<ApiResponse<RefreshTokenResponse>> result = new MutableLiveData<>();
+
+        String refreshToken = getRefreshToken();
+        if (refreshToken == null) {
+            ApiResponse<RefreshTokenResponse> errorResponse = new ApiResponse<>();
+            errorResponse.setSuccess(false);
+            errorResponse.setMessage("Refresh token não encontrado");
+            result.setValue(errorResponse);
+            return result;
+        }
+
+        if (!hasValidRefreshToken()) {
+            ApiResponse<RefreshTokenResponse> errorResponse = new ApiResponse<>();
+            errorResponse.setSuccess(false);
+            errorResponse.setMessage("Refresh token expirado");
+            result.setValue(errorResponse);
+            return result;
+        }
+
+        RefreshTokenRequest request = new RefreshTokenRequest(refreshToken);
+
+        authApiService.refreshToken(request).enqueue(new Callback<RefreshTokenResponse>() {
+            @Override
+            public void onResponse(Call<RefreshTokenResponse> call, Response<RefreshTokenResponse> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    // Refresh bem-sucedido
+                    RefreshTokenResponse refreshResponse = response.body();
+
+                    Log.d(TAG, "Refresh token bem-sucedido");
+                    Log.d(TAG, "Novo access token: " + refreshResponse.getAccessToken());
+                    Log.d(TAG, "ExpiresIn: " + refreshResponse.getExpiresIn());
+
+                    long expiresIn = refreshResponse.getExpiresIn();
+                    if (expiresIn <= 0) {
+                        Log.w(TAG, "expiresIn inválido (" + expiresIn + "), usando valor padrão de 3600 segundos (1 hora)");
+                        expiresIn = 3600;
+                    }
+
+                    if (context != null) {
+                        Log.d(TAG, "Contexto disponível, salvando novo token...");
+                        // Salva novo access token e substitui refresh token pelo novo retornado (single use)
+                        String newRefresh = refreshResponse.getRefreshToken() != null ? refreshResponse.getRefreshToken() : getRefreshToken();
+                        saveAuthToken(refreshResponse.getAccessToken(), expiresIn, newRefresh);
+                    } else {
+                        Log.e(TAG, "Contexto é null, não foi possível salvar o token");
+                    }
+
+                    // Criar ApiResponse para manter compatibilidade
+                    ApiResponse<RefreshTokenResponse> apiResponse = new ApiResponse<>();
+                    apiResponse.setSuccess(true);
+                    apiResponse.setMessage("Token renovado com sucesso");
+                    apiResponse.setData(refreshResponse);
+
+                    result.setValue(apiResponse);
+                    Log.i(TAG, "Refresh token bem-sucedido");
+                } else {
+                    // Erro na resposta da API
+                    String errorMessage = "Erro desconhecido no refresh token";
+                    if (response.errorBody() != null) {
+                        try {
+                            errorMessage = "Erro " + response.code() + ": " + response.errorBody().string();
+                        } catch (Exception e) {
+                            Log.e(TAG, "Erro ao parsear errorBody", e);
+                            errorMessage = "Erro " + response.code() + " ao renovar token";
+                        }
+                    } else if (response.message() != null && !response.message().isEmpty()) {
+                        errorMessage = "Erro " + response.code() + ": " + response.message();
+                    }
+
+                    ApiResponse<RefreshTokenResponse> errorResponse = new ApiResponse<>();
+                    errorResponse.setSuccess(false);
+                    errorResponse.setMessage(errorMessage);
+                    result.setValue(errorResponse);
+                    Log.w(TAG, "Erro no refresh token: " + errorMessage);
+                }
+            }
+
+            @Override
+            public void onFailure(Call<RefreshTokenResponse> call, Throwable t) {
+                // Falha na comunicação com a API
+                ApiResponse<RefreshTokenResponse> failureResponse = new ApiResponse<>();
+                failureResponse.setSuccess(false);
+                failureResponse.setMessage("Falha na comunicação com o servidor: " + t.getMessage());
+                result.setValue(failureResponse);
+                Log.e(TAG, "Falha na chamada de refresh token", t);
+            }
+        });
+
+        return result;
+    }
+
+    /**
      * Verifica se o usuário está autenticado e se o token não expirou.
+     * Se o access token expirou mas há um refresh token válido, tenta renovar automaticamente.
      *
      * @return true se o usuário estiver autenticado e o token for válido
      */
@@ -403,14 +555,67 @@ public class AuthRepository {
         // Verifica se o token expirou pelo tempo definido pelo servidor
         boolean expiredByServer = currentTime > expiryTime;
 
-        if (expiredByInactivity || expiredByServer) {
-            // Token expirado, limpa os dados de autenticação
-            Log.d(TAG, "Token expirado, realizando logout automático");
-            logout();
+        if (expiredByInactivity) {
+            // Token expirado por inatividade, limpa os dados de autenticação
+            Log.d(TAG, "Token expirado por inatividade, realizando logout automático");
+            logoutLocal();
+            return false;
+        }
+
+        if (expiredByServer) {
+            // Access token expirado, verifica se há refresh token válido
+            if (hasValidRefreshToken()) {
+                Log.d(TAG, "Access token expirado, mas há refresh token válido. Tentando renovar...");
+                // Tenta renovar o token automaticamente (síncrono para esta verificação)
+                refreshTokenSync();
+                // Verifica novamente se agora está autenticado
+                token = encryptedPrefs.getString(KEY_TOKEN, null);
+                if (token != null) {
+                    expiryTime = encryptedPrefs.getLong(KEY_EXPIRY, 0);
+                    if (currentTime < expiryTime) {
+                        return true;
+                    }
+                }
+            }
+
+            // Se não conseguiu renovar, faz logout
+            Log.d(TAG, "Não foi possível renovar o token, realizando logout automático");
+            logoutLocal();
             return false;
         }
 
         return true;
+    }
+
+    /**
+     * Renovação síncrona do token (usado internamente).
+     */
+    private void refreshTokenSync() {
+        String refreshToken = getRefreshToken();
+        if (refreshToken == null || !hasValidRefreshToken()) {
+            return;
+        }
+
+        try {
+            RefreshTokenRequest request = new RefreshTokenRequest(refreshToken);
+            Response<RefreshTokenResponse> response = authApiService.refreshToken(request).execute();
+
+            if (response.isSuccessful() && response.body() != null) {
+                RefreshTokenResponse refreshResponse = response.body();
+                long expiresIn = refreshResponse.getExpiresIn();
+                if (expiresIn <= 0) {
+                    expiresIn = 3600;
+                }
+
+                if (context != null) {
+                    String newRefresh = refreshResponse.getRefreshToken() != null ? refreshResponse.getRefreshToken() : getRefreshToken();
+                    saveAuthToken(refreshResponse.getAccessToken(), expiresIn, newRefresh);
+                    Log.d(TAG, "Token renovado automaticamente");
+                }
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "Erro ao renovar token automaticamente", e);
+        }
     }
 
     /**
@@ -465,13 +670,22 @@ public class AuthRepository {
      * Remove os dados do usuário do banco local.
      */
     public void logout() {
+        logoutLocal();
+    }
+
+    /**
+     * Realiza o logout local (sem chamar o servidor).
+     */
+    private void logoutLocal() {
         if (encryptedPrefs == null) return;
 
         // Limpar dados de autenticação
         encryptedPrefs.edit()
                 .remove(KEY_TOKEN)
+                .remove(KEY_REFRESH_TOKEN)
                 .remove(KEY_LAST_USED)
                 .remove(KEY_EXPIRY)
+                .remove(KEY_REFRESH_EXPIRY)
                 .apply();
 
         // Limpar dados do usuário do Room
@@ -486,6 +700,115 @@ public class AuthRepository {
             });
         }
 
-        Log.d(TAG, "Logout realizado com sucesso");
+        Log.d(TAG, "Logout local realizado com sucesso");
+    }
+
+    /**
+     * Realiza o logout chamando o endpoint do servidor e depois limpa os dados locais.
+     *
+     * @return LiveData contendo a resposta da API
+     */
+    public LiveData<ApiResponse<Void>> logoutWithServer() {
+        MutableLiveData<ApiResponse<Void>> result = new MutableLiveData<>();
+
+        String refreshToken = getRefreshToken();
+        if (refreshToken == null) {
+            // Se não há refresh token, apenas faz logout local
+            logoutLocal();
+            ApiResponse<Void> response = new ApiResponse<>();
+            response.setSuccess(true);
+            response.setMessage("Logout realizado com sucesso");
+            result.setValue(response);
+            return result;
+        }
+
+        RefreshTokenRequest request = new RefreshTokenRequest(refreshToken);
+
+        authApiService.logout(request).enqueue(new Callback<ApiResponse<Void>>() {
+            @Override
+            public void onResponse(Call<ApiResponse<Void>> call, Response<ApiResponse<Void>> response) {
+                // Independente da resposta do servidor, sempre faz logout local
+                logoutLocal();
+
+                if (response.isSuccessful() && response.body() != null) {
+                    result.setValue(response.body());
+                    Log.i(TAG, "Logout no servidor realizado com sucesso");
+                } else {
+                    // Mesmo com erro no servidor, considera sucesso pois limpou localmente
+                    ApiResponse<Void> successResponse = new ApiResponse<>();
+                    successResponse.setSuccess(true);
+                    successResponse.setMessage("Logout realizado com sucesso");
+                    result.setValue(successResponse);
+                    Log.w(TAG, "Erro no servidor durante logout, mas logout local realizado");
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ApiResponse<Void>> call, Throwable t) {
+                // Mesmo com falha na comunicação, sempre faz logout local
+                logoutLocal();
+
+                ApiResponse<Void> successResponse = new ApiResponse<>();
+                successResponse.setSuccess(true);
+                successResponse.setMessage("Logout realizado com sucesso");
+                result.setValue(successResponse);
+                Log.w(TAG, "Falha na comunicação durante logout, mas logout local realizado", t);
+            }
+        });
+
+        return result;
+    }
+
+    public LiveData<RefreshTokenResponse> refreshToken(RefreshTokenRequest request) {
+        MutableLiveData<RefreshTokenResponse> result = new MutableLiveData<>();
+
+        authApiService.refreshToken(request).enqueue(new Callback<RefreshTokenResponse>() {
+            @Override
+            public void onResponse(Call<RefreshTokenResponse> call, Response<RefreshTokenResponse> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    result.postValue(response.body());
+                } else {
+                    Log.e(TAG, "Erro ao renovar token: " + response.code());
+                    result.postValue(null);
+                }
+            }
+
+            @Override
+            public void onFailure(Call<RefreshTokenResponse> call, Throwable t) {
+                Log.e(TAG, "Erro de rede ao renovar token", t);
+                result.postValue(null);
+            }
+        });
+
+        return result;
+    }
+
+    public LiveData<UserProfileResponse> getUserProfile() {
+        MutableLiveData<UserProfileResponse> result = new MutableLiveData<>();
+
+        // Usar AuthApiService autenticado para incluir o token no header
+        AuthApiService authenticatedAuthService = RetrofitClient.getAuthApiService(context);
+
+        authenticatedAuthService.getUserProfile().enqueue(new Callback<UserProfileResponse>() {
+            @Override
+            public void onResponse(Call<UserProfileResponse> call, Response<UserProfileResponse> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    UserProfileResponse profile = response.body();
+                    Log.d(TAG, "Perfil do usuário carregado: " + profile.getName());
+                    result.postValue(profile);
+                } else {
+                    Log.e(TAG, "Erro ao buscar perfil do usuário: " + response.code());
+                    result.postValue(null);
+                }
+            }
+
+            @Override
+            public void onFailure(Call<UserProfileResponse> call, Throwable t) {
+                Log.e(TAG, "Erro de rede ao buscar perfil do usuário", t);
+                result.postValue(null);
+            }
+        });
+
+        return result;
     }
 }

@@ -6,9 +6,10 @@ import android.util.Log;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
-import com.ufrj.escalaiv2.dto.ApiResponse;
 import com.ufrj.escalaiv2.dto.LesaoRequest;
 import com.ufrj.escalaiv2.dto.LesaoResponse;
+import com.ufrj.escalaiv2.dto.PrevisaoAfastamentoRequest;
+import com.ufrj.escalaiv2.dto.PrevisaoAfastamentoResponse;
 import com.ufrj.escalaiv2.network.LesaoApiService;
 import com.ufrj.escalaiv2.network.RetrofitClient;
 
@@ -17,105 +18,130 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 public class LesaoRepository {
-    private static final String TAG = "LesaoRepository";
     private final LesaoApiService lesaoApiService;
     private final AuthRepository authRepository;
-    private final Context context;
+    private static final String TAG = "LesaoRepository";
 
     public LesaoRepository(Context context) {
-        this.context = context;
-        this.lesaoApiService = RetrofitClient.getLesaoApiService();
+        this.lesaoApiService = RetrofitClient.getLesaoApiService(context);
         this.authRepository = new AuthRepository(context);
     }
 
-    public LiveData<LesaoResponse> getUserLesoes(int userId) {
+    public LiveData<LesaoResponse> saveLesao(LesaoRequest request) {
         MutableLiveData<LesaoResponse> result = new MutableLiveData<>();
 
-        String token = "Bearer " + authRepository.getAuthToken();
-        if (token == null || token.equals("Bearer null")) {
-            LesaoResponse errorResponse = new LesaoResponse();
-            errorResponse.setSuccess(false);
-            errorResponse.setMessage("Usuário não autenticado");
-            result.setValue(errorResponse);
-            return result;
-        }
-
-        lesaoApiService.getUserLesoes(userId, token).enqueue(new Callback<LesaoResponse>() {
+        lesaoApiService.saveLesao(request).enqueue(new Callback<LesaoResponse>() {
             @Override
             public void onResponse(Call<LesaoResponse> call, Response<LesaoResponse> response) {
                 if (response.isSuccessful() && response.body() != null) {
-                    result.setValue(response.body());
-                    // Atualiza o timestamp de último uso do token
-                    authRepository.updateLastUsedTimestamp();
+                    result.postValue(response.body());
                 } else {
-                    LesaoResponse errorResponse = new LesaoResponse();
-                    errorResponse.setSuccess(false);
-                    errorResponse.setMessage("Erro ao buscar dados: " +
-                            (response.errorBody() != null ? response.code() : "Desconhecido"));
-                    result.setValue(errorResponse);
+                    Log.e(TAG, "Erro ao salvar lesão: " + response.code());
+                    result.postValue(null);
                 }
             }
 
             @Override
             public void onFailure(Call<LesaoResponse> call, Throwable t) {
-                LesaoResponse errorResponse = new LesaoResponse();
-                errorResponse.setSuccess(false);
-                errorResponse.setMessage("Falha na comunicação: " + t.getMessage());
-                result.setValue(errorResponse);
-                Log.e(TAG, "Falha na chamada de API", t);
+                Log.e(TAG, "Erro de rede ao salvar lesão", t);
+                result.postValue(null);
             }
         });
 
         return result;
     }
 
-    public LiveData<LesaoResponse> saveLesao(LesaoRequest lesaoRequest) {
+    public LiveData<LesaoResponse> updateLesao(int id, LesaoRequest request) {
         MutableLiveData<LesaoResponse> result = new MutableLiveData<>();
 
-        String token = "Bearer " + authRepository.getAuthToken();
-        if (token == null || token.equals("Bearer null")) {
-            LesaoResponse errorResponse = new LesaoResponse();
-            errorResponse.setSuccess(false);
-            errorResponse.setMessage("Usuário não autenticado");
-            result.setValue(errorResponse);
-            return result;
-        }
-
-        // Adiciona o token ao request
-        lesaoRequest.setToken(authRepository.getAuthToken());
-
-        Call<LesaoResponse> call;
-        /*if (lesaoRequest.getUserId() > 0) {*//*
-            // Atualização de lesão existente
-            call = lesaoApiService.updateLesao(lesaoRequest.getUserId(), lesaoRequest, token);
-        } else {*/
-            // Criação de nova lesão
-        call = lesaoApiService.createLesao(lesaoRequest, token);
-//        }
-
-        call.enqueue(new Callback<LesaoResponse>() {
+        lesaoApiService.updateLesao(id, request).enqueue(new Callback<LesaoResponse>() {
             @Override
             public void onResponse(Call<LesaoResponse> call, Response<LesaoResponse> response) {
                 if (response.isSuccessful() && response.body() != null) {
-                    result.setValue(response.body());
-                    // Atualiza o timestamp de último uso do token
-                    authRepository.updateLastUsedTimestamp();
+                    result.postValue(response.body());
                 } else {
-                    LesaoResponse errorResponse = new LesaoResponse();
-                    errorResponse.setSuccess(false);
-                    errorResponse.setMessage("Erro ao salvar dados: " +
-                            (response.errorBody() != null ? response.code() : "Desconhecido"));
-                    result.setValue(errorResponse);
+                    Log.e(TAG, "Erro ao atualizar lesão: " + response.code());
+                    result.postValue(null);
                 }
             }
 
             @Override
             public void onFailure(Call<LesaoResponse> call, Throwable t) {
-                LesaoResponse errorResponse = new LesaoResponse();
-                errorResponse.setSuccess(false);
-                errorResponse.setMessage("Falha na comunicação: " + t.getMessage());
-                result.setValue(errorResponse);
-                Log.e(TAG, "Falha na chamada de API", t);
+                Log.e(TAG, "Erro de rede ao atualizar lesão", t);
+                result.postValue(null);
+            }
+        });
+
+        return result;
+    }
+
+    public LiveData<LesaoResponse> getUserLesoes() {
+        MutableLiveData<LesaoResponse> result = new MutableLiveData<>();
+
+        lesaoApiService.getUserLesoes().enqueue(new Callback<LesaoResponse>() {
+            @Override
+            public void onResponse(Call<LesaoResponse> call, Response<LesaoResponse> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    result.postValue(response.body());
+                } else {
+                    Log.e(TAG, "Erro ao buscar lesões: " + response.code());
+                    result.postValue(null);
+                }
+            }
+
+            @Override
+            public void onFailure(Call<LesaoResponse> call, Throwable t) {
+                Log.e(TAG, "Erro de rede ao buscar lesões", t);
+                result.postValue(null);
+            }
+        });
+
+        return result;
+    }
+
+    public LiveData<LesaoResponse> getLesaoById(int lesaoId) {
+        MutableLiveData<LesaoResponse> result = new MutableLiveData<>();
+
+        lesaoApiService.getLesaoById(lesaoId).enqueue(new Callback<LesaoResponse>() {
+            @Override
+            public void onResponse(Call<LesaoResponse> call, Response<LesaoResponse> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    result.postValue(response.body());
+                } else {
+                    Log.e(TAG, "Erro ao buscar lesão: " + response.code());
+                    result.postValue(null);
+                }
+            }
+
+            @Override
+            public void onFailure(Call<LesaoResponse> call, Throwable t) {
+                Log.e(TAG, "Erro de rede ao buscar lesão", t);
+                result.postValue(null);
+            }
+        });
+
+        return result;
+    }
+
+    public LiveData<PrevisaoAfastamentoResponse> preverAfastamento(PrevisaoAfastamentoRequest request) {
+        MutableLiveData<PrevisaoAfastamentoResponse> result = new MutableLiveData<>();
+
+        Log.d(TAG, "Usando API remota para previsão");
+        lesaoApiService.preverAfastamento(request).enqueue(new Callback<PrevisaoAfastamentoResponse>() {
+            @Override
+            public void onResponse(Call<PrevisaoAfastamentoResponse> call, Response<PrevisaoAfastamentoResponse> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    result.postValue(response.body());
+                } else {
+                    Log.e(TAG, "Erro ao prever afastamento: " + response.code());
+                    result.postValue(null);
+                }
+            }
+
+            @Override
+            public void onFailure(Call<PrevisaoAfastamentoResponse> call, Throwable t) {
+                Log.e(TAG, "Erro de rede ao prever afastamento", t);
+                result.postValue(null);
             }
         });
 

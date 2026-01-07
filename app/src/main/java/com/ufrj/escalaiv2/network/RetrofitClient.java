@@ -1,5 +1,6 @@
 package com.ufrj.escalaiv2.network;
 
+import android.content.Context;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 import okhttp3.OkHttpClient;
@@ -11,12 +12,14 @@ import java.util.concurrent.TimeUnit;
  */
 public class RetrofitClient {
 
-    private static final String BASE_URL = "http://192.168.0.18:8000/";
+    private static final String BASE_URL = "http://10.0.2.2:8000/";
 
     private static Retrofit retrofitInstance = null;
+    private static Retrofit authenticatedRetrofitInstance = null;
     private static AuthApiService authApiServiceInstance = null;
     private static LesaoApiService lesaoApiServiceInstance = null;
     private static AtividadesApiService atividadesApiServiceInstance = null;
+    private static ExerciciosApiService exerciciosApiServiceInstance = null;
 
     private static Retrofit getRetrofitInstance() {
         if (retrofitInstance == null) {
@@ -40,6 +43,27 @@ public class RetrofitClient {
         return retrofitInstance;
     }
 
+    private static Retrofit getAuthenticatedRetrofitInstance(Context context) {
+        if (authenticatedRetrofitInstance == null) {
+            HttpLoggingInterceptor logging = new HttpLoggingInterceptor();
+            logging.setLevel(HttpLoggingInterceptor.Level.BODY); // TODO Mude para NONE em produção
+
+            OkHttpClient.Builder httpClient = new OkHttpClient.Builder();
+            httpClient.addInterceptor(logging);
+            httpClient.addInterceptor(new AuthInterceptor(context));
+            httpClient.connectTimeout(10, TimeUnit.SECONDS);
+            httpClient.readTimeout(10, TimeUnit.SECONDS);
+            httpClient.writeTimeout(10, TimeUnit.SECONDS);
+
+            authenticatedRetrofitInstance = new Retrofit.Builder()
+                    .baseUrl(BASE_URL)
+                    .addConverterFactory(GsonConverterFactory.create())
+                    .client(httpClient.build())
+                    .build();
+        }
+        return authenticatedRetrofitInstance;
+    }
+
     /**
      * Obtém a instância singleton do serviço da API de autenticação.
      *
@@ -50,6 +74,16 @@ public class RetrofitClient {
             authApiServiceInstance = getRetrofitInstance().create(AuthApiService.class);
         }
         return authApiServiceInstance;
+    }
+
+    /**
+     * Obtém a instância do serviço da API de autenticação com autenticação automática.
+     *
+     * @param context Contexto da aplicação
+     * @return Instância de AuthApiService autenticada
+     */
+    public static AuthApiService getAuthApiService(Context context) {
+        return getAuthenticatedRetrofitInstance(context).create(AuthApiService.class);
     }
 
     /**
@@ -65,6 +99,16 @@ public class RetrofitClient {
     }
 
     /**
+     * Obtém a instância singleton do serviço da API de lesões com autenticação automática.
+     *
+     * @param context Contexto da aplicação
+     * @return Instância de LesaoApiService
+     */
+    public static LesaoApiService getLesaoApiService(Context context) {
+        return getAuthenticatedRetrofitInstance(context).create(LesaoApiService.class);
+    }
+
+    /**
      * Obtém a instância singleton do serviço da API de atividades.
      *
      * @return Instância de AtividadesApiService
@@ -74,5 +118,37 @@ public class RetrofitClient {
             atividadesApiServiceInstance = getRetrofitInstance().create(AtividadesApiService.class);
         }
         return atividadesApiServiceInstance;
+    }
+
+    /**
+     * Obtém a instância singleton do serviço da API de atividades com autenticação automática.
+     *
+     * @param context Contexto da aplicação
+     * @return Instância de AtividadesApiService
+     */
+    public static AtividadesApiService getAtividadesApiService(Context context) {
+        return getAuthenticatedRetrofitInstance(context).create(AtividadesApiService.class);
+    }
+
+    /**
+     * Obtém a instância singleton do serviço da API de exercícios.
+     *
+     * @return Instância de ExerciciosApiService
+     */
+    public static ExerciciosApiService getExerciciosApiService() {
+        if (exerciciosApiServiceInstance == null) {
+            exerciciosApiServiceInstance = getRetrofitInstance().create(ExerciciosApiService.class);
+        }
+        return exerciciosApiServiceInstance;
+    }
+
+    /**
+     * Obtém a instância singleton do serviço da API de exercícios com autenticação automática.
+     *
+     * @param context Contexto da aplicação
+     * @return Instância de ExerciciosApiService
+     */
+    public static ExerciciosApiService getExerciciosApiService(Context context) {
+        return getAuthenticatedRetrofitInstance(context).create(ExerciciosApiService.class);
     }
 }
