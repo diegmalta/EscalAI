@@ -9,7 +9,6 @@ import android.view.View;
 import android.widget.TextView;
 import android.widget.TimePicker;
 
-import com.google.android.material.slider.Slider;
 import com.google.android.material.snackbar.BaseTransientBottomBar;
 import com.google.android.material.snackbar.Snackbar;
 import com.ufrj.escalaiv2.R;
@@ -55,13 +54,11 @@ public class SonoActivity extends AppCompatActivity {
         binding.sleepTimeInput.setOnClickListener(v -> showTimePickerDialog(true));
         binding.wakeTimeInput.setOnClickListener(v -> showTimePickerDialog(false));
 
-        // Configurar slider de qualidade do sono
-        binding.sleepQualitySlider.addOnChangeListener(new Slider.OnChangeListener() {
-            @Override
-            public void onValueChange(Slider slider, float value, boolean fromUser) {
-                if (fromUser) {
-                    sonoVM.setSleepQuality((int) value);
-                }
+        // Configurar slider de qualidade do sono (5 pontos: 0-4)
+        binding.sleepQualitySlider.addOnChangeListener((slider, value, fromUser) -> {
+            if (fromUser) {
+                // Converter de 0-4 para 1-5 para manter compatibilidade com o ViewModel
+                sonoVM.setSleepQuality((int) value + 1);
             }
         });
 
@@ -119,19 +116,16 @@ public class SonoActivity extends AppCompatActivity {
             }
         });
 
-        // Observar mudanças na qualidade do sono
+        // Observar mudanças na qualidade do sono e atualizar o slider
         sonoVM.getSleepQuality().observe(this, new Observer<Integer>() {
             @Override
             public void onChanged(Integer quality) {
-                binding.sleepQualitySlider.setValue(quality);
-            }
-        });
-
-        // Observar mudanças no texto da qualidade do sono
-        sonoVM.getSleepQualityText().observe(this, new Observer<String>() {
-            @Override
-            public void onChanged(String qualityText) {
-                binding.sleepQualityValue.setText(qualityText);
+                if (quality == null) return;
+                // Converter de 1-5 para 0-4 para o slider
+                float sliderValue = quality - 1;
+                if (binding.sleepQualitySlider.getValue() != sliderValue) {
+                    binding.sleepQualitySlider.setValue(sliderValue);
+                }
             }
         });
 

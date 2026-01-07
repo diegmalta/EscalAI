@@ -12,7 +12,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.databinding.DataBindingUtil;
 import androidx.lifecycle.ViewModelProvider;
 
-import com.google.android.material.slider.Slider;
 import com.ufrj.escalaiv2.R;
 import com.ufrj.escalaiv2.databinding.ActivityTreinoBinding;
 import com.ufrj.escalaiv2.enums.Event;
@@ -41,7 +40,7 @@ public class TreinoActivity extends AppCompatActivity {
 
         setupToolbar();
         setupDropdown();
-        setupSlider();
+        setupDurationPickers();
         setupObservers();
         setupClickListeners();
     }
@@ -77,23 +76,55 @@ public class TreinoActivity extends AppCompatActivity {
         });
     }
 
-    private void setupSlider() {
-        binding.duracaoSlider.addOnChangeListener(new Slider.OnChangeListener() {
-            @Override
-            public void onValueChange(Slider slider, float value, boolean fromUser) {
-                if (fromUser) {
-                    viewModel.updateDuracaoTreino(value);
-                }
+    private void setupDurationPickers() {
+        // Horas: 0 a 24
+        binding.hourPicker.setMinValue(0);
+        binding.hourPicker.setMaxValue(24);
+        binding.hourPicker.setWrapSelectorWheel(false);
+        binding.hourPicker.setFormatter(value -> String.format("%02d", value));
+
+        // Minutos: 0, 15, 30, 45 (usamos índices 0..3 e mapeamos)
+        final int[] minuteValues = new int[]{0, 15, 30, 45};
+        String[] minuteDisplayed = new String[]{"00", "15", "30", "45"};
+        binding.minutePicker.setMinValue(0);
+        binding.minutePicker.setMaxValue(minuteValues.length - 1);
+        binding.minutePicker.setDisplayedValues(minuteDisplayed);
+        binding.minutePicker.setWrapSelectorWheel(false);
+
+        // Aplicar valores iniciais do ViewModel
+        Integer horas = viewModel.getDuracaoTreinoHoras().getValue();
+        Integer mins = viewModel.getDuracaoTreinoMinutosParte().getValue();
+        if (horas != null) binding.hourPicker.setValue(horas);
+        if (mins != null) {
+            int idx = 0;
+            for (int i = 0; i < minuteValues.length; i++) {
+                if (minuteValues[i] == mins) { idx = i; break; }
+            }
+            binding.minutePicker.setValue(idx);
+        }
+        binding.minutePicker.setEnabled(horas == null || horas < 24);
+
+        binding.hourPicker.setOnValueChangedListener((picker, oldVal, newVal) -> {
+            // Se 24h, força minutos em 0
+            if (newVal >= 24) {
+                binding.minutePicker.setValue(0);
+                binding.minutePicker.setEnabled(false);
+                viewModel.updateDuracaoTreino(24, 0);
+            } else {
+                binding.minutePicker.setEnabled(true);
+                int minuteIdx = binding.minutePicker.getValue();
+                viewModel.updateDuracaoTreino(newVal, minuteValues[minuteIdx]);
             }
         });
 
-        // Configurar formato do label do slider
-        binding.duracaoSlider.setLabelFormatter(value -> {
-            if (value == 1.0f) {
-                return "1 hora";
-            } else {
-                return String.format("%.1f horas", value);
+        binding.minutePicker.setOnValueChangedListener((picker, oldVal, newVal) -> {
+            int horasAtual = binding.hourPicker.getValue();
+            // Se horas 24, ignore alterações (já desabilitado, mas por segurança)
+            if (horasAtual >= 24) {
+                binding.minutePicker.setValue(0);
+                return;
             }
+            viewModel.updateDuracaoTreino(horasAtual, minuteValues[newVal]);
         });
     }
 
@@ -144,8 +175,10 @@ public class TreinoActivity extends AppCompatActivity {
         // Resetar dropdown
         binding.tipoTreinoDropdown.setText("", false);
 
-        // Resetar slider para valor padrão
-        binding.duracaoSlider.setValue(1.0f);
+        // Resetar pickers para 1h00
+        binding.hourPicker.setValue(1);
+        binding.minutePicker.setValue(0);
+        binding.minutePicker.setEnabled(true);
 
         // Atualizar ViewModel com reset
         viewModel.resetForm();

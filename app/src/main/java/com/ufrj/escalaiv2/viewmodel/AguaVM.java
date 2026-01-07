@@ -75,24 +75,17 @@ public class AguaVM extends AndroidViewModel {
                 // Buscar token salvo usando AuthRepository
                 AuthRepository authRepository = new AuthRepository(getApplication());
 
-                // Verificar se o token existe
-                boolean hasToken = authRepository.hasToken();
-                Log.d("TOKEN_DEBUG", "hasToken(): " + hasToken);
-
                 // Tentar obter o token sem verificar autenticação
                 String token = authRepository.getAuthTokenRaw();
-                Log.d("TOKEN_DEBUG", "Token recuperado (raw): " + token);
 
                 // Se não encontrou, tentar com verificação de autenticação
                 if (token == null) {
                     token = authRepository.getAuthToken();
-                    Log.d("TOKEN_DEBUG", "Token recuperado (com auth): " + token);
                 }
 
                 if (token != null && !token.startsWith("Bearer ")) {
                     token = "Bearer " + token;
                 }
-                Log.d("TOKEN_DEBUG", "Token enviado: " + token);
 
                 // Registrar água usando o novo repositório
                 atividadesRepository.registrarAgua(sliderValue, token, new AtividadesRepository.OnActivityCallback() {
@@ -108,7 +101,7 @@ public class AguaVM extends AndroidViewModel {
 
                     @Override
                     public void onError(String message) {
-                        Log.e("TOKEN_DEBUG", "Erro na requisição: " + message);
+                        Log.e("AguaVM", "Erro ao registrar água: " + message);
                         uiEvent.postValue(Event.SHOW_ERROR_MESSAGE);
                     }
                 });

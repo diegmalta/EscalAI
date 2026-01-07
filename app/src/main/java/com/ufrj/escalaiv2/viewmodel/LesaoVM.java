@@ -504,17 +504,38 @@ public class LesaoVM extends AndroidViewModel {
         return mensagemComConfianca;
     }
 
-    private String formatarIntervaloMeses(double min, double max) {
+    // Métodos para atualizar previsão (para uso quando carregar previsão existente)
+    public void setPrevisaoAfastamento(PrevisaoAfastamentoResponse previsao) {
+        previsaoAfastamento.postValue(previsao);
+    }
+
+    public void setTempoRecuperacaoFormatado(String tempo) {
+        tempoRecuperacaoFormatado.postValue(tempo);
+    }
+
+    public void setIntervaloConfiancaTexto(String intervalo) {
+        intervaloConfiancaTexto.postValue(intervalo);
+    }
+
+    public String formatarIntervaloMeses(double min, double max) {
         double minMeses = arredondarParaMeioMes(min);
         double maxMeses = arredondarParaMeioMes(max);
 
-        String minStr = formatarMeses(minMeses);
-        String maxStr = formatarMeses(maxMeses);
+        String minStr = formatarMesesSemTexto(minMeses);
+        String maxStr = formatarMesesSemTexto(maxMeses);
 
         if (minMeses == maxMeses) {
             return minStr + " meses";
         } else {
             return minStr + " - " + maxStr + " meses";
+        }
+    }
+    
+    private String formatarMesesSemTexto(double meses) {
+        if (meses == Math.floor(meses)) {
+            return String.valueOf((int) meses);
+        } else {
+            return String.format(Locale.US, "%.1f", meses);
         }
     }
 
@@ -524,10 +545,14 @@ public class LesaoVM extends AndroidViewModel {
 
     private String formatarMeses(double meses) {
         if (meses == Math.floor(meses)) {
-            return String.valueOf((int) meses);
+            return String.valueOf((int) meses) + " meses";
         } else {
-            return String.format(Locale.US, "%.1f", meses);
+            return String.format(Locale.US, "%.1f meses", meses);
         }
+    }
+    
+    public String formatarMesesPublic(double meses) {
+        return formatarMeses(meses);
     }
 
     private String converterMesesParaMesesEDias(double meses) {
@@ -823,15 +848,24 @@ public class LesaoVM extends AndroidViewModel {
                 double min = response.getIntervaloConfiancaMin();
                 double max = response.getIntervaloConfiancaMax();
 
+                // Usar tempo_afastamento_meses diretamente da resposta
+                double tempoMeses = response.getTempoAfastamentoMeses();
+                
+                // Se não tiver meses, tentar converter de semanas
+                if (tempoMeses == 0.0 && response.getTempoAfastamentoSemanas() > 0) {
+                    tempoMeses = response.getTempoAfastamentoSemanas() / 4.33;
+                }
+                
                 // Formatar o intervalo em meses com valores decimais (1, 1.5, 2.0, etc.)
                 String intervaloMeses = formatarIntervaloMeses(min, max);
-                tempoRecuperacaoFormatado.postValue(intervaloMeses);
+                
+                // Formatar tempo estimado apenas em meses (com ponto decimal quando necessário)
+                String tempoFormatado = formatarMeses(tempoMeses);
+                tempoRecuperacaoFormatado.postValue(tempoFormatado);
                 intervaloConfiancaTexto.postValue(intervaloMeses);
-
-                // Combinar a mensagem original com a confiança
-                int confiancaPercent = (int) (response.getConfianca() * 100);
-                String mensagem = response.getMessage() + " (Confiança: " + confiancaPercent + "%)";
-                mensagemComConfianca.postValue(mensagem);
+                
+                // Remover texto de confiança - apenas mensagem simples
+                mensagemComConfianca.postValue(response.getMessage());
             } else {
                 // Em caso de erro, não gerar previsão; sinalizar erro para UI
                 uiEvent.postValue(Event.PREDICTION_ERROR);

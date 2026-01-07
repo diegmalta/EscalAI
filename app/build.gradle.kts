@@ -8,6 +8,13 @@ android {
     namespace = "com.ufrj.escalaiv2"
     compileSdk = 35
 
+    // Carregar propriedades do local.properties
+    val localProperties = java.util.Properties()
+    val localPropertiesFile = rootProject.file("local.properties")
+    if (localPropertiesFile.exists()) {
+        localPropertiesFile.inputStream().use { localProperties.load(it) }
+    }
+
     defaultConfig {
         applicationId = "com.ufrj.escalaiv2"
         minSdk = 33
@@ -16,11 +23,22 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        // BuildConfig fields para URLs e configurações
+        buildConfigField("String", "BASE_URL", "\"${localProperties.getProperty("BASE_URL", "https://api.example.com/")}\"")
+        buildConfigField("boolean", "ENABLE_LOGGING", "true")
+        buildConfigField("boolean", "USE_NGROK_HEADER", localProperties.getProperty("USE_NGROK_HEADER", "false"))
     }
 
     buildTypes {
-        release {
+        debug {
             isMinifyEnabled = false
+            buildConfigField("boolean", "ENABLE_LOGGING", "true")
+        }
+        release {
+            isMinifyEnabled = true
+            isShrinkResources = true
+            buildConfigField("boolean", "ENABLE_LOGGING", "false")
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
@@ -31,6 +49,7 @@ android {
     buildFeatures {
         dataBinding = true
         viewBinding = true
+        buildConfig = true
     }
 
     compileOptions {
@@ -60,7 +79,6 @@ dependencies {
     // Material Design 3
     implementation("com.google.android.material:material:1.12.0")
     implementation("androidx.constraintlayout:constraintlayout:2.2.1")
-    implementation(files("libs/jtds-1.3.1.jar"))
     // Databinding
     implementation("androidx.databinding:databinding-runtime:8.10.1")
     testImplementation("junit:junit:4.13.2")

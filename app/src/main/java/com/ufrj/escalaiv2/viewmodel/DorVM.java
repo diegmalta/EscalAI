@@ -14,6 +14,7 @@ import com.ufrj.escalaiv2.repository.AtividadesRepository;
 import com.ufrj.escalaiv2.repository.AuthRepository;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -42,7 +43,9 @@ public class DorVM extends AndroidViewModel {
     // Dados para os dropdowns
     private final List<String> areas;
     private final Map<Integer, List<String>> subareas;
-    private final Map<String, List<String>> especificacoes;
+    private final Map<Integer, List<Integer>> subareasIds;
+    private final Map<Integer, List<String>> especificacoes;
+    private final Map<Integer, List<Integer>> especificacoesIds;
 
     private final MutableLiveData<Event> uiEvent;
 
@@ -75,31 +78,59 @@ public class DorVM extends AndroidViewModel {
         }
 
         subareas = new HashMap<>();
+        subareasIds = new HashMap<>();
         // Para cada área corporal N1
         for (AreaCorporalN1 area : AreaCorporalN1.values()) {
             List<String> subareasForArea = new ArrayList<>();
+            List<Integer> subareasIdsForArea = new ArrayList<>();
             // Obter todas as subáreas relacionadas a esta área
             AreaCorporalN2[] relatedSubareas = AreaCorporalN2.getByRegiaoCorporalId(area.getId());
             for (AreaCorporalN2 subarea : relatedSubareas) {
                 subareasForArea.add(subarea.getNome());
+                subareasIdsForArea.add(subarea.getId());
             }
             subareas.put(area.getId(), subareasForArea);
+            subareasIds.put(area.getId(), subareasIdsForArea);
         }
 
         especificacoes = new HashMap<>();
+        especificacoesIds = new HashMap<>();
         // Para cada subárea corporal N2
         for (AreaCorporalN2 subarea : AreaCorporalN2.values()) {
             List<String> especificacoesForSubarea = new ArrayList<>();
+            List<Integer> especificacoesIdsForSubarea = new ArrayList<>();
             // Obter todas as especificações relacionadas a esta subárea
             AreaCorporalN3[] relatedEspecificacoes = AreaCorporalN3.getByAreaRegiaoCorporalId(subarea.getId());
             for (AreaCorporalN3 especificacao : relatedEspecificacoes) {
                 especificacoesForSubarea.add(especificacao.getNome());
+                especificacoesIdsForSubarea.add(especificacao.getId());
             }
-            especificacoes.put(subarea.getNome(), especificacoesForSubarea);
+            especificacoes.put(subarea.getId(), especificacoesForSubarea);
+            especificacoesIds.put(subarea.getId(), especificacoesIdsForSubarea);
         }
 
-        // Carregar dados de dor existentes
-        loadDailyDorData();
+        // Não carregar dados anteriores automaticamente: tela deve abrir limpa
+    }
+
+    // Limpa seleções e desabilita campos dependentes (usado ao reabrir a tela)
+    public void clearSelections() {
+        selectedArea.setValue(-1);
+        selectedAreaText.setValue("");
+        subareaEnabled.setValue(false);
+
+        selectedSubarea.setValue(-1);
+        selectedSubareaText.setValue("");
+        especificacaoEnabled.setValue(false);
+
+        selectedEspecificacao.setValue(-1);
+        selectedEspecificacaoText.setValue("");
+    }
+
+    // Limpa todos os campos, incluindo intensidade, para sempre iniciar vazio
+    public void resetAllFields() {
+        clearSelections();
+        intensidadeDor.setValue(5);
+        uiEvent.setValue(null);
     }
 
     private void loadDailyDorData() {
@@ -124,15 +155,16 @@ public class DorVM extends AndroidViewModel {
                         selectedAreaText.postValue(areas.get(areaId));
                         subareaEnabled.postValue(true);
 
-                        if (subareaId >= 0 && subareaId < subareas.get(areaId).size()) {
-                            String subareaText = subareas.get(areaId).get(subareaId);
+                        String subareaText = getSubareaNameById(areaId, subareaId);
+                        if (subareaText != null) {
                             selectedSubarea.postValue(subareaId);
                             selectedSubareaText.postValue(subareaText);
                             especificacaoEnabled.postValue(true);
 
-                            if (especificacaoId >= 0 && especificacaoId < especificacoes.get(subareaText).size()) {
+                            String especText = getEspecificacaoNameById(subareaId, especificacaoId);
+                            if (especText != null) {
                                 selectedEspecificacao.postValue(especificacaoId);
-                                selectedEspecificacaoText.postValue(especificacoes.get(subareaText).get(especificacaoId));
+                                selectedEspecificacaoText.postValue(especText);
                             }
                         }
                     }
@@ -146,11 +178,16 @@ public class DorVM extends AndroidViewModel {
     }
 
     public List<String> getSubareas(int areaId) {
-        return subareas.get(areaId);
+        List<String> list = subareas.get(areaId);
+        return list != null ? list : Collections.emptyList();
     }
 
-    public List<String> getEspecificacoes(String subarea) {
-        return especificacoes.get(subarea);
+    public List<String> getEspecificacoesBySubareaId(Integer subareaId) {
+        if (subareaId == null || subareaId < 0) {
+            return Collections.emptyList();
+        }
+        List<String> list = especificacoes.get(subareaId);
+        return list != null ? list : Collections.emptyList();
     }
 
     public LiveData<Integer> getSelectedArea() {
@@ -193,8 +230,67 @@ public class DorVM extends AndroidViewModel {
         return uiEvent;
     }
 
+    private int getSubareaIdByPosition(int areaId, int position) {
+        List<Integer> ids = subareasIds.get(areaId);
+        if (ids == null || position < 0 || position >= ids.size()) {
+            return -1;
+        }
+        return ids.get(position);
+    }
+
+    private String getSubareaNameByPosition(int areaId, int position) {
+        List<String> names = subareas.get(areaId);
+        if (names == null || position < 0 || position >= names.size()) {
+            return null;
+        }
+        return names.get(position);
+    }
+
+    private String getSubareaNameById(int areaId, int subareaId) {
+        List<Integer> ids = subareasIds.get(areaId);
+        List<String> names = subareas.get(areaId);
+        if (ids == null || names == null) {
+            return null;
+        }
+        int index = ids.indexOf(subareaId);
+        if (index >= 0 && index < names.size()) {
+            return names.get(index);
+        }
+        return null;
+    }
+
+    private int getEspecificacaoIdByPosition(int subareaId, int position) {
+        List<Integer> ids = especificacoesIds.get(subareaId);
+        if (ids == null || position < 0 || position >= ids.size()) {
+            return -1;
+        }
+        return ids.get(position);
+    }
+
+    private String getEspecificacaoNameByPosition(int subareaId, int position) {
+        List<String> names = especificacoes.get(subareaId);
+        if (names == null || position < 0 || position >= names.size()) {
+            return null;
+        }
+        return names.get(position);
+    }
+
+    private String getEspecificacaoNameById(int subareaId, int especificacaoId) {
+        List<Integer> ids = especificacoesIds.get(subareaId);
+        List<String> names = especificacoes.get(subareaId);
+        if (ids == null || names == null) {
+            return null;
+        }
+        int index = ids.indexOf(especificacaoId);
+        if (index >= 0 && index < names.size()) {
+            return names.get(index);
+        }
+        return null;
+    }
+
     // Métodos para atualizar os valores selecionados
     public void updateSelectedArea(int position) {
+        android.util.Log.d("DorVM", "updateSelectedArea - position: " + position);
         selectedArea.setValue(position);
         selectedAreaText.setValue(areas.get(position));
         subareaEnabled.setValue(true);
@@ -208,9 +304,18 @@ public class DorVM extends AndroidViewModel {
     }
 
     public void updateSelectedSubarea(int position) {
-        selectedSubarea.setValue(position);
-        selectedSubareaText.setValue(subareas.get(selectedArea.getValue()).get(position));
-        especificacaoEnabled.setValue(true);
+        Integer areaId = selectedArea.getValue();
+        android.util.Log.d("DorVM", "updateSelectedSubarea - position: " + position + ", areaId: " + areaId);
+        if (areaId != null) {
+            int subareaId = getSubareaIdByPosition(areaId, position);
+            android.util.Log.d("DorVM", "updateSelectedSubarea - subareaId: " + subareaId +
+                    ", name: " + getSubareaNameByPosition(areaId, position));
+            if (subareaId >= 0) {
+                selectedSubarea.setValue(subareaId);
+                selectedSubareaText.setValue(getSubareaNameByPosition(areaId, position));
+                especificacaoEnabled.setValue(true);
+            }
+        }
 
         // Limpar especificação quando a subárea muda
         selectedEspecificacao.setValue(-1);
@@ -218,10 +323,17 @@ public class DorVM extends AndroidViewModel {
     }
 
     public void updateSelectedEspecificacao(int position) {
-        selectedEspecificacao.setValue(position);
-        selectedEspecificacaoText.setValue(
-                especificacoes.get(selectedSubareaText.getValue()).get(position)
-        );
+        Integer subareaId = selectedSubarea.getValue();
+        android.util.Log.d("DorVM", "updateSelectedEspecificacao - position: " + position + ", subareaId: " + subareaId);
+        if (subareaId != null) {
+            int especId = getEspecificacaoIdByPosition(subareaId, position);
+            android.util.Log.d("DorVM", "updateSelectedEspecificacao - especId: " + especId +
+                    ", name: " + getEspecificacaoNameByPosition(subareaId, position));
+            if (especId >= 0) {
+                selectedEspecificacao.setValue(especId);
+                selectedEspecificacaoText.setValue(getEspecificacaoNameByPosition(subareaId, position));
+            }
+        }
     }
 
     public void updateIntensidadeDor(int value) {
@@ -235,8 +347,15 @@ public class DorVM extends AndroidViewModel {
         Integer especificacao = selectedEspecificacao.getValue();
         Integer intensidade = intensidadeDor.getValue();
 
+        android.util.Log.d("DorVM", "saveDorData - area: " + area + ", subarea: " + subarea +
+                ", especificacao: " + especificacao + ", intensidade: " + intensidade);
+        android.util.Log.d("DorVM", "saveDorData - areaText: " + selectedAreaText.getValue() +
+                ", subareaText: " + selectedSubareaText.getValue() +
+                ", especificacaoText: " + selectedEspecificacaoText.getValue());
+
         if (area == null || area < 0 || subarea == null || subarea < 0 ||
                 especificacao == null || especificacao < 0 || intensidade == null) {
+            android.util.Log.e("DorVM", "Validação falhou!");
             uiEvent.setValue(Event.SHOW_ERROR_MESSAGE);
             return;
         }

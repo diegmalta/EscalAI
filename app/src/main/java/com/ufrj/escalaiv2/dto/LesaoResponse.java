@@ -86,6 +86,16 @@ public class LesaoResponse {
         @SerializedName("data_conclusao")
         private String dataConclusao;
 
+        // Campos de previsão de afastamento
+        @SerializedName("tempo_afastamento_meses")
+        private Double tempoAfastamentoMeses;
+
+        @SerializedName("intervalo_confianca_min")
+        private Double intervaloConfiancaMin;
+
+        @SerializedName("intervalo_confianca_max")
+        private Double intervaloConfiancaMax;
+
         // Construtor padrão
         public LesaoData() {}
 
@@ -113,6 +123,13 @@ public class LesaoResponse {
             updatedAt = in.readString();
             dataInicio = in.readString();
             dataConclusao = in.readString();
+            // Ler Double com verificação de null usando flag
+            boolean hasTempo = in.readByte() != 0;
+            tempoAfastamentoMeses = hasTempo ? in.readDouble() : null;
+            boolean hasMin = in.readByte() != 0;
+            intervaloConfiancaMin = hasMin ? in.readDouble() : null;
+            boolean hasMax = in.readByte() != 0;
+            intervaloConfiancaMax = hasMax ? in.readDouble() : null;
         }
 
         public static final Creator<LesaoData> CREATOR = new Creator<LesaoData>() {
@@ -151,6 +168,19 @@ public class LesaoResponse {
             dest.writeString(updatedAt);
             dest.writeString(dataInicio);
             dest.writeString(dataConclusao);
+            // Escrever Double com verificação de null usando flag
+            dest.writeByte((byte) (tempoAfastamentoMeses != null ? 1 : 0));
+            if (tempoAfastamentoMeses != null) {
+                dest.writeDouble(tempoAfastamentoMeses);
+            }
+            dest.writeByte((byte) (intervaloConfiancaMin != null ? 1 : 0));
+            if (intervaloConfiancaMin != null) {
+                dest.writeDouble(intervaloConfiancaMin);
+            }
+            dest.writeByte((byte) (intervaloConfiancaMax != null ? 1 : 0));
+            if (intervaloConfiancaMax != null) {
+                dest.writeDouble(intervaloConfiancaMax);
+            }
         }
 
         @Override
@@ -333,6 +363,30 @@ public class LesaoResponse {
 
         public void setDataConclusao(String dataConclusao) {
             this.dataConclusao = dataConclusao;
+        }
+
+        public Double getTempoAfastamentoMeses() {
+            return tempoAfastamentoMeses;
+        }
+
+        public void setTempoAfastamentoMeses(Double tempoAfastamentoMeses) {
+            this.tempoAfastamentoMeses = tempoAfastamentoMeses;
+        }
+
+        public Double getIntervaloConfiancaMin() {
+            return intervaloConfiancaMin;
+        }
+
+        public void setIntervaloConfiancaMin(Double intervaloConfiancaMin) {
+            this.intervaloConfiancaMin = intervaloConfiancaMin;
+        }
+
+        public Double getIntervaloConfiancaMax() {
+            return intervaloConfiancaMax;
+        }
+
+        public void setIntervaloConfiancaMax(Double intervaloConfiancaMax) {
+            this.intervaloConfiancaMax = intervaloConfiancaMax;
         }
     }
 

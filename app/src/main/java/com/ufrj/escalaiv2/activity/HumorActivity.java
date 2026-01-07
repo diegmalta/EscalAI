@@ -89,12 +89,5 @@ public class HumorActivity extends AppCompatActivity {
                 Toast.makeText(this, "Erro ao salvar o humor", Toast.LENGTH_SHORT).show();
             }
         });
-
-        // Observe mood text values to update the UI
-        humorVM.getJoyText().observe(this, text -> binding.joyValue.setText(text));
-        humorVM.getSadnessText().observe(this, text -> binding.sadnessValue.setText(text));
-        humorVM.getAnxietyText().observe(this, text -> binding.anxietyValue.setText(text));
-        humorVM.getStressText().observe(this, text -> binding.stressValue.setText(text));
-        humorVM.getCalmText().observe(this, text -> binding.calmValue.setText(text));
     }
 }

@@ -1,6 +1,7 @@
 package com.ufrj.escalaiv2.network;
 
 import android.content.Context;
+import com.ufrj.escalaiv2.utils.ConfigHelper;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 import okhttp3.OkHttpClient;
@@ -12,8 +13,6 @@ import java.util.concurrent.TimeUnit;
  */
 public class RetrofitClient {
 
-    private static final String BASE_URL = "http://10.0.2.2:8000/";
-
     private static Retrofit retrofitInstance = null;
     private static Retrofit authenticatedRetrofitInstance = null;
     private static AuthApiService authApiServiceInstance = null;
@@ -23,21 +22,33 @@ public class RetrofitClient {
 
     private static Retrofit getRetrofitInstance() {
         if (retrofitInstance == null) {
-            HttpLoggingInterceptor logging = new HttpLoggingInterceptor();
-            // Defina o nível de log: NONE, BASIC, HEADERS, BODY
-            // Use BODY apenas em debug, pois loga dados sensíveis!
-            logging.setLevel(HttpLoggingInterceptor.Level.BODY); // TODO Mude para NONE em produção
-
             OkHttpClient.Builder httpClient = new OkHttpClient.Builder();
-            httpClient.addInterceptor(logging);
-            httpClient.connectTimeout(10, TimeUnit.SECONDS); // Timeout de conexão
-            httpClient.readTimeout(10, TimeUnit.SECONDS);    // Timeout de leitura
-            httpClient.writeTimeout(10, TimeUnit.SECONDS);   // Timeout de escrita
+            
+            // Configurar logging apenas se habilitado no BuildConfig
+            if (ConfigHelper.isLoggingEnabled()) {
+                HttpLoggingInterceptor logging = new HttpLoggingInterceptor();
+                logging.setLevel(HttpLoggingInterceptor.Level.BODY);
+                httpClient.addInterceptor(logging);
+            }
+            
+            // Adicionar header do ngrok apenas se configurado
+            if (ConfigHelper.shouldUseNgrokHeader()) {
+                httpClient.addInterceptor(chain -> {
+                    okhttp3.Request original = chain.request();
+                    okhttp3.Request.Builder requestBuilder = original.newBuilder()
+                        .header("ngrok-skip-browser-warning", "true");
+                    return chain.proceed(requestBuilder.build());
+                });
+            }
+            
+            httpClient.connectTimeout(10, TimeUnit.SECONDS);
+            httpClient.readTimeout(10, TimeUnit.SECONDS);
+            httpClient.writeTimeout(10, TimeUnit.SECONDS);
 
             retrofitInstance = new Retrofit.Builder()
-                    .baseUrl(BASE_URL)
-                    .addConverterFactory(GsonConverterFactory.create()) // Use o conversor apropriado
-                    .client(httpClient.build()) // Define o OkHttpClient customizado
+                    .baseUrl(ConfigHelper.getBaseUrl())
+                    .addConverterFactory(GsonConverterFactory.create())
+                    .client(httpClient.build())
                     .build();
         }
         return retrofitInstance;
@@ -45,18 +56,32 @@ public class RetrofitClient {
 
     private static Retrofit getAuthenticatedRetrofitInstance(Context context) {
         if (authenticatedRetrofitInstance == null) {
-            HttpLoggingInterceptor logging = new HttpLoggingInterceptor();
-            logging.setLevel(HttpLoggingInterceptor.Level.BODY); // TODO Mude para NONE em produção
-
             OkHttpClient.Builder httpClient = new OkHttpClient.Builder();
-            httpClient.addInterceptor(logging);
+            
+            // Configurar logging apenas se habilitado no BuildConfig
+            if (ConfigHelper.isLoggingEnabled()) {
+                HttpLoggingInterceptor logging = new HttpLoggingInterceptor();
+                logging.setLevel(HttpLoggingInterceptor.Level.BODY);
+                httpClient.addInterceptor(logging);
+            }
+            
+            // Adicionar header do ngrok apenas se configurado
+            if (ConfigHelper.shouldUseNgrokHeader()) {
+                httpClient.addInterceptor(chain -> {
+                    okhttp3.Request original = chain.request();
+                    okhttp3.Request.Builder requestBuilder = original.newBuilder()
+                        .header("ngrok-skip-browser-warning", "true");
+                    return chain.proceed(requestBuilder.build());
+                });
+            }
+            
             httpClient.addInterceptor(new AuthInterceptor(context));
             httpClient.connectTimeout(10, TimeUnit.SECONDS);
             httpClient.readTimeout(10, TimeUnit.SECONDS);
             httpClient.writeTimeout(10, TimeUnit.SECONDS);
 
             authenticatedRetrofitInstance = new Retrofit.Builder()
-                    .baseUrl(BASE_URL)
+                    .baseUrl(ConfigHelper.getBaseUrl())
                     .addConverterFactory(GsonConverterFactory.create())
                     .client(httpClient.build())
                     .build();
@@ -150,5 +175,19 @@ public class RetrofitClient {
      */
     public static ExerciciosApiService getExerciciosApiService(Context context) {
         return getAuthenticatedRetrofitInstance(context).create(ExerciciosApiService.class);
+    }
+
+    /**
+     * Reseta todas as instâncias singleton.
+     * Útil quando a BASE_URL é alterada durante o desenvolvimento.
+     * Chame este método antes de usar os serviços após mudar a URL.
+     */
+    public static void resetInstances() {
+        retrofitInstance = null;
+        authenticatedRetrofitInstance = null;
+        authApiServiceInstance = null;
+        lesaoApiServiceInstance = null;
+        atividadesApiServiceInstance = null;
+        exerciciosApiServiceInstance = null;
     }
 }

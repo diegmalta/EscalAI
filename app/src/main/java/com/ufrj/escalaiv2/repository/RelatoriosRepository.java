@@ -217,10 +217,8 @@ public class RelatoriosRepository {
                 Log.d(TAG, "Processando dor: " + dor.getDate() + " - Intensidade:" + intensity +
                         " Área1:" + dor.getAreaDorN1() + " Área2:" + dor.getAreaDorN2() + " Área3:" + dor.getAreaDorN3());
 
-                // Processa cada área de dor registrada
-                processPainArea(painDataByLocation, date, intensity, dor.getAreaDorN1(), 1);
-                processPainArea(painDataByLocation, date, intensity, dor.getAreaDorN2(), 2);
-                processPainArea(painDataByLocation, date, intensity, dor.getAreaDorN3(), 3);
+            // Considerar somente o nível 3 (mais específico) na tabela de dores
+            processPainArea(painDataByLocation, date, intensity, dor.getAreaDorN3(), 3);
 
             } catch (ParseException e) {
                 Log.e(TAG, "Erro ao parsear data: " + dor.getDate(), e);
@@ -274,7 +272,8 @@ public class RelatoriosRepository {
 
     // Métodos auxiliares
     private void processPainArea(Map<String, List<PainDataPoint>> painDataMap, Date date, int intensity, int areaId, int nivel) {
-        if (areaId <= 0) return;
+        // IDs válidos incluem 0; somente valores negativos são descartados
+        if (areaId < 0) return;
 
         String locationName = getLocationNameById(areaId, nivel);
         if (locationName != null && !locationName.isEmpty()) {

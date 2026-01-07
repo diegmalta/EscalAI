@@ -223,39 +223,52 @@ public class UserDailyDataRepository {
         AtomicBoolean success = new AtomicBoolean(false);
         CountDownLatch latch = new CountDownLatch(1);
 
+        android.util.Log.d("UserDailyDataRepo", "saveTreinoData - Iniciando salvamento: userId=" + userId + 
+                ", tipoIndex=" + tipoTreinoIndex + ", duracao=" + duracaoMinutos);
+
         databaseWriteExecutor.execute(() -> {
             try {
                 String todayDate = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());
+                android.util.Log.d("UserDailyDataRepo", "saveTreinoData - Data de hoje: " + todayDate);
                 UserDailyData userDailyData = getOrCreateUserDailyData(userId, todayDate);
+                android.util.Log.d("UserDailyDataRepo", "saveTreinoData - UserDailyData ID: " + userDailyData.getId());
 
                 // Obter o nome/chave do tipo de treino a partir do índice
                 TipoTreino tipoTreino = TipoTreino.getById(tipoTreinoIndex);
                 if (tipoTreino == null) {
+                    android.util.Log.e("UserDailyDataRepo", "Índice de tipo de treino inválido: " + tipoTreinoIndex);
                     throw new IllegalArgumentException("Índice de tipo de treino inválido: " + tipoTreinoIndex);
                 }
                 String treinoKey = tipoTreino.name();
+                android.util.Log.d("UserDailyDataRepo", "saveTreinoData - Tipo de treino: " + treinoKey);
 
                 // Obter o mapa atual de treinos (agora sempre será um HashMap modificável)
                 Map<String, Integer> treinosMap = userDailyData.getTreinosMap();
+                android.util.Log.d("UserDailyDataRepo", "saveTreinoData - Mapa antes: " + treinosMap);
 
                 // Adicionar a nova duração à duração existente para este tipo de treino
                 int duracaoAtual = treinosMap.getOrDefault(treinoKey, 0);
                 treinosMap.put(treinoKey, duracaoAtual + duracaoMinutos);
+                android.util.Log.d("UserDailyDataRepo", "saveTreinoData - Mapa depois: " + treinosMap);
 
                 // Atualizar o mapa na entidade (necessário por causa do TypeConverter)
                 userDailyData.setTreinosMap(treinosMap);
 
                 // Salvar (inserir ou atualizar) a entidade UserDailyData
                 if (userDailyData.getId() == 0) {
+                    android.util.Log.d("UserDailyDataRepo", "saveTreinoData - Inserindo novo registro");
                     long id = userDailyDataDao.insert(userDailyData);
                     success.set(id > 0);
+                    android.util.Log.d("UserDailyDataRepo", "saveTreinoData - Inserção: " + (id > 0 ? "SUCESSO (ID=" + id + ")" : "FALHA"));
                 } else {
+                    android.util.Log.d("UserDailyDataRepo", "saveTreinoData - Atualizando registro existente (ID=" + userDailyData.getId() + ")");
                     userDailyDataDao.update(userDailyData);
                     success.set(true);
+                    android.util.Log.d("UserDailyDataRepo", "saveTreinoData - Atualização: SUCESSO");
                 }
 
             } catch (Exception e) {
-                e.printStackTrace();
+                android.util.Log.e("UserDailyDataRepo", "saveTreinoData - ERRO ao salvar", e);
                 success.set(false);
             } finally {
                 latch.countDown();
@@ -266,18 +279,21 @@ public class UserDailyDataRepository {
             latch.await(2, TimeUnit.SECONDS);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
-            e.printStackTrace();
+            android.util.Log.e("UserDailyDataRepo", "saveTreinoData - Thread interrompida", e);
         }
+        android.util.Log.d("UserDailyDataRepo", "saveTreinoData - Resultado final: " + (success.get() ? "SUCESSO" : "FALHA"));
         return success.get();
     }
     public Map<String, Float> getTodayTrainingData(int userId) {
         Map<String, Float> resumoTreinosHoras = new HashMap<>();
         try {
             String todayDate = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());
+            android.util.Log.d("UserDailyDataRepo", "getTodayTrainingData - userId=" + userId + ", data=" + todayDate);
             UserDailyData userDailyData = userDailyDataDao.getUserDailyData(userId, todayDate);
 
             if (userDailyData != null && userDailyData.getTreinosMap() != null) {
                 Map<String, Integer> treinosMapMinutos = userDailyData.getTreinosMap();
+                android.util.Log.d("UserDailyDataRepo", "Treinos no Room (em minutos): " + treinosMapMinutos);
 
                 for (Map.Entry<String, Integer> entry : treinosMapMinutos.entrySet()) {
                     String treinoKey = entry.getKey();
@@ -289,17 +305,23 @@ public class UserDailyDataRepository {
                         try {
                             TipoTreino tipo = TipoTreino.valueOf(treinoKey);
                             nomeTreino = tipo.getNome();
+                            android.util.Log.d("UserDailyDataRepo", "Convertido: " + treinoKey + " -> " + nomeTreino);
                         } catch (IllegalArgumentException e) {
                             // Se a chave não for um nome de enum válido (caso raro), usar a própria chave
                             nomeTreino = treinoKey;
+                            android.util.Log.w("UserDailyDataRepo", "Não conseguiu converter: " + treinoKey);
                         }
                         float horasTreino = duracaoMinutos / 60.0f;
                         resumoTreinosHoras.put(nomeTreino, horasTreino);
+                        android.util.Log.d("UserDailyDataRepo", "Adicionado ao resumo: " + nomeTreino + " = " + horasTreino + "h");
                     }
                 }
+            } else {
+                android.util.Log.w("UserDailyDataRepo", "UserDailyData é null ou treinosMap é null");
             }
+            android.util.Log.d("UserDailyDataRepo", "Resumo final (em horas): " + resumoTreinosHoras);
         } catch (Exception e) {
-            e.printStackTrace(); // Logar o erro
+            android.util.Log.e("UserDailyDataRepo", "Erro ao buscar treinos de hoje", e);
         }
         return resumoTreinosHoras;
     }

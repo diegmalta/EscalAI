@@ -160,39 +160,66 @@ public class AtividadesRepository {
         });
     }
 
-    // Método para registrar treino
+    // Método para registrar treino (salva localmente em thread de fundo e envia ao servidor)
     public void registrarTreino(int tipoTreinoIndex, int duracaoMinutos, String token, OnActivityCallback callback) {
+        Log.d("AtividadesRepository", "registrarTreino - Iniciando registro: tipoIndex=" + tipoTreinoIndex + ", duracao=" + duracaoMinutos);
         executorService.execute(() -> {
             int localUserId = getLocalUserId(context);
-            if (localUserId == -1) {
-                callback.onError("Usuário local não encontrado");
-                return;
+            Log.d("AtividadesRepository", "registrarTreino - localUserId=" + localUserId);
+            if (localUserId != -1) {
+                boolean roomSuccess = userDailyDataRepository.saveTreinoData(localUserId, tipoTreinoIndex, duracaoMinutos);
+                Log.d("AtividadesRepository", "registrarTreino - Salvamento no Room: " + (roomSuccess ? "SUCESSO" : "FALHA"));
             }
+
             String todayDate = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());
-            boolean localSuccess = userDailyDataRepository.saveTreinoData(localUserId, tipoTreinoIndex, duracaoMinutos);
-            if (!localSuccess) {
-                callback.onError("Erro ao salvar dados localmente");
-                return;
-            }
             TipoTreino tipoTreino = TipoTreino.getById(tipoTreinoIndex);
+            Log.d("AtividadesRepository", "registrarTreino - Preparando envio ao servidor: tipo=" + tipoTreino.name() + ", data=" + todayDate);
             TreinoRequest request = new TreinoRequest(todayDate, tipoTreino.name(), duracaoMinutos);
             atividadesApiService.registrarTreino(token, request).enqueue(new Callback<ApiResponse>() {
                 @Override
                 public void onResponse(Call<ApiResponse> call, Response<ApiResponse> response) {
                     if (response.isSuccessful() && response.body() != null) {
-                        Log.d("AtividadesRepository", "Treino registrado no servidor com sucesso");
+                        Log.d("AtividadesRepository", "registrarTreino - SERVIDOR RESPONDEU 200 - Treino registrado com sucesso!");
+                        Log.d("AtividadesRepository", "registrarTreino - Resposta do servidor: " + response.body());
                         callback.onSuccess();
                     } else {
-                        Log.e("AtividadesRepository", "Erro ao registrar treino no servidor: " + response.code());
+                        Log.e("AtividadesRepository", "registrarTreino - ERRO no servidor: código=" + response.code());
+                        try {
+                            Log.e("AtividadesRepository", "registrarTreino - Corpo do erro: " + response.errorBody().string());
+                        } catch (Exception e) {
+                            Log.e("AtividadesRepository", "Erro ao ler corpo da resposta de erro", e);
+                        }
                         callback.onError("Erro ao enviar dados para o servidor");
                     }
                 }
                 @Override
                 public void onFailure(Call<ApiResponse> call, Throwable t) {
-                    Log.e("AtividadesRepository", "Falha na requisição de treino: " + t.getMessage());
+                    Log.e("AtividadesRepository", "registrarTreino - FALHA na conexão com servidor: " + t.getMessage(), t);
                     callback.onError("Erro de conexão com o servidor");
                 }
             });
+        });
+    }
+
+    public void getTodayTrainingDataAsync(Integer tipoTreinoIndex, Integer duracaoMinutos, java.util.function.Consumer<Map<String, Float>> callback) {
+        executorService.execute(() -> {
+            int localUserId = getLocalUserId(context);
+            Map<String, Float> map;
+            if (localUserId == -1) {
+                map = new HashMap<>();
+            } else {
+                map = userDailyDataRepository.getTodayTrainingData(localUserId);
+            }
+
+            // Se não há usuário local ou o mapa veio vazio, garantir inclusão do treino recém enviado
+            if (tipoTreinoIndex != null && duracaoMinutos != null && duracaoMinutos > 0) {
+                TipoTreino tipo = TipoTreino.getById(tipoTreinoIndex);
+                if (tipo != null) {
+                    float horas = duracaoMinutos / 60.0f;
+                    map.put(tipo.getNome(), map.getOrDefault(tipo.getNome(), 0f) + horas);
+                }
+            }
+            callback.accept(map);
         });
     }
 
@@ -257,6 +284,37 @@ public class AtividadesRepository {
         int localUserId = getLocalUserId(context);
         if (localUserId == -1) return new HashMap<>();
         return userDailyDataRepository.getTodayTrainingData(localUserId);
+    }
+
+    public void getTodayTrainingDataAsync(int tipoTreinoIndex, int duracaoMinutos, java.util.function.Consumer<Map<String, Float>> callback) {
+        executorService.execute(() -> {
+            Map<String, Float> resumoMap = new HashMap<>();
+            try {
+                Log.d("AtividadesRepository", "getTodayTrainingDataAsync - tipoIndex: " + tipoTreinoIndex + 
+                        ", duracao: " + duracaoMinutos);
+                int localUserId = getLocalUserId(context);
+                Log.d("AtividadesRepository", "localUserId: " + localUserId);
+                if (localUserId != -1) {
+                    resumoMap = userDailyDataRepository.getTodayTrainingData(localUserId);
+                    Log.d("AtividadesRepository", "Resumo do Room: " + resumoMap);
+                }
+                
+                // Se não conseguiu ler do Room ou está vazio, adicionar o treino que acabou de salvar
+                if (resumoMap.isEmpty()) {
+                    Log.d("AtividadesRepository", "Resumo vazio, adicionando treino recém-salvo");
+                    TipoTreino tipo = TipoTreino.getById(tipoTreinoIndex);
+                    if (tipo != null) {
+                        resumoMap.put(tipo.getNome(), duracaoMinutos / 60.0f);
+                        Log.d("AtividadesRepository", "Adicionado: " + tipo.getNome() + " = " + (duracaoMinutos / 60.0f) + "h");
+                    }
+                }
+            } catch (Exception e) {
+                Log.e("AtividadesRepository", "Erro ao buscar resumo de treinos", e);
+            }
+            final Map<String, Float> finalMap = resumoMap;
+            Log.d("AtividadesRepository", "Chamando callback com: " + finalMap);
+            callback.accept(finalMap);
+        });
     }
 
     public void resetWaterConsumption() {
