@@ -147,4 +147,58 @@ public class LesaoRepository {
 
         return result;
     }
+
+    public LiveData<LesaoResponse> concluirLesao(int id) {
+        MutableLiveData<LesaoResponse> result = new MutableLiveData<>();
+
+        lesaoApiService.concluirLesao(id).enqueue(new Callback<LesaoResponse>() {
+            @Override
+            public void onResponse(Call<LesaoResponse> call, Response<LesaoResponse> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    result.postValue(response.body());
+                } else {
+                    Log.e(TAG, "Erro ao concluir lesão: " + response.code());
+                    result.postValue(null);
+                }
+            }
+
+            @Override
+            public void onFailure(Call<LesaoResponse> call, Throwable t) {
+                Log.e(TAG, "Erro de rede ao concluir lesão", t);
+                result.postValue(null);
+            }
+        });
+
+        return result;
+    }
+
+    public LiveData<LesaoResponse> reabrirLesao(int id, LesaoRequest request) {
+        // Para reabrir, atualizamos a lesão removendo a data_conclusao
+        // Isso é feito através do updateLesao, mas com data_conclusao = null
+        return updateLesao(id, request);
+    }
+
+    public LiveData<LesaoResponse> deleteLesao(int id) {
+        MutableLiveData<LesaoResponse> result = new MutableLiveData<>();
+
+        lesaoApiService.deleteLesao(id).enqueue(new Callback<LesaoResponse>() {
+            @Override
+            public void onResponse(Call<LesaoResponse> call, Response<LesaoResponse> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    result.postValue(response.body());
+                } else {
+                    Log.e(TAG, "Erro ao excluir lesão: " + response.code());
+                    result.postValue(null);
+                }
+            }
+
+            @Override
+            public void onFailure(Call<LesaoResponse> call, Throwable t) {
+                Log.e(TAG, "Erro de rede ao excluir lesão", t);
+                result.postValue(null);
+            }
+        });
+
+        return result;
+    }
 }

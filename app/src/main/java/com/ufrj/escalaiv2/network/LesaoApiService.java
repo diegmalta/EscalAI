@@ -7,7 +7,9 @@ import com.ufrj.escalaiv2.dto.PrevisaoAfastamentoResponse;
 
 import retrofit2.Call;
 import retrofit2.http.Body;
+import retrofit2.http.DELETE;
 import retrofit2.http.GET;
+import retrofit2.http.PATCH;
 import retrofit2.http.POST;
 import retrofit2.http.Path;
 import retrofit2.http.PUT;
@@ -27,4 +29,10 @@ public interface LesaoApiService {
 
     @PUT("api/lesoes/{id}")
     Call<LesaoResponse> updateLesao(@Path("id") int id, @Body LesaoRequest request);
+
+    @PATCH("api/lesoes/{id}/concluir")
+    Call<LesaoResponse> concluirLesao(@Path("id") int id);
+
+    @DELETE("api/lesoes/{id}")
+    Call<LesaoResponse> deleteLesao(@Path("id") int id);
 }

@@ -15,6 +15,7 @@ import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.button.MaterialButton;
+import com.google.android.material.chip.Chip;
 import com.ufrj.escalaiv2.R;
 import com.ufrj.escalaiv2.dto.LesaoResponse;
 import com.ufrj.escalaiv2.enums.AreaCorporalN1;
@@ -39,6 +40,7 @@ public class LesaoAdapter extends RecyclerView.Adapter<LesaoAdapter.LesaoViewHol
         void onConcluirClick(LesaoResponse.LesaoData lesao);
         void onReabrirClick(LesaoResponse.LesaoData lesao);
         void onPreverTempoClick(LesaoResponse.LesaoData lesao);
+        void onExcluirClick(LesaoResponse.LesaoData lesao);
     }
 
     public LesaoAdapter(Context context, List<LesaoResponse.LesaoData> lesoes) {
@@ -88,7 +90,7 @@ public class LesaoAdapter extends RecyclerView.Adapter<LesaoAdapter.LesaoViewHol
         private View statusIndicator;
         private TextView tvAreaLesao;
         private TextView tvDataLesao;
-        private TextView tvStatusAtual;
+        private Chip tvStatusAtual;
         private TextView tvTempoAtual;
         private TextView tvTempoPrevisto;
         private ImageView ivExpandArrow;
@@ -102,6 +104,7 @@ public class LesaoAdapter extends RecyclerView.Adapter<LesaoAdapter.LesaoViewHol
         private MaterialButton btnEditarLesao;
         private MaterialButton btnConcluirLesao;
         private MaterialButton btnPreverTempo;
+        private MaterialButton btnExcluirLesao;
         private LinearLayout cardHeader;
 
         private boolean isExpanded = false;
@@ -125,6 +128,7 @@ public class LesaoAdapter extends RecyclerView.Adapter<LesaoAdapter.LesaoViewHol
             btnEditarLesao = itemView.findViewById(R.id.btnEditarLesao);
             btnConcluirLesao = itemView.findViewById(R.id.btnConcluirLesao);
             btnPreverTempo = itemView.findViewById(R.id.btnPreverTempo);
+            btnExcluirLesao = itemView.findViewById(R.id.btnExcluirLesao);
             cardHeader = itemView.findViewById(R.id.cardHeader);
 
             cardHeader.setOnClickListener(v -> toggleExpansion());
@@ -154,19 +158,23 @@ public class LesaoAdapter extends RecyclerView.Adapter<LesaoAdapter.LesaoViewHol
                 tvTempoAtual.setText(diasDesdeCriacao + " dias");
             }
 
-            // Tempo previsto baseado no tipo de lesão (exemplo)
-            int tempoPrevisto = calcularTempoPrevisto(lesao);
-            tvTempoPrevisto.setText("Prev: " + tempoPrevisto + " dias");
+            // Tempo previsto - usa dados salvos se disponíveis, senão calcula estimativa
+            String tempoPrevistoTexto = obterTempoPrevistoTexto(lesao);
+            tvTempoPrevisto.setText(tempoPrevistoTexto);
 
             // Status e cor do indicador
             boolean isConcluida = isConcluida(lesao);
             if (isConcluida) {
                 tvStatusAtual.setText("Concluída");
+                tvStatusAtual.setChipBackgroundColorResource(R.color.status_concluida_background);
+                tvStatusAtual.setTextColor(ContextCompat.getColor(context, R.color.status_concluida));
                 statusIndicator.setBackgroundTintList(
                     ContextCompat.getColorStateList(context, R.color.md_theme_light_primary)
                 );
             } else {
                 tvStatusAtual.setText("Em andamento");
+                tvStatusAtual.setChipBackgroundColorResource(R.color.status_em_andamento_background);
+                tvStatusAtual.setTextColor(ContextCompat.getColor(context, R.color.status_em_andamento));
                 statusIndicator.setBackgroundTintList(
                     ContextCompat.getColorStateList(context, R.color.md_theme_light_error)
                 );
@@ -183,11 +191,19 @@ public class LesaoAdapter extends RecyclerView.Adapter<LesaoAdapter.LesaoViewHol
             // Configurar botões
             if (isConcluida) {
                 btnConcluirLesao.setText("Reabrir");
+                btnConcluirLesao.setBackgroundTintList(
+                    ContextCompat.getColorStateList(context, R.color.md_theme_light_secondary)
+                );
+                btnConcluirLesao.setTextColor(ContextCompat.getColor(context, R.color.md_theme_light_onSecondary));
                 btnConcluirLesao.setOnClickListener(v -> {
                     if (listener != null) listener.onReabrirClick(lesao);
                 });
             } else {
                 btnConcluirLesao.setText("Concluir");
+                btnConcluirLesao.setBackgroundTintList(
+                    ContextCompat.getColorStateList(context, R.color.md_theme_light_primary)
+                );
+                btnConcluirLesao.setTextColor(ContextCompat.getColor(context, R.color.md_theme_light_onPrimary));
                 btnConcluirLesao.setOnClickListener(v -> {
                     if (listener != null) listener.onConcluirClick(lesao);
                 });
@@ -200,20 +216,52 @@ public class LesaoAdapter extends RecyclerView.Adapter<LesaoAdapter.LesaoViewHol
             btnPreverTempo.setOnClickListener(v -> {
                 if (listener != null) listener.onPreverTempoClick(lesao);
             });
+
+            btnExcluirLesao.setOnClickListener(v -> {
+                if (listener != null) listener.onExcluirClick(lesao);
+            });
         }
 
         private void configurarIntervaloConfianca(LesaoResponse.LesaoData lesao) {
-            // Por enquanto, vamos esconder o container
-            // Quando a previsão for feita, este método será chamado com os dados reais
-            intervaloConfiancaContainer.setVisibility(View.GONE);
+            // Usa os dados de previsão salvos na lesão
+            Double tempoAfastamentoMeses = lesao.getTempoAfastamentoMeses();
+            Double min = lesao.getIntervaloConfiancaMin();
+            Double max = lesao.getIntervaloConfiancaMax();
+            
+            if (tempoAfastamentoMeses != null && tempoAfastamentoMeses > 0 && 
+                min != null && max != null && min > 0 && max > 0) {
+                // Converte meses para dias (aproximadamente 30 dias por mês)
+                int tempoDias = (int) Math.round(tempoAfastamentoMeses * 30);
+                double minDias = min * 30;
+                double maxDias = max * 30;
+                tvIntervaloConfianca.setText(String.format(Locale.getDefault(), 
+                    "Tempo estimado: %d dias (%.1f meses)\nIntervalo: %.0f - %.0f dias (%.1f - %.1f meses)", 
+                    tempoDias, tempoAfastamentoMeses, minDias, maxDias, min, max));
+                intervaloConfiancaContainer.setVisibility(View.VISIBLE);
+            } else if (tempoAfastamentoMeses != null && tempoAfastamentoMeses > 0) {
+                // Se só tiver tempo estimado, sem intervalo
+                int tempoDias = (int) Math.round(tempoAfastamentoMeses * 30);
+                tvIntervaloConfianca.setText(String.format(Locale.getDefault(), 
+                    "Tempo estimado: %d dias (%.1f meses)", tempoDias, tempoAfastamentoMeses));
+                intervaloConfiancaContainer.setVisibility(View.VISIBLE);
+            } else {
+                intervaloConfiancaContainer.setVisibility(View.GONE);
+            }
+        }
 
-            // TODO: Implementar quando a previsão for feita
-            // if (lesao.getPrevisaoAfastamento() != null) {
-            //     double min = lesao.getPrevisaoAfastamento().getIntervaloConfiancaMin();
-            //     double max = lesao.getPrevisaoAfastamento().getIntervaloConfiancaMax();
-            //     tvIntervaloConfianca.setText(String.format("Intervalo: %.1f - %.1f dias", min, max));
-            //     intervaloConfiancaContainer.setVisibility(View.VISIBLE);
-            // }
+        private String obterTempoPrevistoTexto(LesaoResponse.LesaoData lesao) {
+            // Primeiro tenta usar os dados salvos de previsão
+            Double tempoAfastamentoMeses = lesao.getTempoAfastamentoMeses();
+            
+            if (tempoAfastamentoMeses != null && tempoAfastamentoMeses > 0) {
+                // Converte meses para dias (aproximadamente 30 dias por mês)
+                int dias = (int) Math.round(tempoAfastamentoMeses * 30);
+                return String.format(Locale.getDefault(), "Prev: %d dias (%.1f meses)", dias, tempoAfastamentoMeses);
+            }
+            
+            // Se não houver previsão salva, usa cálculo estimado
+            int tempoPrevisto = calcularTempoPrevisto(lesao);
+            return "Prev: " + tempoPrevisto + " dias (estimado)";
         }
 
         private void toggleExpansion() {

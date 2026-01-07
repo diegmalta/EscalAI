@@ -5,6 +5,7 @@ import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
+import com.ufrj.escalaiv2.dto.LesaoRequest;
 import com.ufrj.escalaiv2.dto.LesaoResponse;
 import com.ufrj.escalaiv2.repository.AuthRepository;
 import com.ufrj.escalaiv2.repository.LesaoRepository;
@@ -79,5 +80,83 @@ public class LesaoListVM extends AndroidViewModel {
 
     private int getCurrentUserId() {
         return authRepository.getCurrentUserId();
+    }
+
+    public void concluirLesao(int lesaoId) {
+        isLoading.setValue(true);
+        errorMessage.setValue(null);
+
+        lesaoRepository.concluirLesao(lesaoId).observeForever(response -> {
+            isLoading.postValue(false);
+
+            if (response != null && response.isSuccess()) {
+                // Recarregar lesões após concluir
+                loadLesoes();
+            } else {
+                String error = response != null && response.getMessage() != null 
+                    ? response.getMessage() 
+                    : "Erro ao concluir lesão";
+                errorMessage.postValue(error);
+            }
+        });
+    }
+
+    public void reabrirLesao(LesaoResponse.LesaoData lesao) {
+        isLoading.setValue(true);
+        errorMessage.setValue(null);
+
+        // Criar request com os dados da lesão, mas com data_conclusao = null
+        LesaoRequest request = new LesaoRequest();
+        request.setAreaLesaoN1(lesao.getAreaLesaoN1());
+        request.setAreaLesaoN2(lesao.getAreaLesaoN2());
+        request.setAreaLesaoN3(lesao.getAreaLesaoN3());
+        request.setMassa(lesao.getMassa());
+        request.setAltura(lesao.getAltura());
+        request.setGrauEscalada(lesao.getGrauEscalada());
+        request.setTempoPraticaMeses(lesao.getTempoPraticaMeses());
+        request.setFrequenciaSemanal(lesao.getFrequenciaSemanal());
+        request.setHorasSemanais(lesao.getHorasSemanais());
+        request.setLesoesPrevias(lesao.getLesoesPrevias());
+        request.setReincidencia(lesao.isReincidencia());
+        request.setBuscouAtendimento(lesao.isBuscouAtendimento());
+        request.setProfissionalAtendimento(lesao.getProfissionalAtendimento());
+        request.setDiagnostico(lesao.getDiagnostico());
+        request.setProfissionalTratamento(lesao.getProfissionalTratamento());
+        request.setModalidadePraticada(lesao.getModalidadePraticada());
+        request.setDataInicio(lesao.getDataInicio());
+        request.setDataConclusao(null); // Remove a data de conclusão para reabrir
+
+        lesaoRepository.reabrirLesao(lesao.getId(), request).observeForever(response -> {
+            isLoading.postValue(false);
+
+            if (response != null && response.isSuccess()) {
+                // Recarregar lesões após reabrir
+                loadLesoes();
+            } else {
+                String error = response != null && response.getMessage() != null 
+                    ? response.getMessage() 
+                    : "Erro ao reabrir lesão";
+                errorMessage.postValue(error);
+            }
+        });
+    }
+
+    public void deleteLesao(int lesaoId) {
+        isLoading.setValue(true);
+        errorMessage.setValue(null);
+
+        lesaoRepository.deleteLesao(lesaoId).observeForever(response -> {
+            isLoading.postValue(false);
+
+            if (response != null && response.isSuccess()) {
+                // Recarregar lesões após excluir
+                loadLesoes();
+            } else {
+                String error = response != null && response.getMessage() != null 
+                    ? response.getMessage() 
+                    : "Erro ao excluir lesão";
+                errorMessage.postValue(error);
+            }
+        });
     }
 }

@@ -164,8 +164,7 @@ public class AuthRepository {
                     // Login bem-sucedido
                     LoginResponse loginResponse = response.body();
 
-                    Log.d(TAG, "Dados do login recebidos: " + loginResponse);
-                    Log.d(TAG, "Token recebido: " + loginResponse.getToken());
+                    Log.d(TAG, "Dados do login recebidos com sucesso");
                     Log.d(TAG, "ExpiresIn: " + loginResponse.getExpiresIn());
 
                     long expiresIn = loginResponse.getExpiresIn();
@@ -315,7 +314,7 @@ public class AuthRepository {
         long expiryTime = currentTime + (expiresIn * 1000); // Converte segundos para milissegundos
         long refreshExpiryTime = currentTime + SEVEN_DAYS_MS; // 7 dias para refresh token
 
-        Log.d(TAG, "Salvando token. expiresIn: " + expiresIn + " (segundos), expiryTime: " + expiryTime + " (ms), currentTime: " + currentTime);
+        Log.d(TAG, "Salvando token. expiresIn: " + expiresIn + " (segundos), expiryTime: " + expiryTime + " (ms)");
 
         encryptedPrefs.edit()
                 .putString(KEY_TOKEN, token)
@@ -326,17 +325,7 @@ public class AuthRepository {
                 .apply();
 
         Log.d(TAG, "Token e refresh token salvos com sucesso. Expira em: " + new Date(expiryTime));
-        Log.d(TAG, "Token salvo: " + token);
-        Log.d(TAG, "Refresh token salvo: " + refreshToken);
-        Log.d(TAG, "Expira em: " + new Date(expiryTime));
         Log.d(TAG, "Refresh token expira em: " + new Date(refreshExpiryTime));
-
-        // Verificar se foi salvo corretamente
-        String savedToken = encryptedPrefs.getString(KEY_TOKEN, null);
-        String savedRefreshToken = encryptedPrefs.getString(KEY_REFRESH_TOKEN, null);
-        Log.d(TAG, "Token verificado após salvar: " + savedToken);
-        Log.d(TAG, "Refresh token verificado após salvar: " + savedRefreshToken);
-        Log.d(TAG, "=== FIM SAVE AUTH TOKEN DEBUG ===");
     }
 
     /**
@@ -471,7 +460,6 @@ public class AuthRepository {
                     RefreshTokenResponse refreshResponse = response.body();
 
                     Log.d(TAG, "Refresh token bem-sucedido");
-                    Log.d(TAG, "Novo access token: " + refreshResponse.getAccessToken());
                     Log.d(TAG, "ExpiresIn: " + refreshResponse.getExpiresIn());
 
                     long expiresIn = refreshResponse.getExpiresIn();

@@ -30,6 +30,9 @@ public class DorActivity extends AppCompatActivity {
         binding.setLifecycleOwner(this);
         binding.setViewModel(dorVM);
 
+        // Resetar todos os campos ao abrir a tela (sempre iniciar vazio)
+        dorVM.resetAllFields();
+
         // Configurar a interface
         setupToolbar();
         setupDropdowns();
@@ -51,21 +54,45 @@ public class DorActivity extends AppCompatActivity {
                 dorVM.getAreas()
         );
         binding.areaDropdown.setAdapter(areaAdapter);
+        binding.areaDropdown.setOnClickListener(v -> binding.areaDropdown.showDropDown());
 
         // Listener para o dropdown de áreas
         binding.areaDropdown.setOnItemClickListener((parent, view, position, id) -> {
             dorVM.updateSelectedArea(position);
+
+            // Atualizar o adapter da subárea
+            ArrayAdapter<String> subareaAdapter = new ArrayAdapter<>(
+                    this,
+                    android.R.layout.simple_dropdown_item_1line,
+                    dorVM.getSubareas(position)
+            );
+            binding.subareaDropdown.setAdapter(subareaAdapter);
+            binding.subareaDropdown.setText("", false);
         });
 
         // Listener para o dropdown de subáreas (configurado dinamicamente quando uma área é selecionada)
         binding.subareaDropdown.setOnItemClickListener((parent, view, position, id) -> {
             dorVM.updateSelectedSubarea(position);
+
+            // Atualizar o adapter da especificação
+            Integer subareaId = dorVM.getSelectedSubarea().getValue();
+            ArrayAdapter<String> especificacaoAdapter = new ArrayAdapter<>(
+                    this,
+                    android.R.layout.simple_dropdown_item_1line,
+                    dorVM.getEspecificacoesBySubareaId(subareaId)
+            );
+            binding.especificacaoDropdown.setAdapter(especificacaoAdapter);
+            binding.especificacaoDropdown.setText("", false);
         });
 
         // Listener para o dropdown de especificações (configurado dinamicamente quando uma subárea é selecionada)
         binding.especificacaoDropdown.setOnItemClickListener((parent, view, position, id) -> {
             dorVM.updateSelectedEspecificacao(position);
         });
+
+        // Garantir que os dropdowns sempre mostrem todas as opções ao ganhar foco
+        binding.subareaDropdown.setOnClickListener(v -> binding.subareaDropdown.showDropDown());
+        binding.especificacaoDropdown.setOnClickListener(v -> binding.especificacaoDropdown.showDropDown());
     }
 
     private void setupSlider() {
@@ -93,36 +120,32 @@ public class DorActivity extends AppCompatActivity {
 
     private void observeSelectionChanges() {
         // Observar mudanças na área selecionada para atualizar o dropdown de subáreas
-        dorVM.getSelectedArea().observe(this, areaId -> {
-            if (areaId >= 0) {
+        dorVM.getSelectedArea().observe(this, areaPosition -> {
+            if (areaPosition >= 0) {
                 ArrayAdapter<String> subareaAdapter = new ArrayAdapter<>(
                         this,
                         android.R.layout.simple_dropdown_item_1line,
-                        dorVM.getSubareas(areaId)
+                        dorVM.getSubareas(areaPosition)
                 );
                 binding.subareaDropdown.setAdapter(subareaAdapter);
 
                 // Limpar texto atual se não tiver sido definido pelo ViewModel
-                if (binding.subareaDropdown.getText().toString().isEmpty()) {
-                    binding.subareaDropdown.setText("", false);
-                }
+                binding.subareaDropdown.setText("", false);
             }
         });
 
         // Observar mudanças na subárea selecionada para atualizar o dropdown de especificações
-        dorVM.getSelectedSubareaText().observe(this, subarea -> {
-            if (subarea != null && !subarea.isEmpty()) {
+        dorVM.getSelectedSubarea().observe(this, subareaId -> {
+            if (subareaId != null && subareaId >= 0) {
                 ArrayAdapter<String> especificacaoAdapter = new ArrayAdapter<>(
                         this,
                         android.R.layout.simple_dropdown_item_1line,
-                        dorVM.getEspecificacoes(subarea)
+                        dorVM.getEspecificacoesBySubareaId(subareaId)
                 );
                 binding.especificacaoDropdown.setAdapter(especificacaoAdapter);
 
                 // Limpar texto atual se não tiver sido definido pelo ViewModel
-                if (binding.especificacaoDropdown.getText().toString().isEmpty()) {
-                    binding.especificacaoDropdown.setText("", false);
-                }
+                binding.especificacaoDropdown.setText("", false);
             }
         });
     }

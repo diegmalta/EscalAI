@@ -1,6 +1,8 @@
 package com.ufrj.escalaiv2.activity;
 
+import android.os.Build;
 import android.os.Bundle;
+import android.text.Html;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.TextView;
@@ -16,6 +18,19 @@ public class TermsOfUseActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.terms_of_use);
         setupBackButton();
+        setupTermsText();
+    }
+    
+    private void setupTermsText() {
+        TextView termsTextView = findViewById(R.id.termsTextView);
+        if (termsTextView != null) {
+            String termsText = getString(R.string.lorem_ipsum_10x);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                termsTextView.setText(Html.fromHtml(termsText, Html.FROM_HTML_MODE_COMPACT));
+            } else {
+                termsTextView.setText(Html.fromHtml(termsText));
+            }
+        }
     }
     
     private void setupBackButton() {

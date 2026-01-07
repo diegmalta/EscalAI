@@ -24,7 +24,9 @@ public class TreinoVM extends AndroidViewModel {
     private final MutableLiveData<Integer> selectedTreinoTipo;
     private final MutableLiveData<String> selectedTreinoTipoText;
     private final MutableLiveData<Integer> duracaoTreinoMinutos;
-    private final MutableLiveData<Float> duracaoTreinoHoras; // Para o slider
+    private final MutableLiveData<Integer> duracaoTreinoHoras;
+    private final MutableLiveData<Integer> duracaoTreinoMinutosParte; // minutos no intervalo {0,15,30,45}
+    private final MutableLiveData<String> duracaoTreinoDisplay;
 
     // LiveData para a tabela de resumo
     private final MutableLiveData<Map<String, Float>> resumoTreinosHoje;
@@ -41,7 +43,9 @@ public class TreinoVM extends AndroidViewModel {
         selectedTreinoTipo = new MutableLiveData<>(-1);
         selectedTreinoTipoText = new MutableLiveData<>("");
         duracaoTreinoMinutos = new MutableLiveData<>(60); // 1 hora por padrão
-        duracaoTreinoHoras = new MutableLiveData<>(1.0f); // 1 hora por padrão
+        duracaoTreinoHoras = new MutableLiveData<>(1);    // componente horas
+        duracaoTreinoMinutosParte = new MutableLiveData<>(0); // componente minutos (0,15,30,45)
+        duracaoTreinoDisplay = new MutableLiveData<>("1h 00min");
         resumoTreinosHoje = new MutableLiveData<>(new HashMap<>());
         uiEvent = new MutableLiveData<>();
 
@@ -72,9 +76,9 @@ public class TreinoVM extends AndroidViewModel {
         return duracaoTreinoMinutos;
     }
 
-    public LiveData<Float> getDuracaoTreinoHoras() {
-        return duracaoTreinoHoras;
-    }
+    public LiveData<Integer> getDuracaoTreinoHoras() { return duracaoTreinoHoras; }
+    public LiveData<Integer> getDuracaoTreinoMinutosParte() { return duracaoTreinoMinutosParte; }
+    public LiveData<String> getDuracaoTreinoDisplay() { return duracaoTreinoDisplay; }
 
     public LiveData<Map<String, Float>> getResumoTreinosHoje() {
         return resumoTreinosHoje;
@@ -95,10 +99,31 @@ public class TreinoVM extends AndroidViewModel {
         }
     }
 
-    public void updateDuracaoTreino(float horasFloat) {
-        duracaoTreinoHoras.setValue(horasFloat);
-        int minutos = Math.round(horasFloat * 60);
-        duracaoTreinoMinutos.setValue(minutos);
+    public void updateDuracaoTreino(int horas, int minutosParte) {
+        // minutosParte deve ser um dos {0,15,30,45}
+        if (minutosParte != 0 && minutosParte != 15 && minutosParte != 30 && minutosParte != 45) {
+            minutosParte = 0;
+        }
+        // Impedir 24h com minutos > 0
+        if (horas >= 24) {
+            horas = 24;
+            minutosParte = 0;
+        } else if (horas < 0) {
+            horas = 0;
+        }
+
+        duracaoTreinoHoras.setValue(horas);
+        duracaoTreinoMinutosParte.setValue(minutosParte);
+
+        int totalMinutos = (horas * 60) + minutosParte;
+        duracaoTreinoMinutos.setValue(totalMinutos);
+        duracaoTreinoDisplay.setValue(formatarDuracao(horas, minutosParte));
+    }
+
+    private String formatarDuracao(int horas, int minutosParte) {
+        String h = String.format("%02dh", horas);
+        String m = String.format("%02dmin", minutosParte);
+        return horas == 0 ? m : (horas == 24 ? "24h 00min" : h + " " + m);
     }
 
     // Método para salvar os dados de treino
@@ -106,7 +131,11 @@ public class TreinoVM extends AndroidViewModel {
         Integer treinoTipo = selectedTreinoTipo.getValue();
         Integer duracaoMinutos = duracaoTreinoMinutos.getValue();
 
+        android.util.Log.d("TreinoVM", "saveTreinoData - tipo: " + treinoTipo + 
+                ", duracaoMinutos: " + duracaoMinutos);
+
         if (treinoTipo == null || treinoTipo < 0 || duracaoMinutos == null || duracaoMinutos <= 0) {
+            android.util.Log.e("TreinoVM", "Validação falhou!");
             uiEvent.setValue(Event.SHOW_ERROR_MESSAGE);
             return;
         }
@@ -122,19 +151,26 @@ public class TreinoVM extends AndroidViewModel {
             }
 
             // Registrar treino usando o novo repositório
+            android.util.Log.d("TreinoVM", "Chamando registrarTreino no repositório");
             atividadesRepository.registrarTreino(treinoTipo, duracaoMinutos,
                     token,
                     new AtividadesRepository.OnActivityCallback() {
                         @Override
                         public void onSuccess() {
-                            // Após salvar, recarregar o resumo de treinos
-                            Map<String, Float> resumoMap = atividadesRepository.getTodayTrainingData();
-                            resumoTreinosHoje.postValue(resumoMap);
-                            uiEvent.postValue(Event.SHOW_SUCCESS_MESSAGE);
+                            android.util.Log.d("TreinoVM", "onSuccess - Treino salvo com sucesso!");
+                            // Atualizar resumo em thread de fundo, com fallback ao treino atual
+                            android.util.Log.d("TreinoVM", "Buscando resumo de treinos atualizado...");
+                            atividadesRepository.getTodayTrainingDataAsync(treinoTipo, duracaoMinutos, resumoMap -> {
+                                android.util.Log.d("TreinoVM", "Resumo recebido: " + resumoMap);
+                                resumoTreinosHoje.postValue(resumoMap);
+                                uiEvent.postValue(Event.SHOW_SUCCESS_MESSAGE);
+                                android.util.Log.d("TreinoVM", "UI atualizada com sucesso");
+                            });
                         }
 
                         @Override
                         public void onError(String message) {
+                            android.util.Log.e("TreinoVM", "onError - Erro ao salvar treino: " + message);
                             uiEvent.postValue(Event.SHOW_ERROR_MESSAGE);
                         }
                     });
@@ -147,6 +183,8 @@ public class TreinoVM extends AndroidViewModel {
         selectedTreinoTipo.setValue(-1);
         selectedTreinoTipoText.setValue("");
         duracaoTreinoMinutos.setValue(60); // 1 hora por padrão
-        duracaoTreinoHoras.setValue(1.0f); // 1 hora por padrão
+        duracaoTreinoHoras.setValue(1);    // componente horas
+        duracaoTreinoMinutosParte.setValue(0);
+        duracaoTreinoDisplay.setValue("1h 00min");
     }
 }

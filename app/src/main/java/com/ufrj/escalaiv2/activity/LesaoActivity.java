@@ -92,14 +92,28 @@ public class LesaoActivity extends AppCompatActivity implements LesaoAdapter.OnL
 
     @Override
     public void onConcluirClick(LesaoResponse.LesaoData lesao) {
-        // Implementar conclusão da lesão
-        Snackbar.make(binding.getRoot(), "Funcionalidade de conclusão será implementada", Snackbar.LENGTH_SHORT).show();
+        lesaoListVM.concluirLesao(lesao.getId());
+        Snackbar.make(binding.getRoot(), "Lesão concluída com sucesso", Snackbar.LENGTH_SHORT).show();
     }
 
     @Override
     public void onReabrirClick(LesaoResponse.LesaoData lesao) {
-        // Implementar reabertura da lesão
-        Snackbar.make(binding.getRoot(), "Funcionalidade de reabertura será implementada", Snackbar.LENGTH_SHORT).show();
+        lesaoListVM.reabrirLesao(lesao);
+        Snackbar.make(binding.getRoot(), "Lesão reaberta com sucesso", Snackbar.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void onExcluirClick(LesaoResponse.LesaoData lesao) {
+        // Mostrar dialog de confirmação
+        new androidx.appcompat.app.AlertDialog.Builder(this)
+            .setTitle("Excluir Lesão")
+            .setMessage("Tem certeza que deseja excluir a lesão? Essa ação não pode ser desfeita.")
+            .setPositiveButton("Confirmar", (dialog, which) -> {
+                lesaoListVM.deleteLesao(lesao.getId());
+                Snackbar.make(binding.getRoot(), "Lesão excluída com sucesso", Snackbar.LENGTH_SHORT).show();
+            })
+            .setNegativeButton("Cancelar", null)
+            .show();
     }
 
     @Override
